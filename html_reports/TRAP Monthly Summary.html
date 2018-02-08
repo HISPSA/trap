@@ -84,7 +84,7 @@
 
 
 	var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-	var dxCore = 'LHTsLNCZnlX,mH17opU6Ivq,KnQn2N452bE,Bmo4lk1FhgP,S6BlQpoZVhQ';
+	var dxCore = 'fG0NDp9ZcQh,mH17opU6Ivq,KnQn2N452bE,Bmo4lk1FhgP,S6BlQpoZVhQ';
 	var dxCoreArr = dxCore.split(',')
 	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q';
 	var dxCoreCat = '';
@@ -201,11 +201,13 @@
 			var tbody = document.createElement('tbody');
 			tbl1.appendChild(tbody);
 
-			for (var p = 0; p < dataDE.dataElements.length; p++){
+			//for (var p = 0; p < dataDE.dataElements.length; p++){
+			for (var p = 0; p < dxCoreArr.length; p++){
+				
 
 				myYTDCALCvals.push ({
 					ou: ou,
-					dx: dataDE.dataElements[p].id,
+					dx: dxCoreArr[p],
 					baseline: 0,
 					FYtarget: 0,
 					YTDtarget: 0,
@@ -230,61 +232,56 @@
 				});
 
 				var tr = document.createElement('tr');
-				tr.setAttribute("id",dataDE.dataElements[p].id+'_'+ou+'_row');
+				tr.setAttribute("id",dxCoreArr[p]+'_'+ou+'_row');
 				tbody.appendChild(tr);
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-				td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_1');
+				td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
 				tr.appendChild(td);
 
-				td.innerText = (dataDE.dataElements[p].name).replace('TRAP_','');
+				//td.innerText = (dataDE.dataElements[p].name).replace('TRAP_','');
+				td.innerText = (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','');
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_1');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_2');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.mLVlvjLwl9q_'+ou+'_'+peFYcurr);
+				td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
 				tr.appendChild(td);
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("storedValue",'');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.YTDtarget_'+ou+'_'+peFYcurr);
+				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peFYcurr);
 				tr.appendChild(td);
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("storedValue",'');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.YTDactual_'+ou+'_'+peFYcurr);
+				td.setAttribute("id",dxCoreArr[p]+'.YTDtarget_'+ou+'_'+peFYcurr);
 				tr.appendChild(td);
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.DifferenceGap_'+ou+'_'+peFYcurr);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				//td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_6');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.DifferencePercentage_'+ou+'_'+peFYcurr);
+				td.setAttribute("id",dxCoreArr[p]+'.YTDactual_'+ou+'_'+peFYcurr);
 				tr.appendChild(td);
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
-				td.setAttribute("id",dataDE.dataElements[p].id+'.mLVlvjLwl9q_'+ou+'_'+peMMrange.split(';')[0]);
+				td.setAttribute("id",dxCoreArr[p]+'.DifferenceGap_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("id",dxCoreArr[p]+'.DifferencePercentage_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peMMrange.split(';')[0]);
 				tr.appendChild(td);
 
 				for (var r = 4; r <= 12; r++){
@@ -292,8 +289,7 @@
 						var td = document.createElement('td');
 						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
 						td.setAttribute("class",'cellNumeric');
-						//td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_MM_'+peFcurr+paddNumeric(r,2));
-						td.setAttribute("id",dataDE.dataElements[p].id+'.wyZ6KAmjZeD_'+ou+'_'+peFcurr+paddNumeric(r,2));
+						td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFcurr+paddNumeric(r,2));
 						tr.appendChild(td);
 					}
 				}
@@ -302,8 +298,7 @@
 						var td = document.createElement('td');
 						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
 						td.setAttribute("class",'cellNumeric');
-						//td.setAttribute("id",'1_'+dataDE.dataElements[p].id+'_MM_'+(peFcurr+1)+paddNumeric(r,2));
-						td.setAttribute("id",dataDE.dataElements[p].id+'.wyZ6KAmjZeD_'+ou+'_'+(peFcurr+1)+paddNumeric(r,2));
+						td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+(peFcurr+1)+paddNumeric(r,2));
 						tr.appendChild(td);
 					}
 				}
@@ -602,13 +597,13 @@
 
 							}
 
-							setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
+							//setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
 
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1750 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 2000 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[2], 5); }, 2250 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 2500 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 2750 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1000 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 1100 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[2], 5); }, 1200 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 1300 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
 
 						}
 
@@ -621,6 +616,14 @@
 		}
 	
 	 })
+
+	function getElementName(dxData,id){
+		for (var a = 0; a < dxData.dataElements.length; a++){
+			if (dxData.dataElements[a].id == id){
+				return dxData.dataElements[a].name;
+			}
+		}
+	}
 
 	function getBackgroundPerformanceColor(varVal){
 		if (isNumber(varVal)) {
@@ -676,7 +679,8 @@
 		var rowData = tableData.getElementsByTagName('tr');            
 		for(var i = 0; i < rowData.length - 1; i++){
 			for(var j = 0; j < rowData.length - (i + 1); j++){
-				if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
+				//if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
+				if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
 					tableData.insertBefore(rowData.item(j+1),rowData.item(j));
 				}
 			}

@@ -1,0 +1,676 @@
+<html>
+
+<head>
+
+	<style>
+		table.MainTbl{
+			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;
+		}
+		table.SecondaryTbl{
+			border-left:1px solid #000;border-top:1px solid #000;border-right:1px solid #000;
+		}
+		th.labelHeader {
+			font-weight:800;border-left:1px solid #000;border-bottom:1pt solid #000;text-align:center;padding:4px;color:#000;
+		}
+		th.labelquarterName{
+			font-weight:800;border-left:1px solid #000;border-bottom:1pt solid #000;text-align:center;padding:4px;background-Color:#f5f5f5;color:#000;
+		}
+		td.cellNumeric, div.cellNumeric{
+			text-align: right;padding:4px;cursor: default;
+		}
+		.rounded{
+		    -webkit-border-radius: 4px 4px 4px 4px;
+		    -moz-border-radius: 4px 4px 4px 4px;
+		    border-radius: 4px 4px 4px 4px;
+		}
+		table.perfBar { width:100%;height:100;padding:0; }
+	</style>
+
+	<script language=javascript>
+
+		function getParameterByName(name) {0
+			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+				results = regex.exec(location.search);
+			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+
+		var ou = getParameterByName('ou');
+		var pe = getParameterByName('pe');
+
+	</script>
+
+</head>
+
+<body>
+
+<div id="" style="padding:0">
+
+<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
+	<thead>
+		<tr>
+			<th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
+			<th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
+			<th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
+			<th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
+			<th colspan=1 rowspan=2 class='labelHeader' id='1_peQTRtarget'></th>
+			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ2'></th>
+			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ3'></th>
+			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ4'></th>
+			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ1'></th>
+
+		</tr>
+		<tr>
+			<th colspan=1 class='labelHeader' id='1_peFYTDtarget'></th>
+			<th colspan=1 class='labelHeader' id='1_peFYTDactual'></th>
+			<th colspan=1 class='labelHeader' id='1_peFYTDgap'></th>
+			<th colspan=1 class='labelHeader' id='1_peFYTDprogress'></th>
+		</tr>
+	</thead>
+</table>
+
+</div>
+
+<input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;">
+
+ <script language=javascript>
+
+
+	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
+	var dxCore = 'fG0NDp9ZcQh,mH17opU6Ivq,KnQn2N452bE,Bmo4lk1FhgP,S6BlQpoZVhQ';
+	var dxCoreArr = dxCore.split(',')
+	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q';
+	var dxCoreCat = '';
+	var lblCat = 'Actual,Target';
+	var dxNonRunningTotal = 'mH17opU6Ivq';
+	var peQTRrange = '';
+	var peQTRrangeEnd = '';
+	var peQTRlabelEnd = '';
+	var peQTRprevYRangeEnd = '';
+	var peQTRcurrYRangeEnd = '';
+
+	var sort_by = function(field, reverse, primer){
+		var key = primer ? 
+			function(x) {return primer(x[field])} : 
+			function(x) {return x[field]};
+		reverse = !reverse ? 1 : -1;
+		return function (a, b) {
+			return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+			} 
+	}
+
+	var peQcurr = parseInt(pe.split('Q')[1]); //parseInt(pe.substring(4,6));
+	var peFcurr = parseInt(pe.split('Q')[0]); //parseInt(pe.substring(0,4));
+
+	if (peQcurr < 2){
+		peFcurr = (peFcurr-1);
+	}
+
+	var peFprev = (peFcurr-1); //parseInt(((parseInt(peQcurr)<4) ? (peFcurr-1) : peFcurr));
+	var peFcurrSuff = parseInt(peFcurr.toString().substring(2,4));
+	var peFprevSuff = parseInt(peFprev.toString().substring(2,4));
+
+	var peFYcurr = (peFcurr+'April');
+	var peFYprev = (peFprev+'April');
+
+	if (dxNonRunningTotal.length > 0) {
+		peQTRprevYRangeEnd = (peFcurr + 'Q1');
+	}
+
+	peQTRcurrYRangeEnd = ((peFcurr+1) + 'Q1');
+
+	document.getElementById('1_peFprev').innerHTML = (peFprev + '/' + peFcurrSuff + '<br>Baseline');
+	document.getElementById('1_peFtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Target');
+
+	document.getElementById('1_FYspan').innerHTML = ('YTD ' + peFcurr + '/' + ((peFcurrSuff)+1) + '');
+
+	document.getElementById('1_peFYTDtarget').innerHTML = ('Target');
+	document.getElementById('1_peFYTDactual').innerHTML = ('Actual');
+	document.getElementById('1_peFYTDgap').innerHTML = ('Gap');
+	document.getElementById('1_peFYTDprogress').innerHTML = ('Progress');
+
+	document.getElementById('1_peQTRtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Quarterly<br>Target');
+
+	for (var p = 2; p <= 4; p++){
+		document.getElementById('1_peQ'+p).innerHTML = ((quarters[p-1]).toString() +'<br>'+peFcurrSuff);
+		if ( (p > peQcurr) && (peQcurr > 1) ){
+			document.getElementById('1_peQ'+p).style.display='none';
+		} else {
+			peQTRrange += (peFcurr+'Q'+p+';');
+			peQTRlabelEnd = ((quarters[p-1]).toString()+'<br>'+peFcurrSuff);
+			peQTRrangeEnd = (peFcurr+'Q'+p);
+		}
+	}
+	for (var p = 1; p <= 1; p++){
+		document.getElementById('1_peQ'+p).innerHTML = ((quarters[p-1]).toString()+'<br>'+(peFcurrSuff+1));
+		if (peQcurr > p){
+			document.getElementById('1_peQ'+p).style.display='none';
+		} else {
+			peQTRrange += ((peFcurr+1)+'Q'+p+';');
+			peQTRlabelEnd = ((quarters[p-1]).toString()+'<br>'+(peFcurrSuff+1));
+			peQTRrangeEnd = ((peFcurrSuff+1)+'Q'+p);
+		}
+	}
+
+	var template1 = document.getElementById('tblMaster').outerHTML.replace('MainTbl','SecondaryTbl');
+
+	document.getElementById('tblMaster').outerHTML = document.getElementById('tblMaster').outerHTML.replace('{PLACEHOLDER}',dhis2.report.organisationUnit.name)
+
+	for (var p = 2; p <= 4; p++){
+		document.getElementById('1_peQ'+p).innerHTML = ((quarters[p-1]).toString()+'<br>'+peFcurrSuff);
+	}
+	for (var p = 1; p <= 1; p++){
+		document.getElementById('1_peQ'+p).innerHTML = ((quarters[p-1]).toString()+'<br>'+(peFcurrSuff+1));
+	}
+
+	var myYTDCALCvals = [];
+
+	//URL for Dx Core List
+	var sDxCore = ('../api/dataElements.json?filter=id:in:['+dxCore+']&fields=id,name,shortName,displayName');
+
+	 $.ajax({
+		url: sDxCore,
+		error: function (xhr, ajaxOptions, thrownError) {
+			console.log('error: Data Element Lookup');
+		},
+		success : function(dataDE){
+
+			var sort_by = function(field, reverse, primer){
+
+			var key = primer ? 
+				function(x) {return primer(x[field])} : 
+				function(x) {return x[field]};
+
+			reverse = !reverse ? 1 : -1;
+
+			return function (a, b) {
+				return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+				} 
+			}
+
+			var ArrDx = dxCore.split(',');
+			var tbl1 = document.getElementById('tblMaster');
+			var tbody = document.createElement('tbody');
+			tbl1.appendChild(tbody);
+
+			//for (var p = 0; p < dataDE.dataElements.length; p++){
+			for (var p = 0; p < dxCoreArr.length; p++){
+
+				myYTDCALCvals.push ({
+					ou: ou,
+					dx: dxCoreArr[p],
+					baseline: 0,
+					FYtarget: 0,
+					YTDtarget: 0,
+					YTDactual: 0,
+					YTDgapNum: 0,
+					YTDgapPer: 0,
+					CALCtarget: 0,
+					CALCactual: 0,
+					GrandTotAll: 0,
+					QTR02: 0,
+					QTR03: 0,
+					QTR04: 0,
+					QTR01: 0
+				});
+
+				var tr = document.createElement('tr');
+				tr.setAttribute("id",dxCoreArr[p]+'_'+ou+'_row');
+				tbody.appendChild(tr);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+				td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
+				tr.appendChild(td);
+
+				//td.innerText = (dataDE.dataElements[p].name).replace('TRAP_','');
+				td.innerText = (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','');
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
+				td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_2');
+				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				//td.setAttribute("storedValue",'');
+				td.setAttribute("id",dxCoreArr[p]+'.YTDtarget_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				//td.setAttribute("storedValue",'');
+				td.setAttribute("id",dxCoreArr[p]+'.YTDactual_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				td.setAttribute("id",dxCoreArr[p]+'.DifferenceGap_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				//td.setAttribute("class",'cellNumeric');
+				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_6');
+				td.setAttribute("id",dxCoreArr[p]+'.DifferencePercentage_'+ou+'_'+peFYcurr);
+				tr.appendChild(td);
+
+				var td = document.createElement('td');
+				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+				td.setAttribute("class",'cellNumeric');
+				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peQTRrange.split(';')[0]);
+				tr.appendChild(td);
+
+				for (var r = 2; r <= 4; r++){
+					if ( (r <= peQcurr) || (peQcurr == 1) ){
+						var td = document.createElement('td');
+						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
+						td.setAttribute("class",'cellNumeric');
+						//td.setAttribute("id",'1_'+dxCoreArr[p]+'_QTR_'+peFcurr+paddNumeric(r,2));
+						td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFcurr+'Q'+r);
+						tr.appendChild(td);
+					}
+				}
+				for (var r = 1; r <= 1; r++){
+					if ( (r >= peQcurr)  ){
+						var td = document.createElement('td');
+						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
+						td.setAttribute("class",'cellNumeric');
+						//td.setAttribute("id",'1_'+dxCoreArr[p]+'_QTR_'+(peFcurr+1)+paddNumeric(r,2));
+						td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+(peFcurr+1)+'Q'+r);
+						tr.appendChild(td);
+					}
+				}
+
+			}
+
+			var dv = document.createElement('div');
+			dv.setAttribute('style','padding:8px 0 8px 0;');
+			dv.innerHTML = 'Table 1. Quarterly sub-district summary for financial year F' + peFcurr + ' ('+dhis2.report.organisationUnit.name+', period ending ' + peQTRlabelEnd.replace('<br>',' ') + ')';
+			document.getElementById('mainPage').appendChild(dv);
+
+			var dxArrCore = dxCore.split(',')
+			var dxArrCat = dxCat.split(',')
+
+			for (var n = 0; n < dxArrCore.length; n++){
+				for (var o = 0; o < dxArrCat.length; o++){
+					dxCoreCat += (dxArrCore[n]+'.'+dxArrCat[o]+';');
+				}
+			}
+
+			dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
+
+			//URL for parent-OU 
+			var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,level,children[id,name,displayName,displayShortName,level]');
+
+			$.ajax({
+				url: sOU,
+				error: function (xhr, ajaxOptions, thrownError) {
+					console.log('error: Data Element Lookup');
+				},
+				success : function(dataOU){
+
+					var OUchildren = '';
+
+					for (var p = 0; p < dataOU.children.length; p++){
+						OUchildren += (dataOU.children[p].id + ';');
+					}
+
+					OUchildren = OUchildren.substring(OUchildren,OUchildren.length-1);
+
+					for (var n = 0; n < dataDE.dataElements.length; n++){
+
+						var dv = document.createElement('div');
+						dv.setAttribute('id','dv_'+dataDE.dataElements[n].id);
+						dv.setAttribute('style','padding:8px 0 8px 0;');
+						document.getElementById('mainPage').appendChild(dv);
+
+						dv.innerHTML = (template1.replace('tblMaster','tblDx_'+dataDE.dataElements[n].id));
+						dv.innerHTML = (dv.innerHTML).replace('{PLACEHOLDER}',dataDE.dataElements[n].name).replace('TRAP_','');
+
+						var tbl1 = document.getElementById('tblDx_'+dataDE.dataElements[n].id);
+						var tbody = document.createElement('tbody');
+						tbl1.appendChild(tbody);
+
+						for (var p = 0; p < dataOU.children.length; p++){
+
+							myYTDCALCvals.push ({
+								ou: dataOU.children[p].id,
+								dx: dataDE.dataElements[n].id,
+								baseline: 0,
+								FYtarget: 0,
+								YTDtarget: 0,
+								YTDactual: 0,
+								YTDgapNum: 0,
+								YTDgapPer: 0,
+								CALCtarget: 0,
+								CALCactual: 0,
+								GrandTotAll: 0,
+								QTR02: 0,
+								QTR03: 0,
+								QTR04: 0,
+								QTR01: 0
+							});
+
+							var tr = document.createElement('tr');
+							tr.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_row');
+							tbody.appendChild(tr);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+							td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_0');
+							tr.appendChild(td);
+
+							td.innerText = (dataOU.children[p].name);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							//td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_2');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peFYcurr);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.YTDtarget_'+dataOU.children[p].id+'_'+peFYcurr);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.YTDactual_'+dataOU.children[p].id+'_'+peFYcurr);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.DifferenceGap_'+dataOU.children[p].id+'_'+peFYcurr);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							//td.setAttribute("class",'cellNumeric');
+							//td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_6');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.DifferencePercentage_'+dataOU.children[p].id+'_'+peFYcurr);
+							tr.appendChild(td);
+
+							var td = document.createElement('td');
+							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
+							td.setAttribute("class",'cellNumeric');
+							td.setAttribute("id",dataDE.dataElements[n].id+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peQTRrange.split(';')[0]);
+							tr.appendChild(td);
+
+							for (var r = 2; r <= 4; r++){
+								if ( (r <= peQcurr) || (peQcurr == 1) ){
+									var td = document.createElement('td');
+									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
+									td.setAttribute("class",'cellNumeric');
+									td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFcurr+'Q'+r);
+									tr.appendChild(td);
+								}
+							}
+							for (var r = 1; r <= 1; r++){
+								if ( (r >= peQcurr)  ){
+									var td = document.createElement('td');
+									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
+									td.setAttribute("class",'cellNumeric');
+									td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+(peFcurr+1)+'Q'+r);
+									tr.appendChild(td);
+								}
+							}
+
+						}
+
+						var dv1 = document.createElement('div');
+						dv1.setAttribute('style','padding:8px 0 8px 0;');
+						dv1.innerHTML = 'Table '+(n+2)+'. Facility totals for ['+(dataDE.dataElements[n].name).replace('TRAP_','')+']';
+						dv.appendChild(dv1);
+
+					}
+
+					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRcurrYRangeEnd+';'+( (peQTRprevYRangeEnd.length > 0) ? (peQTRprevYRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
+					console.log(sDataGet);
+
+					$.ajax({
+						url: sDataGet,
+						error: function (xhr, ajaxOptions, thrownError) {
+							console.log('error: getting report data values');
+						},
+						success : function(dataVal){
+
+							var comboRESULTALL = [];
+
+							for (var i = 0; i < dataVal.rows.length; i++){
+
+								var myRowID = (dataVal.rows[i][0] + '_' + dataVal.rows[i][2] + '_' + dataVal.rows[i][1]);
+								var myValue = dataVal.rows[i][3];
+
+								comboRESULTALL.push ({ id: myRowID, value: myValue });
+
+								try {
+									document.getElementById(myRowID).innerText = formatNumber(parseFloat(myValue).toFixed(1).toString().replace('.0',''));
+								}
+								catch(err) {
+									//console.log('No match: '+myRowID +': ['+myValue+']')
+								}
+
+							}
+
+							var PEarr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';')
+
+							for (var a = 0; a < myYTDCALCvals.length; a++){
+
+								for (var i = 0; i < comboRESULTALL.length; i++){
+
+									// DX and OU match
+									if ( ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].dx) >= 0) && ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].ou) >= 0) ){
+
+										if ( ( (comboRESULTALL[i].id).indexOf(peFYprev) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) < 0) ) {
+											myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+										} else {
+											// PE match of Prev-Year-End-QTR value for RunningTotal element
+											if ( ( (comboRESULTALL[i].id).indexOf(peQTRprevYRangeEnd) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+										}
+
+										// YTD target
+										if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(peFYcurr) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) < 0) ) {
+											//myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											myYTDCALCvals[a].FYtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+										} else {
+											// PE match of Current-Range-End-QTR value for RunningTotal element
+											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(peQTRcurrYRangeEnd ) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].FYtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+											// PE match of Current-Range-End-QTR value for RunningTotal element
+											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(peQTRrangeEnd ) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+										}
+
+										// YTD actual
+										if ( ( (comboRESULTALL[i].id).indexOf('wyZ6KAmjZeD') >= 0) && ( (comboRESULTALL[i].id).indexOf(peFYcurr) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) < 0) ) {
+											myYTDCALCvals[a].YTDactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+										} else {
+											// PE match of Current-Range-End-QTR value for RunningTotal element
+											if ( ( (comboRESULTALL[i].id).indexOf('wyZ6KAmjZeD') >= 0) && ( (comboRESULTALL[i].id).indexOf(peQTRrangeEnd) >= 0) && ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].YTDactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												myYTDCALCvals[a].CALCactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+										}
+
+										for (var p = 0; p < PEarr.length; p++){
+											if ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) < 0){
+												// YTD CALC of TARGET
+												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) ) {
+													myYTDCALCvals[a].YTDtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												}
+											}
+											// YTD CALC of TARGET
+											if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) ) {
+												myYTDCALCvals[a].CALCtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+											// ACTUAL
+											if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) ) {
+												myYTDCALCvals[a].CALCactual += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												//myYTDCALCvals[a]['QTR'+p] = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
+											
+										}
+
+										myYTDCALCvals[a].GrandTotAll += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+
+									}
+
+								}
+
+							}
+
+							for (var a = 0; a < myYTDCALCvals.length; a++){
+
+
+								document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
+								document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].FYtarget) );
+								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) );
+								document.getElementById(myYTDCALCvals[a].dx+'.YTDactual_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDactual) );
+								document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual)).toFixed(0) );
+
+
+								/*if (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual) < 0){
+									document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).style.color = '#C70000';
+								}*/
+
+								if (myYTDCALCvals[a].YTDtarget > 0) {
+									var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0);
+									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<TABLE class="perfBar"><TR><TD class="cellNumeric" style="padding:5px 5px 0px 5px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</TD></TR><TR><TD><DIV style="position:relative;left:-3px;top:3px;width:' + ( (parseInt(iW) > 0) ? (parseInt(iW)+11) : 0)  + '%;height:4px;border:0;background-Color:'+getBackgroundPerformanceColor(iW)+';">&nbsp;</DIV></TD></TR></TABLE>';
+									document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? (parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW)+';">&nbsp;</div></div>';
+									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(1)) + '%';
+									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).style.backgroundColor = getBackgroundPerformanceColor((parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ));
+								}
+
+								if ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0){
+									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peQTRrange.split(';')[0]).innerHTML = '<span color="#808080">*</span> ' + formatNumber( parseFloat(parseFloat(myYTDCALCvals[a].CALCtarget) / (PEarr.length) ).toFixed(0) ); /// (PEarr.length+1)
+									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peQTRrange.split(';')[0]).title = 'Average TARGET of quarterly values';
+									//console.log((PEarr.length));
+								}
+
+								if (myYTDCALCvals[a].GrandTotAll == 0) { 
+									document.getElementById(myYTDCALCvals[a].dx+'_'+myYTDCALCvals[a].ou+'_row').style.display = 'none';
+								}
+
+							}
+
+							//setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
+
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1000 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 1100 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[2], 5); }, 1200 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 1300 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
+
+						}
+
+					});
+					
+				}	
+
+			});
+
+		}
+	
+	 })
+
+	function getElementName(dxData,id){
+		for (var a = 0; a < dxData.dataElements.length; a++){
+			if (dxData.dataElements[a].id == id){
+				return dxData.dataElements[a].name;
+			}
+		}
+	}
+
+	function getBackgroundPerformanceColor(varVal){
+		if (isNumber(varVal)) {
+			if (parseFloat(varVal) > 110){
+				return '#656AFC'; // blue
+			}
+			if ( (parseFloat(varVal) >= 95) && (parseFloat(varVal) <= 110) ){
+				return '#90FC65'; // green
+			}
+			if ( (parseFloat(varVal) >= 80) && (parseFloat(varVal) < 95) ){
+				return '#FCDC65'; // orange
+			}
+			if (parseFloat(varVal) < 80){
+				return '#FC6565'; // red
+			}
+		}
+	}
+
+	function paddNumeric(varVal,iPadd){
+		var sPadd = '';
+		for (var i = (varVal.toString().length); i < iPadd; i++){
+			sPadd += '0';
+		}
+		return (sPadd.toString() + varVal.toString());
+	}
+
+	function isNumber(n) {
+		return !isNaN(parseFloat(n)) && isFinite(n);
+	}
+
+	function returnAttributeValue(Arr,sName,ReturnDefault){
+		var sReturn = '';
+		for(var i = 0; i < Arr.length; i++) {
+			if (Arr[i].attribute.name == sName){
+				sReturn = Arr[i].value;
+			}
+		}
+		if (sReturn.length == 0){
+			return ReturnDefault
+		}
+		else{
+			return sReturn
+		}
+	}
+
+	function formatNumber(num) {
+		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + "," });
+	}
+
+	function sortTable(table_id, sortColumn){
+		//console.log('sortTable("'+table_id+'",'+sortColumn+')');
+		var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
+		var rowData = tableData.getElementsByTagName('tr');            
+		for(var i = 0; i < rowData.length - 1; i++){
+			for(var j = 0; j < rowData.length - (i + 1); j++){
+				//if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
+				if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
+					tableData.insertBefore(rowData.item(j+1),rowData.item(j));
+				}
+			}
+		}
+	}
+
+</script>
+
+</body>
+</html>
