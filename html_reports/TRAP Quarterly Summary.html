@@ -26,6 +26,8 @@
 		table.perfBar { width:100%;height:100;padding:0; }
 	</style>
 
+	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
+
 	<script language=javascript>
 
 		function getParameterByName(name) {0
@@ -43,6 +45,8 @@
 </head>
 
 <body>
+
+<div id="chart1"></div>
 
 <div id="" style="padding:0">
 
@@ -77,7 +81,7 @@
 
 
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
-	var dxCore = 'fG0NDp9ZcQh,mH17opU6Ivq,KnQn2N452bE,Bmo4lk1FhgP,S6BlQpoZVhQ';
+	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,S6BlQpoZVhQ,gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg';
 	var dxCoreArr = dxCore.split(',')
 	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q';
 	var dxCoreCat = '';
@@ -298,7 +302,7 @@
 
 			var dv = document.createElement('div');
 			dv.setAttribute('style','padding:8px 0 8px 0;');
-			dv.innerHTML = 'Table 1. Quarterly sub-district summary for financial year F' + peFcurr + ' ('+dhis2.report.organisationUnit.name+', period ending ' + peQTRlabelEnd.replace('<br>',' ') + ')';
+			dv.innerHTML = 'Table 1. Quarterly summary for financial year F' + peFcurr + ' ('+dhis2.report.organisationUnit.name+', period ending ' + peQTRlabelEnd.replace('<br>',' ') + ')';
 			document.getElementById('mainPage').appendChild(dv);
 
 			var dxArrCore = dxCore.split(',')
@@ -330,17 +334,18 @@
 
 					OUchildren = OUchildren.substring(OUchildren,OUchildren.length-1);
 
-					for (var n = 0; n < dataDE.dataElements.length; n++){
+					//for (var n = 0; n < dataDE.dataElements.length; n++){
+					for (var n = 0; n < dxCoreArr.length; n++){
 
 						var dv = document.createElement('div');
-						dv.setAttribute('id','dv_'+dataDE.dataElements[n].id);
+						dv.setAttribute('id','dv_'+dxCoreArr[n]);
 						dv.setAttribute('style','padding:8px 0 8px 0;');
 						document.getElementById('mainPage').appendChild(dv);
 
-						dv.innerHTML = (template1.replace('tblMaster','tblDx_'+dataDE.dataElements[n].id));
-						dv.innerHTML = (dv.innerHTML).replace('{PLACEHOLDER}',dataDE.dataElements[n].name).replace('TRAP_','');
+						dv.innerHTML = (template1.replace('tblMaster','tblDx_'+dxCoreArr[n]));
+						dv.innerHTML = (dv.innerHTML).replace('{PLACEHOLDER}',(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','')).replace('TRAP_','');
 
-						var tbl1 = document.getElementById('tblDx_'+dataDE.dataElements[n].id);
+						var tbl1 = document.getElementById('tblDx_'+dxCoreArr[n]);
 						var tbody = document.createElement('tbody');
 						tbl1.appendChild(tbody);
 
@@ -348,7 +353,7 @@
 
 							myYTDCALCvals.push ({
 								ou: dataOU.children[p].id,
-								dx: dataDE.dataElements[n].id,
+								dx: dxCoreArr[n],
 								baseline: 0,
 								FYtarget: 0,
 								YTDtarget: 0,
@@ -365,12 +370,12 @@
 							});
 
 							var tr = document.createElement('tr');
-							tr.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_row');
+							tr.setAttribute("id",dxCoreArr[n]+'_'+dataOU.children[p].id+'_row');
 							tbody.appendChild(tr);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-							td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_0');
+							td.setAttribute("id",dxCoreArr[n]+'_'+dataOU.children[p].id+'_0');
 							tr.appendChild(td);
 
 							td.innerText = (dataOU.children[p].name);
@@ -378,45 +383,43 @@
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
+							td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							//td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_2');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peFYcurr);
+							td.setAttribute("id",dxCoreArr[n]+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peFYcurr);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.YTDtarget_'+dataOU.children[p].id+'_'+peFYcurr);
+							td.setAttribute("id",dxCoreArr[n]+'.YTDtarget_'+dataOU.children[p].id+'_'+peFYcurr);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.YTDactual_'+dataOU.children[p].id+'_'+peFYcurr);
+							td.setAttribute("id",dxCoreArr[n]+'.YTDactual_'+dataOU.children[p].id+'_'+peFYcurr);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.DifferenceGap_'+dataOU.children[p].id+'_'+peFYcurr);
+							td.setAttribute("id",dxCoreArr[n]+'.DifferenceGap_'+dataOU.children[p].id+'_'+peFYcurr);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							//td.setAttribute("class",'cellNumeric');
-							//td.setAttribute("id",dataDE.dataElements[n].id+'_'+dataOU.children[p].id+'_6');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.DifferencePercentage_'+dataOU.children[p].id+'_'+peFYcurr);
+							td.setAttribute("id",dxCoreArr[n]+'.DifferencePercentage_'+dataOU.children[p].id+'_'+peFYcurr);
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dataDE.dataElements[n].id+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peQTRrange.split(';')[0]);
+							td.setAttribute("id",dxCoreArr[n]+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peQTRrange.split(';')[0]);
 							tr.appendChild(td);
 
 							for (var r = 2; r <= 4; r++){
@@ -424,7 +427,7 @@
 									var td = document.createElement('td');
 									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
 									td.setAttribute("class",'cellNumeric');
-									td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFcurr+'Q'+r);
+									td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFcurr+'Q'+r);
 									tr.appendChild(td);
 								}
 							}
@@ -433,7 +436,7 @@
 									var td = document.createElement('td');
 									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
 									td.setAttribute("class",'cellNumeric');
-									td.setAttribute("id",dataDE.dataElements[n].id+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+(peFcurr+1)+'Q'+r);
+									td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+(peFcurr+1)+'Q'+r);
 									tr.appendChild(td);
 								}
 							}
@@ -448,7 +451,7 @@
 					}
 
 					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRcurrYRangeEnd+';'+( (peQTRprevYRangeEnd.length > 0) ? (peQTRprevYRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
-					console.log(sDataGet);
+					//console.log(sDataGet);
 
 					$.ajax({
 						url: sDataGet,
@@ -555,7 +558,6 @@
 								document.getElementById(myYTDCALCvals[a].dx+'.YTDactual_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDactual) );
 								document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual)).toFixed(0) );
 
-
 								/*if (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual) < 0){
 									document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).style.color = '#C70000';
 								}*/
@@ -588,17 +590,104 @@
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 1300 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
 
+							setTimeout(function () { loadChart(); }, 2000);
+
 						}
 
 					});
 					
-				}	
+				}
 
 			});
 
 		}
 	
 	 })
+
+	function loadChart(){
+
+		document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
+
+		chartPlugin.url = "../";
+		//chartPlugin.username = "<username>";
+		//chartPlugin.password = "<password>";
+
+		chartPlugin.load([{
+		"columns": [
+			{
+			"dimension": "PI4HF35fhhu",
+			"items": [
+				{
+				"id": "MtGfK0t2bZa",
+				"name": "Actual"
+				},
+				{
+				"id": "cxImobqF3HG",
+				"name": "Gap"
+				}
+			]
+			}
+		],
+		"rows": [
+			{
+			"dimension": "dx",
+			"items": [
+				{
+				"id": "TGE8O0ErSyz",
+				"name": "Adult LHIV"
+				},
+				{
+				"id": "wardjsS17GJ",
+				"name": "Adult living with HIV know status"
+				},
+				{
+				"id": "nv6NqiggcVd",
+				"name": "Adult living with HIV on ART"
+				},
+				{
+				"id": "qYuujpU8smT",
+				"name": "Adult VLD12"
+				},
+				{
+				"id": "eCDgrOTfXaE",
+				"name": "Adult VLS12"
+				}
+			]
+			}
+		],
+		"filters": [
+			{
+			"dimension": "ou",
+			"items": [
+				{
+				"id": ( ( (dhis2.report.organisationUnitHierarchy.length) <= 3) ? dhis2.report.organisationUnit.id : dhis2.report.organisationUnitHierarchy[1].id),
+				"name": ( ( (dhis2.report.organisationUnitHierarchy.length) <= 3) ? dhis2.report.organisationUnit.name : dhis2.report.organisationUnitHierarchy[1].name)
+				}
+			]
+			},
+			{
+			"dimension": "pe",
+			"items": [
+				{
+				"id": pe,
+				"name": peQTRlabelEnd
+				}
+			]
+			}
+		],
+		"type": "stackedcolumn",
+		"percentStackedValues": false,
+		"cumulativeValues": false,
+		"hideEmptyRowItems": "NONE",
+		"showAsEpiCurve": false,
+		"hideSubtitle": false,
+		"subtitle": '90-90-90 Cascade',
+		"url": "https://training.dhis.dhmis.org/za",
+		"el": "chart1"
+		}]);
+
+
+	}
 
 	function getElementName(dxData,id){
 		for (var a = 0; a < dxData.dataElements.length; a++){
