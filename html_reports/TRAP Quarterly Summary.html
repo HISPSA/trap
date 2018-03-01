@@ -201,8 +201,8 @@
 	var peFYprev = (peFprev+'April');
 
 	if (dxMMendOfQtr.length > 0) {
-		peQTRprevYmmRangeEnd = (peFcurr + '02');
-		peQTRcurrYmmRangeEnd = ((peFcurr+1) + '02');
+		peQTRprevYmmRangeEnd = (peFcurr + '03');
+		peQTRcurrYmmRangeEnd = ((peFcurr+1) + '03');
 	}
 
 	peQTRcurrYRangeEnd = ((peFcurr+1) + 'Q1');
@@ -693,11 +693,12 @@
 
 							}
 
+
 							for (var a = 0; a < myYTDCALCvals.length; a++){
 
 								document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
 								document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].FYtarget) );
-								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) );
+								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( ( (dxOffset.indexOf(myYTDCALCvals[a].dx)>=0) ? parseFloat(myYTDCALCvals[a].FYtarget) : parseFloat(myYTDCALCvals[a].YTDtarget) )  );
 
 								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
 									// do nothing
