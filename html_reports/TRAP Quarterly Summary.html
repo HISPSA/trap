@@ -294,7 +294,8 @@
 					QTR02: 0,
 					QTR03: 0,
 					QTR04: 0,
-					QTR01: 0
+					QTR01: 0,
+					LASTtarget: 0
 				});
 
 				if (dxCoreArr[p] == 'gOOE6omxMyL'){
@@ -491,7 +492,8 @@
 								QTR02: 0,
 								QTR03: 0,
 								QTR04: 0,
-								QTR01: 0
+								QTR01: 0,
+								LASTtarget: 0
 							});
 
 							var tr = document.createElement('tr');
@@ -584,11 +586,6 @@
 
 						}
 
-						/*var dv1 = document.createElement('div');
-						dv1.setAttribute('style','padding:8px 0 8px 0;');
-						dv1.innerHTML = 'Table '+(n+2)+'. Facility totals for ['+(dataDE.dataElements[n].name).replace('TRAP_','')+']';
-						dv.appendChild(dv1);*/
-
 					}
 
 					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
@@ -619,8 +616,6 @@
 
 							}
 
-							//var PEarr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';')
-
 							for (var a = 0; a < myYTDCALCvals.length; a++){
 
 								for (var i = 0; i < comboRESULTALL.length; i++){
@@ -649,6 +644,11 @@
 											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(ArrPEmmEnd[ArrPEmmEnd.length-1] ) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
 												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 											}
+											// PE match of Current-Range-End-QTR value for End-Of-Month element
+											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1]) ) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												//myYTDCALCvals[a].LASTtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
 										}
 
 										// YTD actual
@@ -668,8 +668,12 @@
 										for (var p = 0; p < PEarr.length; p++){
 											if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0){
 												// YTD CALC of TARGET
-												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) ) {
+												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) < 0) ) {
 													myYTDCALCvals[a].YTDtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												}
+												if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+													//console.log(PEarr[p] + ': ' + comboRESULTALL[i].id + ' = ' + comboRESULTALL[i].value);
+													myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 												}
 											}
 											// YTD CALC of TARGET
@@ -682,8 +686,6 @@
 											}
 
 										}
-
-										//var PEarr = peQTRrangeAct.substring(peQTRrangeAct,peQTRrangeAct.length-1).split(';')
 
 										myYTDCALCvals[a].GrandTotAll += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 
@@ -698,7 +700,7 @@
 
 								document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
 								document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].FYtarget) );
-								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( ( (dxOffset.indexOf(myYTDCALCvals[a].dx)>=0) ? parseFloat(myYTDCALCvals[a].FYtarget) : parseFloat(myYTDCALCvals[a].YTDtarget) )  );
+								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) ); //formatNumber( ( (dxOffset.indexOf(myYTDCALCvals[a].dx)>=0) ? parseFloat(myYTDCALCvals[a].FYtarget) : parseFloat(myYTDCALCvals[a].YTDtarget) )  );
 
 								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
 									// do nothing
