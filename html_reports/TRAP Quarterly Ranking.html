@@ -43,6 +43,7 @@
 
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
+		var iTopPercent = ((getParameterByName('performers').length > 0) ? getParameterByName('performers') : 5);
 
 	</script>
 
@@ -163,6 +164,29 @@
 	</thead>
 </table>
 
+<div id='advancedFilterOptions'>
+	<table>
+		<tr>
+			<td colspan=3>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>Filter Performers for Top/Bottom:</td>
+			<td>
+				<select id='performers' onchange='updateReportCriteria()'>
+					<option value='5'>5%</option>
+					<option value='10'>10%</option>
+					<option value='20'>20%</option>
+					<option value='25'>25%</option>
+					<option value='25'>33%</option>
+					<option value='25'>50%</option>
+					<option value='25'>75%</option>
+					<option value='25'>100%</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+</div>
+
 </div>
 
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
@@ -256,6 +280,31 @@
 	}
 
 	var myYTDCALCvals = [];
+
+	if (iTopPercent == 5){
+		document.getElementById('performers').options[0].selected = true;
+	}
+	if (iTopPercent == 10){
+		document.getElementById('performers').options[1].selected = true;
+	}
+	if (iTopPercent == 20){
+		document.getElementById('performers').options[2].selected = true;
+	}
+	if (iTopPercent == 25){
+		document.getElementById('performers').options[3].selected = true;
+	}
+	if (iTopPercent == 33){
+		document.getElementById('performers').options[4].selected = true;
+	}
+	if (iTopPercent == 50){
+		document.getElementById('performers').options[5].selected = true;
+	}
+	if (iTopPercent == 75){
+		document.getElementById('performers').options[6].selected = true;
+	}
+	if (iTopPercent == 100){
+		document.getElementById('performers').options[7].selected = true;
+	}
 
 	//URL for Dx Core List
 	var sDxCore = ('../api/dataElements.json?filter=id:in:['+dxCore+']&fields=id,name,shortName,displayName');
@@ -1000,16 +1049,16 @@
 
 	function getBackgroundPerformanceColor(varVal){
 		if (isNumber(varVal)) {
-			if (parseFloat(varVal) > 110){
+			if (parseFloat(varVal) >= 60){
 				return '#656AFC'; // blue
 			}
-			if ( (parseFloat(varVal) >= 95) && (parseFloat(varVal) <= 110) ){
+			if ( (parseFloat(varVal) >= 30) && (parseFloat(varVal) < 60) ){
 				return '#90FC65'; // green
 			}
-			if ( (parseFloat(varVal) >= 80) && (parseFloat(varVal) < 95) ){
+			if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 30) ){
 				return '#FCDC65'; // orange
 			}
-			if (parseFloat(varVal) < 80){
+			if (parseFloat(varVal) < 24){
 				return '#FC6565'; // red
 			}
 		}
@@ -1085,7 +1134,7 @@
 		}
 		var tableDt = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
 		var rowDt = tableDt.getElementsByTagName('tr');
-		iRankCount = (iCount/5);
+		iRankCount = (iCount/(100/iTopPercent)); //5 (100 / x): (x / 100)
 		var bInitializeLabelRow = false;
 		for(var i = 0; i < (rowDt.length); i++){
 			if ((i+1) > Math.ceil(iRankCount)){
@@ -1107,10 +1156,23 @@
 		var td = document.createElement('td');
 		td.setAttribute('colspan',(8+peQTRrange.split(';').length));
 		td.setAttribute('style','padding:3px;background-Color:#f5f5f5;border-bottom:1px solid #000;font-style:italic;');
-		td.innerText = ' Top/Bottom 20 Percent'; //(ile) ';
+		td.innerText = ' Top '+iTopPercent+' Percent'; //(ile) ';
+		tr.appendChild(td);
+		document.getElementById(table_id).getElementsByTagName('tbody').item(0).insertBefore(tr,rowDt.item(0));
+
+		var tr = document.createElement('tr');
+		tr.setAttribute('id',''+table_id+'_ranksplitter');
+		var td = document.createElement('td');
+		td.setAttribute('colspan',(8+peQTRrange.split(';').length));
+		td.setAttribute('style','padding:3px;background-Color:#f5f5f5;border-bottom:1px solid #000;font-style:italic;');
+		td.innerText = ' Bottom '+iTopPercent+' Percent'; //(ile) ';
 		tr.appendChild(td);
 		document.getElementById(table_id).getElementsByTagName('tbody').item(0).insertBefore(tr,rowDt.item(Math.ceil(iRankCount)+1));
 
+	}
+
+	function updateReportCriteria(){
+		window.location = ((window.location.toString().indexOf('&performers=')>0) ? window.location.toString().replace('&performers='+iTopPercent,'&performers='+document.getElementById('performers').value) : window.location.toString() + '&performers='+document.getElementById('performers').value)
 	}
 
 </script>

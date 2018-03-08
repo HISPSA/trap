@@ -716,16 +716,16 @@
 
 	function getBackgroundPerformanceColor(varVal){
 		if (isNumber(varVal)) {
-			if (parseFloat(varVal) > 110){
+			if (parseFloat(varVal) >= 60){
 				return '#656AFC'; // blue
 			}
-			if ( (parseFloat(varVal) >= 95) && (parseFloat(varVal) <= 110) ){
+			if ( (parseFloat(varVal) >= 30) && (parseFloat(varVal) < 60) ){
 				return '#90FC65'; // green
 			}
-			if ( (parseFloat(varVal) >= 80) && (parseFloat(varVal) < 95) ){
+			if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 30) ){
 				return '#FCDC65'; // orange
 			}
-			if (parseFloat(varVal) < 80){
+			if (parseFloat(varVal) < 24){
 				return '#FC6565'; // red
 			}
 		}
