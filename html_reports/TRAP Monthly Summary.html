@@ -658,22 +658,14 @@
 								document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual)).toFixed(0) );
 
 
-								/*if (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual) < 0){
-									document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).style.color = '#C70000';
-								}*/
-
 								if (myYTDCALCvals[a].YTDtarget > 0) {
 									var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0);
-									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<TABLE class="perfBar"><TR><TD class="cellNumeric" style="padding:5px 5px 0px 5px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</TD></TR><TR><TD><DIV style="position:relative;left:-3px;top:3px;width:' + ( (parseInt(iW) > 0) ? (parseInt(iW)+11) : 0)  + '%;height:4px;border:0;background-Color:'+getBackgroundPerformanceColor(iW)+';">&nbsp;</DIV></TD></TR></TABLE>';
-									document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? (parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW)+';">&nbsp;</div></div>';
-									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(1)) + '%';
-									//document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).style.backgroundColor = getBackgroundPerformanceColor((parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ));
+									document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? (parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx)+';">&nbsp;</div></div>';
 								}
 
 								if ( (dxNonRunningTotal).indexOf(myYTDCALCvals[a].dx) >= 0){
 									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peMMrange.split(';')[0]).innerHTML = '<span color="#808080">*</span> ' + formatNumber( parseFloat(parseFloat(myYTDCALCvals[a].CALCtarget) / (PEarr.length) ).toFixed(0) ); /// (PEarr.length+1)
 									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peMMrange.split(';')[0]).title = 'Average TARGET of monthly values';
-									//console.log((PEarr.length));
 								}
 
 								if (myYTDCALCvals[a].GrandTotAll == 0) { 
@@ -714,19 +706,68 @@
 		}
 	}
 
-	function getBackgroundPerformanceColor(varVal){
+
+	function getBackgroundPerformanceColor(varVal,dx){
+		//var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg';
+		var dxOne = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq';
 		if (isNumber(varVal)) {
-			if (parseFloat(varVal) >= 60){
-				return '#656AFC'; // blue
-			}
-			if ( (parseFloat(varVal) >= 30) && (parseFloat(varVal) < 60) ){
-				return '#90FC65'; // green
-			}
-			if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 30) ){
-				return '#FCDC65'; // orange
-			}
-			if (parseFloat(varVal) < 24){
-				return '#FC6565'; // red
+
+			if (dxOne.indexOf(dx) >= 0){
+				if (parseFloat(varVal) > 110){
+					return '#656AFC'; // blue
+				}
+				if ( (parseFloat(varVal) >= 90) && (parseFloat(varVal) <= 110) ){
+					return '#90FC65'; // green
+				}
+				if ( (parseFloat(varVal) >= 70) && (parseFloat(varVal) < 90) ){
+					return '#FCDC65'; // orange
+				}
+				if (parseFloat(varVal) < 70){
+					return '#FC6565'; // red
+				}
+			} else {
+				if (dx == 'gOOE6omxMyL'){
+					if (parseFloat(varVal) > 100){
+						return '#656AFC'; // blue
+					}
+					if ( (parseFloat(varVal) >= 75) && (parseFloat(varVal) <= 100) ){
+						return '#90FC65'; // green
+					}
+					if ( (parseFloat(varVal) >= 60) && (parseFloat(varVal) < 75) ){
+						return '#FCDC65'; // orange
+					}
+					if (parseFloat(varVal) < 60){
+						return '#FC6565'; // red
+					}
+				}
+				if (dx == 'IsqRJtrTAP6'){
+					if (parseFloat(varVal) > 100){
+						return '#656AFC'; // blue
+					}
+					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
+						return '#90FC65'; // green
+					}
+					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
+						return '#FCDC65'; // orange
+					}
+					if (parseFloat(varVal) < 65){
+						return '#FC6565'; // red
+					}
+				}
+				if (dx == 'ePxyv7IJofg'){
+					if (parseFloat(varVal) > 100){
+						return '#656AFC'; // blue
+					}
+					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
+						return '#90FC65'; // green
+					}
+					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
+						return '#FCDC65'; // orange
+					}
+					if (parseFloat(varVal) < 24){
+						return '#FC6565'; // red
+					}
+				}
 			}
 		}
 	}
