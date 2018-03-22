@@ -50,6 +50,7 @@
 
 </head>
 
+
 <body>
 
 	<div id="reportHeader">
@@ -62,7 +63,7 @@
 			<tr>
 				<td></td>
 				<td style='text-align:center;'>
-					<strong style='font-size:14pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION PLAN QUARTERLY REPORT</strong>
+					<strong style='font-size:14pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
 				</td>
 				<td></td>
 			</tr>
@@ -116,8 +117,7 @@
 			</tr>
 			<tr>
 				<td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
-					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The following indicators must be monitored closely against set targets:<br>
-					<div id='dxList'></div>
+					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The indicators listed below must be monitored closely against set targets.
 				</td>
 			</tr>
 			<tr>
@@ -127,7 +127,58 @@
 			</tr>
 			<tr>
 				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 3. &nbsp; REPORT SUMMARY</strong>
+					<strong>&nbsp; 3. &nbsp; 90-90-90 HIV cascade</strong>
+			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+					Cascades are used to track performance towards achieving the 90-90-90 targets. The indicators below are used for this purpose:<br><br>
+
+					1st bar: The total population living with HIV (LHIV). This is generated from the Thembisa estimate model.<br><br>
+						
+					2nd bar: LHIV who know their status.  It is estimated that 75% of those LHIV in South Africa already know their HIV status. In order to reach the 90% target another 15% of the LHIV population must still be diagnosed<br><br>
+						
+					3rd bar: LHIV with known status on ART. At least 90% of the LHIV population who know their HIV status must be on ART. The acual number of clients on ART (TROA) is generated from the Provincial integrated webDHIS instances.<br><br>
+						
+					4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br><br>
+
+					5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;'>
+					<strong>&nbsp; 4. &nbsp; How indicators are monitored</strong>
+			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;'>
+					The coloured bars provide a quick way of tracking progress made with regard to a particular indicator. The indicators are represented by green, yellow, red and blue bars. The colours mean the following:<br><br>
+					<div style="color:red">Red: Critical</div>
+					<div style="color:orange">Orange: Need to improve</div>
+					<div style="color:green">Green: The indicator is close to or reached its target value</div>
+					<div style="color:blue">Blue: Needs explanation</div><br>
+					<!-- Colour ranges for the indicators have been set as follows: -->
+					
+					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The following indicators must be monitored closely against set targets:
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;'>
+					<div id='dxList'></div>
+				</td>
 			</tr>
 		</table>
 
@@ -138,9 +189,9 @@
 
 <div id="chart1"></div>
 
-<div id="" style="padding:0">
+<div id="" style="padding:0;">
 
-<div id='table1Title'></div>
+<div id='table1Title' style='display:none;'></div>
 
 <table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
 	<thead>
@@ -165,36 +216,37 @@
 	</thead>
 </table>
 
+
 <div id='advancedFilterOptions'>
-	<table>
-		<tr>
-			<td colspan=5>&nbsp;</td>
-		</tr>
-		<tr>
-			<td>Filter Performers for Top/Bottom:</td>
-			<td>
-				<select id='performers' onchange=''>
-					<option value='1'>1%</option>
-					<option value='5'>5%</option>
-					<option value='10'>10%</option>
-					<option value='20'>20%</option>
-					<option value='25'>25%</option>
-					<option value='33'>33%</option>
-					<option value='50'>50%</option>
-					<!--<option value='75'>75%</option>
-					<option value='100'>100%</option>-->
-				</select>
-			</td>
-			<td style='padding:0 0 0 8px;'>Filter Output level:</td>
-			<td>
-				<select id='oulevels' onchange=''></select>
-			</td>
-			<td style='padding:0 0 0 8px;'>
-				<input type="button" value="refresh" onclick="updateReportCriteria()" style="">
-			</td>
-		</tr>
-	</table>
-</div>
+		<table>
+			<tr>
+				<td colspan=5><div style="font-weight:800;font-size:12pt">Report Filters</div></td>
+			</tr>
+			<tr>
+				<td>Top/Bottom Performers:</td>
+				<td>
+					<select id='performers' onchange=''>
+						<option value='1'>1%</option>
+						<option value='5'>5%</option>
+						<option value='10'>10%</option>
+						<option value='20'>20%</option>
+						<option value='25'>25%</option>
+						<option value='33'>33%</option>
+						<option value='50'>50%</option>
+						<!--<option value='75'>75%</option>
+						<option value='100'>100%</option>-->
+					</select>
+				</td>
+				<td style='padding:0 0 0 8px;'>Output level:</td>
+				<td>
+					<select id='oulevels' onchange=''></select>
+				</td>
+				<td style='padding:0 0 0 8px;'>
+					<input type="button" value="refresh" onclick="updateReportCriteria()" style="">
+				</td>
+			</tr>
+		</table>
+	</div>
 
 </div>
 
@@ -203,12 +255,13 @@
  <script language=javascript>
 
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
-	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg'; //S6BlQpoZVhQ: TB screening REMOVED Temporarily (2018-02-09)
+	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,YrrIYRXd82h,NsrFeZdWd14,Og44c6zMLLT'; //S6BlQpoZVhQ: TB screening REMOVED Temporarily (2018-02-09); replaced (2018-03-20) gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg
 	var dxCoreSentiment = '1,1,1,1,1,1,-1';
-	var dxCoreArr = dxCore.split(',')
+	var dxCoreArr = dxCore.split(',');
 	var dxCoreSentimentArr = dxCoreSentiment.split(',')
 	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q';
-	var dxOffset = 'gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg';
+	var dxOffset = ''; /*gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg*/
+	var dxSingleTarget = 'Og44c6zMLLT,YrrIYRXd82h,NsrFeZdWd14'; 
 	var dxCoreCat = '';
 	var lblCat = 'Actual,Target';
 	var dxMMendOfQtr = 'mH17opU6Ivq';
@@ -361,7 +414,12 @@
 			tbl1.appendChild(tbody);
 
 			var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
+			
+			for (var p = 0; p < dxCoreArr.length; p++){
+				document.getElementById('dxList').innerHTML += ('<div style="padding:2px 0 2px 2px"> • ' + (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','')+'</div>');
+			}
 
+/*
 			for (var p = 0; p < dxCoreArr.length; p++){
 
 				myYTDCALCvals.push ({
@@ -383,7 +441,7 @@
 					LASTtarget: 0
 				});
 
-				if (dxCoreArr[p] == 'gOOE6omxMyL'){
+				if (dxCoreArr[p] == 'YrrIYRXd82h'){
 
 					var iCols = (tr.childNodes.length + 1);
 
@@ -496,7 +554,7 @@
 			dv.setAttribute('style','padding:12px 0 8px 4px;');
 			dv.innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
 			document.getElementById('table1Title').appendChild(dv);
-
+*/
 			var dxArrCore = dxCore.split(',')
 			var dxArrCat = dxCat.split(',')
 
@@ -509,7 +567,7 @@
 			dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
 
 			var sOU = ('../api/organisationUnits.json?fields=id,name,displayName,displayShortName,level,path&filter=path:like:' + ou + '&filter=level:eq:'+OUlevel+'&paging=false');
-			console.log(sOU);
+			//console.log(sOU);
 
 			$.ajax({
 				url: sOU,
@@ -530,7 +588,7 @@
 
 						var dv1 = document.createElement('div');
 						dv1.setAttribute('style','padding:12px 0 4px 4px;');
-						dv1.innerText = 'Table '+(n+2)+'. '+(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+						dv1.innerText = 'Table '+(n+1)+'. '+(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
 						document.getElementById('mainPage').appendChild(dv1);
 
 						var dv = document.createElement('div');
@@ -719,6 +777,10 @@
 												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 												//myYTDCALCvals[a].LASTtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 											}
+											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1]) ) >= 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												//myYTDCALCvals[a].LASTtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
 										}
 
 										// YTD actual
@@ -737,10 +799,14 @@
 										for (var p = 0; p < PEarr.length; p++){
 											if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0){
 												// YTD CALC of TARGET
-												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) < 0) ) {
+												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) < 0) ) {
 													myYTDCALCvals[a].YTDtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 												}
-												if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												/*if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+													//console.log(PEarr[p] + ': ' + comboRESULTALL[i].id + ' = ' + comboRESULTALL[i].value);
+													myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												}*/
+												if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
 													//console.log(PEarr[p] + ': ' + comboRESULTALL[i].id + ' = ' + comboRESULTALL[i].value);
 													myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 												}
@@ -750,8 +816,12 @@
 												myYTDCALCvals[a].CALCtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 											}
 											// ACTUAL
-											if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf(getPeriodPair(PEarr[p])) >= 0) ) {
+											if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf(getPeriodPair(PEarr[p])) >= 0) && (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) < 0) ) {
 												myYTDCALCvals[a].CALCactual += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											} else {
+												if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf((PEarr[p])) >= 0) && (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+													myYTDCALCvals[a].CALCactual += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+												}
 											}
 
 										}
@@ -774,22 +844,25 @@
 								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
 									// do nothing
 								} else {
-									if ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0){
+									if ( ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) || ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
 										myYTDCALCvals[a].YTDactual = parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length)).toFixed(1);
 									} else {
+										/*if ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0){
+											myYTDCALCvals[a].YTDactual = parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length)).toFixed(1);
+										}*/
 										// do nothing
 									}
 								}
 
 								if (myYTDCALCvals[a].YTDtarget > 0) {
-									if ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0){
+									if (( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) || ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0)){
 										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0);
 										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx)+';">&nbsp;</div></div>';
 									} else {
 										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0);
 										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx)+';">&nbsp;</div></div>';
 									}
-								} 
+								}
 
 								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
 									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peQTRrange.split(';')[0]).innerHTML = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) );
@@ -817,7 +890,8 @@
 
 							document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
 							document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
-							document.getElementById("logoTable").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
+							document.getElementById("tblMaster").style.display = 'none';
+							document.getElementById("logoTable").style.width = (document.getElementById('tblDx_'+dxCoreArr[0]).offsetWidth + 'px');
 
 							//setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
 
@@ -892,7 +966,7 @@
 	function loadChart(){
 
 		document.getElementById("chart1Title").innerText = 'Chart 1. Current 90-90-90 Treatment Cascade and Pillars';
-		document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
+		document.getElementById("chart1").style.width = (document.getElementById('tblDx_'+dxCoreArr[0]).offsetWidth + 'px');
 
 		chartPlugin.url = "../";
 		//chartPlugin.username = "<username>";
@@ -1001,7 +1075,7 @@
 					return '#FC6565'; // red
 				}
 			} else {
-				if (dx == 'gOOE6omxMyL'){
+				if (dx == 'Og44c6zMLLT'){
 					if (parseFloat(varVal) > 100){
 						return '#656AFC'; // blue
 					}
@@ -1015,7 +1089,7 @@
 						return '#FC6565'; // red
 					}
 				}
-				if (dx == 'IsqRJtrTAP6'){
+				if (dx == 'YrrIYRXd82h'){
 					if (parseFloat(varVal) > 100){
 						return '#656AFC'; // blue
 					}
@@ -1029,7 +1103,7 @@
 						return '#FC6565'; // red
 					}
 				}
-				if (dx == 'ePxyv7IJofg'){
+				if (dx == 'NsrFeZdWd14'){
 					if (parseFloat(varVal) > 100){
 						return '#656AFC'; // blue
 					}
