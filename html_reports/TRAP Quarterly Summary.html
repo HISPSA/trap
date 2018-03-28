@@ -27,8 +27,8 @@
 		#reportOverview {padding:4px;display:none;}
 		table, td, div, span {font-family:Calibri}
 		li {padding:4px;}
-		#chart1Title {padding:12px 0 4px 8px;font-weight: 800;}
-		.tableTitle {padding:24px 0 4px 4px;font-weight: 800;}
+		#chart1Title {padding:12px 0 4px 8px;font-weight: 400;}
+		.tableTitle {padding:12px 0 4px 4px;font-weight: 400;}
 	</style>
 
 	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
@@ -153,6 +153,15 @@
 				</td>
 			</tr>
 			<tr>
+				<td colspan=3>
+
+					<div id='chart1Title'></div>
+
+					<div id="chart1"></div>
+
+				</td>
+			</tr>
+			<tr>
 				<td colspan=3 style='text-align:left;'>
 					<strong>&nbsp; 4. &nbsp; How indicators are monitored</strong>
 			</tr>
@@ -178,43 +187,62 @@
 					<div id='dxList'></div>
 				</td>
 			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;'>
+					<strong>&nbsp; 5. &nbsp;Ranking per indicator</strong>
+			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					&nbsp;Organisational units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:left;'>
+
+				<div id="" style="padding:0">
+
+						<div id='table1Title' class='tableTitle'></div>
+
+						<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
+							<thead>
+								<tr>
+									<th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
+									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
+									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
+									<th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
+									<th colspan=1 rowspan=2 class='labelHeader' id='1_peQTRtarget'></th>
+									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ2'></th>
+									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ3'></th>
+									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ4'></th>
+									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ1'></th>
+						
+								</tr>
+								<tr>
+									<th colspan=1 class='labelHeader' id='1_peFYTDtarget'></th>
+									<th colspan=1 class='labelHeader' id='1_peFYTDactual'></th>
+									<th colspan=1 class='labelHeader' id='1_peFYTDgap'></th>
+									<th colspan=1 class='labelHeader' id='1_peFYTDprogress'></th>
+								</tr>
+							</thead>
+						</table>
+						
+						</div>
+					</td>
+				</tr>
 		</table>
 
 	</div>
-	
 
-<div id='chart1Title'></div>
-
-<div id="chart1"></div>
-
-<div id="" style="padding:0">
-
-<div id='table1Title' class='tableTitle'></div>
-
-<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
-	<thead>
-		<tr>
-			<th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
-			<th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
-			<th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
-			<th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
-			<th colspan=1 rowspan=2 class='labelHeader' id='1_peQTRtarget'></th>
-			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ2'></th>
-			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ3'></th>
-			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ4'></th>
-			<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ1'></th>
-
-		</tr>
-		<tr>
-			<th colspan=1 class='labelHeader' id='1_peFYTDtarget'></th>
-			<th colspan=1 class='labelHeader' id='1_peFYTDactual'></th>
-			<th colspan=1 class='labelHeader' id='1_peFYTDgap'></th>
-			<th colspan=1 class='labelHeader' id='1_peFYTDprogress'></th>
-		</tr>
-	</thead>
-</table>
-
-</div>
 
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
 
@@ -254,6 +282,8 @@
 
 	var peFYcurr = (peFcurr+'April');
 	var peFYprev = (peFprev+'April');
+
+	var peFYprevJul = (peFprev+'July');//dxSingleTarget.indexOf(dxCoreArr[p])
 
 	if (dxMMendOfQtr.length > 0) {
 		peQTRprevYmmRangeEnd = (peFcurr + '03');
@@ -332,7 +362,7 @@
 			//for (var p = 0; p < dataDE.dataElements.length; p++){
 			for (var p = 0; p < dxCoreArr.length; p++){
 
-				dxSummaryCounter.push ( { dx: dxCoreArr[p], counter: 0, missing: 0, colorMatch: { "blue": 0, "green": 0, "orange": 0, "red": 0 } } );
+				dxSummaryCounter.push ( { dx: dxCoreArr[p], counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
 
 				myYTDCALCvals.push ({
 					ou: ou,
@@ -388,7 +418,11 @@
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 				td.setAttribute("class",'cellNumeric');
 				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
-				td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
+				if (dxSingleTarget.indexOf(dxCoreArr[p]) < 0){
+					td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
+				} else {
+					td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprevJul);
+				}
 				tr.appendChild(td);
 
 				var td = document.createElement('td');
@@ -560,7 +594,12 @@
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
 							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
+							
+							if (dxSingleTarget.indexOf(dxCoreArr[n]) < 0){
+								td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
+							} else {
+								td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprevJul);
+							}
 							tr.appendChild(td);
 
 							var td = document.createElement('td');
@@ -638,7 +677,7 @@
 
 					}
 
-					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
+					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
 					console.log(sDataGet);
 
 					$.ajax({
@@ -673,9 +712,12 @@
 									// DX and OU match
 									if ( ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].dx) >= 0) && ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].ou) >= 0) ){
 
-										if ( ( (comboRESULTALL[i].id).indexOf(peFYprev) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) ) {
+										if ( ( (comboRESULTALL[i].id).indexOf(peFYprev) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) < 0) ) {
 											myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
 										} else {
+											if ( ( (comboRESULTALL[i].id).indexOf(peFYprevJul) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
+												myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
+											}
 											// PE match of Prev-Year-End-QTR value for End-Of-Month element
 											if ( ( (comboRESULTALL[i].id).indexOf(peQTRprevYmmRangeEnd) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
 												myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
@@ -759,7 +801,11 @@
 
 							for (var a = 0; a < myYTDCALCvals.length; a++){
 
-								document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
+								if (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) < 0){
+									document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
+								} else {
+									document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprevJul).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
+								}
 								document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].FYtarget) );
 								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) ); //formatNumber( ( (dxOffset.indexOf(myYTDCALCvals[a].dx)>=0) ? parseFloat(myYTDCALCvals[a].FYtarget) : parseFloat(myYTDCALCvals[a].YTDtarget) )  );
 
@@ -779,10 +825,10 @@
 								if (myYTDCALCvals[a].YTDtarget > 0) {
 									if (( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) || ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0)){
 										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0);
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx)+';">&nbsp;</div></div>';
+										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx,(myYTDCALCvals[a].ou==ou))+';">&nbsp;</div></div>';
 									} else {
 										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0);
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx)+';">&nbsp;</div></div>';
+										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx,(myYTDCALCvals[a].ou==ou))+';">&nbsp;</div></div>';
 									}
 								}
 
@@ -804,9 +850,12 @@
 								}
 
 
+
 								if (myYTDCALCvals[a].GrandTotAll == 0) { 
+									if (myYTDCALCvals[a].ou != ou){
+										incrDxSummaryMissing(myYTDCALCvals[a].dx);
+									}
 									document.getElementById(myYTDCALCvals[a].dx+'_'+myYTDCALCvals[a].ou+'_row').style.display = 'none';
-									incrDxSummaryMissing(myYTDCALCvals[a].dx);
 								}
 
 							}
@@ -815,17 +864,86 @@
 							document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
 							document.getElementById("logoTable").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
 
-							//setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
+							setTimeout(function () { loadChart(); }, 100);
 
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1000 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 1100 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[2], 5); }, 1200 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 1300 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[5], 5); }, 1400 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[6], 5); }, 1400 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[5], 5); }, 1500 ) ;
+							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[6], 5); }, 1600 ) ;
 
-							setTimeout(function () { loadChart(); }, 2000);
+							for (var n = 0; n < dxCoreArr.length; n++){
+
+								var tbl = document.createElement('table');
+								tbl.setAttribute("style","");
+								document.getElementById('dv_'+dxCoreArr[n]).appendChild(tbl);
+
+								var tr = document.createElement('tr');
+								tbl.appendChild(tr);
+								var td = document.createElement('td');
+								td.setAttribute("style",'padding:3px;border-bottom:1px solid #fff;width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+								tr.appendChild(td);
+
+								var sInner = 'Out of ' + dxSummaryCounter[n].counter + ' participating orgunits:<br>'
+								td.innerHTML = sInner;
+
+								if (dxSummaryCounter[n].colorMatch['red'] > 0){
+
+									var tr = document.createElement('tr');
+									tbl.appendChild(tr);
+									var td = document.createElement('td');
+									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+									tr.appendChild(td);
+
+									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['red']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['red']+') scored in <span style="background-Color:#FC6565;color:#fff;width:50px;">[RED]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['red_progress']/(dxSummaryCounter[n].colorMatch['red'])).toFixed(1) + '%];</div>';
+									td.innerHTML = sInner;
+
+								}
+
+								if (dxSummaryCounter[n].colorMatch['orange'] > 0){
+
+									var tr = document.createElement('tr');
+									tbl.appendChild(tr);
+									var td = document.createElement('td');
+									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+									tr.appendChild(td);
+
+									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FCDC65;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
+									td.innerHTML = sInner;
+
+								}
+
+								if (dxSummaryCounter[n].colorMatch['green'] > 0){
+
+									var tr = document.createElement('tr');
+									tbl.appendChild(tr);
+									var td = document.createElement('td');
+									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+									tr.appendChild(td);
+
+									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#90FC65;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
+									td.innerHTML = sInner;
+
+								}
+
+								if (dxSummaryCounter[n].colorMatch['blue'] > 0){
+
+									var tr = document.createElement('tr');
+									tbl.appendChild(tr);
+									var td = document.createElement('td');
+									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+									tr.appendChild(td);
+
+									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['blue']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['blue']+') scored in <span style="background-Color:#656AFC;color:#fff;width:50px;">[BLUE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['blue_progress']/(dxSummaryCounter[n].colorMatch['blue'])).toFixed(1) + '%];</div>';
+									td.innerHTML = sInner;
+
+								}
+
+							}
+
+							//LoadHTMLresultsTable(dataVal,'mainPage');
 
 						}
 
@@ -974,89 +1092,122 @@
 		}
 	}
 
-	function incrDxSummaryCounter(sCol,dx){
+	function incrDxSummaryCounter(sCol,dx,varVal){
 		for(var i = 0; i < dxSummaryCounter.length; i++){
 			if (dxSummaryCounter[i].dx == dx){
 				dxSummaryCounter[i].counter += 1;
 				dxSummaryCounter[i].colorMatch[sCol] += 1;
+				dxSummaryCounter[i].colorMatch[sCol+'_progress'] += varVal;
 			}
 		}
 	}
 
-	function getBackgroundPerformanceColor(varVal,dx){
+	function getBackgroundPerformanceColor(varVal,dx,bSkipIncr){
 		//var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg';
 		var dxOne = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq';
 		if (isNumber(varVal)) {
 
 			if (dxOne.indexOf(dx) >= 0){
 				if (parseFloat(varVal) > 110){
-					incrDxSummaryCounter('blue',dx);
+					if (bSkipIncr != true){
+						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+					}
 					return '#656AFC'; // blue
 				}
 				if ( (parseFloat(varVal) >= 90) && (parseFloat(varVal) <= 110) ){
-					incrDxSummaryCounter('green',dx);
+					if (bSkipIncr != true){
+						incrDxSummaryCounter('green',dx,parseFloat(varVal));
+					}
 					return '#90FC65'; // green
 				}
 				if ( (parseFloat(varVal) >= 70) && (parseFloat(varVal) < 90) ){
-					incrDxSummaryCounter('orange',dx);
+					if (bSkipIncr != true){
+						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+					}
 					return '#FCDC65'; // orange
 				}
 				if (parseFloat(varVal) < 70){
-					incrDxSummaryCounter('red',dx);
+					if (bSkipIncr != true){
+						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+					}
 					return '#FC6565'; // red
 				}
 			} else {
 				if (dx == 'Og44c6zMLLT'){
 					if (parseFloat(varVal) > 100){
-						incrDxSummaryCounter('blue',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+					}
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 75) && (parseFloat(varVal) <= 100) ){
-						incrDxSummaryCounter('green',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('green',dx,parseFloat(varVal));
+					}
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 60) && (parseFloat(varVal) < 75) ){
-						incrDxSummaryCounter('orange',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+					}
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 60){
-						incrDxSummaryCounter('red',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+					}
 						return '#FC6565'; // red
 					}
 				}
 				if (dx == 'YrrIYRXd82h'){
 					if (parseFloat(varVal) > 100){
-						incrDxSummaryCounter('blue',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+					}
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
-						incrDxSummaryCounter('green',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('green',dx,parseFloat(varVal));
+					}
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
-						incrDxSummaryCounter('orange',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+					}
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 65){
-						incrDxSummaryCounter('red',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+					}
 						return '#FC6565'; // red
 					}
 				}
 				if (dx == 'NsrFeZdWd14'){
 					if (parseFloat(varVal) > 100){
-						incrDxSummaryCounter('blue',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+					}
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
-						incrDxSummaryCounter('green',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('green',dx,parseFloat(varVal));
+					}
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
-						incrDxSummaryCounter('orange',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+					}
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 24){
-						incrDxSummaryCounter('red',dx);
+						if (bSkipIncr != true){
+						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+					}
 						return '#FC6565'; // red
 					}
 				}
@@ -1094,7 +1245,28 @@
 	function formatNumber(num) {
 		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + "," });
 	}
-
+function LoadHTMLresultsTable(myData,sDestination){
+	var sReturn = '';
+	sReturn += '<table class="listTable gridTable"><thead><tr>';
+	for(var i = 0; i < myData.headers.length; i++) {
+		sReturn += '<th class="pivot-dim-label">' + myData.headers[i].name + '</th>';
+	}
+	sReturn += '</tr></tr></thead>';
+	sReturn += '<tbody>';
+	for(var i = 0; i < myData.rows.length; i++) {
+		sReturn += '<tr>';
+		for(var p = 0; p < myData.headers.length; p++) {
+			if (myData.headers[p].name != 'value'){
+				sReturn += '<td title="' + myData.rows[i][p] + '" class="td-nobreak">' + myData.metaData.items[myData.rows[i][p]].name + '</td>';
+			} else {
+				sReturn += '<td class="td-nobreak">' + myData.rows[i][p] + '</td>';
+			}
+		}
+		sReturn += '</tr>';
+	}
+	sReturn += '</tbody></table>';
+	$('#'+sDestination).html(sReturn);
+}
 	function sortTable(table_id, sortColumn){
 		//console.log('sortTable("'+table_id+'",'+sortColumn+')');
 		var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);

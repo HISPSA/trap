@@ -715,8 +715,8 @@
 
 					}
 
-					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:LEVEL-' + OUlevel + ';'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
-					//dimension=ou:LEVEL-' + OUlevel + ';'+ou+'
+					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:LEVEL-' + OUlevel + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID';
+					//dimension=ou:LEVEL-' + OUlevel + ';'+ou+';'+OUchildren+'
 					console.log(sDataGet);
 
 					$.ajax({
@@ -892,6 +892,7 @@
 							document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
 							document.getElementById("tblMaster").style.display = 'none';
 							document.getElementById("logoTable").style.width = (document.getElementById('tblDx_'+dxCoreArr[0]).offsetWidth + 'px');
+							document.getElementById("tblMaster").style.display = 'none';
 
 							//setTimeout(function () { sortTable('tblMaster', 5); }, 1500);
 
