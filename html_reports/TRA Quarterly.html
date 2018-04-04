@@ -3,6 +3,7 @@
 <head>
 
 	<style>
+
 		table.MainTbl{
 			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;
 		}
@@ -15,6 +16,10 @@
 		th.labelquarterName{
 			font-weight:800;border-left:1px solid #000;border-bottom:1pt solid #000;text-align:center;padding:4px;background-Color:#f5f5f5;color:#000;
 		}
+        td.rowItemLeft {padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        td.rowItem {border-bottom:1px solid #000;border-left:1px solid #000;}
+        td.rowItemRight {border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5}
+
 		td.cellNumeric, div.cellNumeric{
 			text-align: right;padding:4px;cursor: default;
 		}
@@ -25,12 +30,30 @@
 		}
 		table.perfBar { width:100%;height:100;padding:0; }
 		#reportOverview {padding:4px;display:none;}
+
 		table, td, div, span {font-family:Calibri}
 		li {padding:4px;}
 		#chart1Title {padding:12px 0 4px 8px;font-weight: 400;}
 		.tableTitle {padding:12px 0 4px 4px;font-weight: 400;}
+
+
+
+        #tblMaster {display:none;}
+
+        #leafMap {width:1000px;height:800px;position:relative;top:0;left:0;padding:0; margin:0;border:0;border-radius:0;background-image:-webkit-linear-gradient(top, #ffffff 0%, #ffffff 100%);cursor: default; }
+        .leaflet-control-attribution {display:none;}
+        @media all {
+            .page-break	{ display: none; }
+        }
+        @media print {
+            footer {page-break-after: always;}
+        }
+
 	</style>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
 	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
 
 	<script language=javascript>
@@ -62,20 +85,40 @@
 			<tr>
 				<td></td>
 				<td style='text-align:center;'>
-					<strong style='font-size:14pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
+					<strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
 				</td>
 				<td></td>
-			</tr>
+            </tr>
 			<tr>
-				<td colspan=3 style='text-align:center;padding:4px 0 0 0;'>
-					<div style='font-size:12pt;' id='ouName'></div>
+                    <td colspan=3 style='padding:4px;'>
+                        &nbsp;
+                    </td>
+                </tr>
+			<tr>
+				<td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
+					<div style='font-size:18pt;' id='ouName'></div>
 				</td>
 			</tr>
 			<tr>
-				<td colspan=3 style='text-align:center;'>
-					<div style='font-size:12pt;' id='peSummary'></div>
+				<td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
+					<div style='font-size:18pt;' id='peSummary'></div>
 				</td>
-			</tr>
+            </tr>
+			<tr>
+                <td colspan=3 style='text-align:center;'>
+                    <div id='leafMap'></div>
+                </td>
+            </tr>
+			<tr>
+                <td colspan=3 style='text-align:center;'>
+                    <div style='font-size:14pt;' id='genDetails'></div>
+                </td>
+            </tr>
+        </table>
+
+        <footer></footer>
+
+        <table id='subHeader' style=""></table>
 
 			<tr>
 				<td colspan=3>
@@ -96,7 +139,7 @@
 						<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
 							<thead>
 								<tr>
-									<th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
+									<th colspan=1 rowspan=2 class='labelHeader ' style='border-left:0;'>{PLACEHOLDER}</th>
 									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
 									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
 									<th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
@@ -148,6 +191,30 @@
 	var peQTRcurrYmmRangeEnd = '';
 	var peQTRrangeAct = '';
 	var dxSummaryCounter = [];
+    var dxCurrent = '';
+
+    /* MAP START */
+
+    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+
+    /*var g_baseMapLayerOpacity = 0;
+
+    var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
+    var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
+    var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
+    var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
+
+    g_baseMapCollection = {
+        "PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
+        "PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
+        "PRINT: StreetMap": Open_StreetMap,
+        "HikeBike":HikeBike_HikeBike
+    };
+
+    var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
+    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);*/
+
+    /* MAP END */
 
 	var peQcurr = parseInt(pe.split('Q')[1]); //parseInt(pe.substring(4,6));
 	var peFcurr = parseInt(pe.split('Q')[0]); //parseInt(pe.substring(0,4));
@@ -159,11 +226,9 @@
 	var peFprev = (peFcurr-1); //parseInt(((parseInt(peQcurr)<4) ? (peFcurr-1) : peFcurr));
 	var peFcurrSuff = parseInt(peFcurr.toString().substring(2,4));
 	var peFprevSuff = parseInt(peFprev.toString().substring(2,4));
-
 	var peFYcurr = (peFcurr+'April');
 	var peFYprev = (peFprev+'April');
-
-	var peFYprevJul = (peFprev+'July');//dxSingleTarget.indexOf(dxCoreArr[p])
+	var peFYprevJul = (peFprev+'July');
 
 	if (dxMMendOfQtr.length > 0) {
 		peQTRprevYmmRangeEnd = (peFcurr + '03');
@@ -175,7 +240,6 @@
 	document.getElementById('1_peFprev').innerHTML = (peFprev + '/' + peFcurrSuff + '<br>Baseline');
 	document.getElementById('1_peFtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Target');
 	document.getElementById('1_FYspan').innerHTML = ('YTD ' + peFcurr + '/' + ((peFcurrSuff)+1) + '');
-
 	document.getElementById('1_peFYTDtarget').innerHTML = ('Target');
 	document.getElementById('1_peFYTDactual').innerHTML = ('Actual');
 	document.getElementById('1_peFYTDgap').innerHTML = ('Gap');
@@ -233,7 +297,6 @@
 	//URL for Dx Core List
 	//var sDxCore = ('../api/dataElements.json?filter=id:in:['+dxCore+']&fields=id,name,shortName,displayName');
     var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(/,/g,';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID';
-    //console.log(sDataGet);
 
 	 $.ajax({
 		url: sDataGet,
@@ -272,8 +335,6 @@
 
 			}
 
-            //console.log(myYTDCALCvals);
-
 			for (var p = 0; p < dxCoreArr.length; p++){
 
                 var dxCoreCat = '';
@@ -285,17 +346,48 @@
                 dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
 
                 var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + OUlevel + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID';
-                //console.log(sDataGet);
-                console.log(dxCoreArr[p] + ': ' + sDataGet);
+                //dxCurrent = dxCoreArr[p];
+                //console.log(dxCoreArr[p] + ': ' + sDataGet);
+
+                var dv1 = document.createElement('div');
+                dv1.setAttribute('id','title_'+dxCoreArr[p]);
+                dv1.setAttribute('class','tableTitle');
+                dv1.innerText = ('Table '+(p+1)+'. ');
+
+                document.getElementById('mainPage').appendChild(dv1);
+
+                var dv1 = document.createElement('div');
+                dv1.setAttribute('id','dv_'+dxCoreArr[p]);
+                dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]);
+                document.getElementById('mainPage').appendChild(dv1);
+
+                //console.log(p + ': ' + dxCoreArr[p]);
 
                 $.ajax({
                     url: sDataGet,
+                    dx: dxCoreArr[p],
+                    idxItem: (p+1),
+                    bfinalDx: (p == (dxCoreArr.length-1)),
                     error: function (xhr, ajaxOptions, thrownError) {
                         console.log('error: Data Element Lookup');
                     },
                     success : function(dataDE){
-                        returnPrepArray(dataDE);
 
+						document.getElementById('title_'+this.dx).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                        document.getElementById('tbl_'+this.dx).innerHTML = (document.getElementById('tbl_'+this.dx).innerHTML.replace('tblMaster','tbl_'+this.dx).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
+
+                        var myPrepArr = returnPrepArray(dataDE,this.dx);
+
+                        buildCUSTOMHtmlTable(myPrepArr,'#tbl_'+this.dx,this.dx)
+
+                        //console.log(myPrepArr);
+
+                        if (this.bfinalDx == true){
+                            loadMapFrame();
+                            console.log('leafMap loaded');
+                        }
+
+                        myPrepArr = [];
 
                     }
 
@@ -303,11 +395,33 @@
 
             }
 
+
+            document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
+            document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
+            document.getElementById('genDetails').innerHTML = '<i>report created </i>' + todayDate();
+
 		}
 	
 	 })
 
-     function returnPrepArray(myData){
+    function todayDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        if(dd<10) {
+            dd = '0'+dd
+        } 
+
+        if(mm<10) {
+            mm = '0'+mm
+        } 
+
+        return ( yyyy + '/' + mm + '/' + dd );
+    }
+
+     function returnPrepArray(myData,dx){
         var ArrRet = [];
         for (var o = 0; o < myData.metaData.dimensions.ou.length; o++){
             ArrRet.push ({
@@ -322,12 +436,13 @@
                 YTDgapPer: 0,
                 CALCtarget: 0,
                 CALCactual: 0,
-                GrandTotAll: 0,
                 QTR1: 0,
                 QTR2: 0,
                 QTR3: 0,
                 QTR4: 0,
-                LASTtarget: 0
+                LASTtarget: 0,
+                GrandTotAll: 0,
+                position: 0
             })
         }
 
@@ -391,12 +506,12 @@
 
                     // YTD gap
                     if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
                     } else {
                         // PE match of Current-Range-End-QTR value for End-Of-Month element
                         if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[a].YTDgapPer = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
+                            ArrRet[a].YTDgapPer = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
                         }
                     }
 
@@ -456,11 +571,40 @@
 
         }
 
+        var sRem = '';
+
+        for (var a = 0; a < ArrRet.length; a++){
+            ArrRet[a].GrandTotAll = (ArrRet[a].baseline + ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
+            if (ArrRet[a].GrandTotAll == 0){
+                sRem += (a + ',');
+            } else {
+                ArrRet[a].YTDgapNum = parseFloat(ArrRet[a].YTDtarget - ArrRet[a].YTDactual).toFixed(1);
+
+                if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
+                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1);
+                } else {
+                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1);
+                }
+            }
+        }
+
+        if (sRem.length > 0){
+            var arrRem = sRem.substring(sRem,sRem.length-1).split(',');
+            for (var i = arrRem.length -1; i >= 0; i--)
+            ArrRet.splice(arrRem[i],1);
+        }
+
         ArrRet.sort(function(a, b) {
-            return parseFloat(a.baseline) - parseFloat(b.baseline);
+            return parseFloat(a.YTDgapNum) - parseFloat(b.YTDgapNum);
         });
 
-        console.log(ArrRet);
+/*
+        for (var a = 0; a < ArrRet.length; a++){
+            ArrRet[a].position = (a+1);
+        }
+*/
+
+        return ArrRet;
 
      }
 
@@ -792,12 +936,83 @@ function LoadHTMLresultsTable(myData,sDestination){
 	}
 
 
+// Builds the HTML Table out of myList.
+function buildCUSTOMHtmlTable(myList,selector,dx) {
+  //var columns = addAllColumnHeaders(myList, selector);
+  for (var i = 0; i < myList.length; i++) {
+    if ( (i < 10) || (i > (myList.length-10)) ){
+
+        var row$ = $('<tr/>');
+
+        /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
+
+        // # Rank + OUname: 1
+        row$.append($('<td class="rowItemLeft"/>').html('#'+(i+1)+'&nbsp;'+myList[i].ouName));
+
+        //prevY BASELINE: 2
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+
+        //prevY TARGET: 3 
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].FYtarget));
+
+        //YTD TARGET: 4
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDtarget));
+
+        //YTD ACTUAL: 5
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDactual));
+
+        //YTD GAP Number: 7
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDgapNum));
+
+        //YTD PROGRESS %: 8
+        if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
+            //var iW = parseFloat(parseFloat(myList[i].YTDactual) / parseFloat(100) * 100 ).toFixed(0);
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        } else {
+            //var iW = parseFloat(parseFloat(myList[i].YTDactual) / parseFloat(myList[i].YTDtarget) * 100 ).toFixed(0);
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        }
+
+        //QTR TARGET: 9
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+
+        //QTR 1: 11
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].QTR1));
+
+        if ( (peQcurr > 2) || (peQcurr == 1) ) {
+            //QTR 2: 12
+            row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].QTR2));
+        }
+        if ( (peQcurr > 3) || (peQcurr == 1) ) {
+            //QTR 3: 13
+            row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].QTR3));
+        }
+        if (peQcurr == 1){
+            //QTR 4: 14
+            row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].QTR4));
+        }
+
+/*
+        for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+        var cellValue = myList[i][columns[colIndex]];
+        if (cellValue == null) cellValue = "";
+        row$.append($('<td/>').html(cellValue));
+        }
+*/
+        $(selector).append(row$);
+    }
+  }
+  document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
+  document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
+  console.log('leafMap resized');
+}
 
 
 // Builds the HTML Table out of myList.
-function buildHtmlTable(selector) {
+function buildHtmlTable(myList,selector) {
   var columns = addAllColumnHeaders(myList, selector);
-
   for (var i = 0; i < myList.length; i++) {
     var row$ = $('<tr/>');
     for (var colIndex = 0; colIndex < columns.length; colIndex++) {
@@ -829,6 +1044,163 @@ function addAllColumnHeaders(myList, selector) {
 
   return columnSet;
 }
+
+function loadMapFrame(){
+
+    //URL for parent-OU 
+    var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
+
+    $.ajax({
+        url: sOU,
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log('error: Data Element Lookup');
+        },
+        success : function(dataOU){
+
+
+            geojson_decode = function(geoFeatures, levelOrder, tyFilter) {
+                /*var geojson = {
+                    type: 'FeatureCollection',
+                    crs: {
+                        type: 'EPSG',
+                        properties: {
+                            code: '4326'
+                        }
+                    },
+                    features: []
+                };*/
+                var geojson = {
+                    type: 'FeatureCollection',
+                    features: []
+                };
+                levelOrder = levelOrder || 'ASC';
+
+                if (tyFilter == 'Polygon'){
+
+                    if ((geoFeatures.featureType).indexOf('POLYGON') >= 0) {
+
+                        geojson.features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: JSON.parse(dataOU.coordinates)[0][0]
+                            },
+                            properties: {
+                                id: geoFeatures.id,
+                                name: geoFeatures.name,
+                                shortName: 	geoFeatures.shortName,
+                                hasCoordinatesDown: '',
+                                hasCoordinatesUp: '',
+                                level: geoFeatures.level,
+                                grandParentParentGraph: '',
+                                grandParentId: '',
+                                parentGraph: '',
+                                parentId: '',
+                                parentName: '',
+                                type: ''
+                            } 
+                        });
+
+                    }
+                } else {
+
+                    geojson.features.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: geoFeatures.featureType,
+                            coordinates: JSON.parse(geoFeatures.coordinates)
+                        },
+                        properties: {
+                            id: geoFeatures.id,
+                            name: geoFeatures.name,
+                            shortName: geoFeatures.shortName,
+                            hasCoordinatesDown: '',
+                            hasCoordinatesUp: '',
+                            level: geoFeatures.level,
+                            grandParentParentGraph: '',
+                            grandParentId: '',
+                            parentGraph: '',
+                            parentId: '',
+                            parentName: '',
+                            type: ''
+                        } 
+                    });
+
+                }
+
+                return geojson;
+            }
+
+            var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
+
+            var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
+                style: AdaptStyle
+            }).addTo(g_map);
+
+            setTimeout(function () { g_map.fitBounds(g_geoJSONlayerObj.getBounds()); }, 1000 ) ;
+
+        }
+    })
+
+}
+
+
+function AdaptStyle(feature){
+
+    if (feature.properties['id'] == ou)	{
+        return {
+            weight: 3,
+            opacity: 0.75,
+            color: '#000',
+            zIndex: 0,
+            dashArray: '10,2',
+            fillOpacity: 0.5,
+            fill: '#000'
+        }
+    } else {
+        return {
+            weight: 1,
+            opacity: 0.85, 
+            color: '#606060', 
+            dashArray: '0',
+            fillOpacity: 0.85,
+            fillColor: '#ffffff', 
+            radius: 20,
+            className: 'pointShadow'
+        }
+    }
+
+}
+
+function highlightFeature(e) {
+
+    var layer = e.target;
+    var FillOp = 0.75; 
+    var updateInfo = 1;
+
+    if (layer.feature.properties['id'] == ou){
+
+        layer.setStyle({
+            weight: 3,
+            opacity: 1,
+            color: '#0080CD',
+            zIndex: 0,
+            dashArray: '5, 5',
+            fillOpacity: 0,
+            fillColor: '#ffffff'});
+
+    } else {
+
+        layer.setStyle({
+            weight: 2, 
+            color: '#3A5C8A', 
+            opacity: 1,
+            fillOpacity: 0.5,
+            fillColor: '#ffffff'});
+    }
+
+}
+
 
 </script>
 
