@@ -47,6 +47,8 @@
 
         #SentimentSummary {border:1px solid #C0C0C0; background-Color:#EBEBEB; font-size: 10pt;padding:10px; -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;}
 
+        .leaflet-control-layers-list {text-align: left;}
+
         @media all {
             .page-break	{ display: none; }
         }
@@ -73,6 +75,7 @@
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
         var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : 5);
+        var perfCount = ((getParameterByName('perfcount').length > 0) ? getParameterByName('perfcount') : 10);
 
 	</script>
 
@@ -98,6 +101,22 @@
                     <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
                 </td>
             </tr>
+			<tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
+                    <strong style='font-size:18pt;font-weight:800' id='ouName'></strong>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
+                    <strong style='font-size:18pt;font-weight:800' id='peSummary'></strong>
+                </td>
+            </tr>
+    
             <tr>
                 <td colspan=3 style='padding:10px;'>
                     &nbsp;
@@ -106,21 +125,6 @@
 			<tr>
                 <td colspan=3 style='text-align:center;'>
                     <div id='leafMap'></div>
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='padding:2px;'>
-                    &nbsp;
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
-                    <strong style='font-size:18pt;font-weight:800' id='ouName'></strong>
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
-                    <strong style='font-size:18pt;font-weight:800' id='peSummary'></strong>
                 </td>
             </tr>
 			<tr>
@@ -229,7 +233,7 @@
 
     var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
 
-    /*var g_baseMapLayerOpacity = 0;
+    var g_baseMapLayerOpacity = 0.5;
 
     var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
     var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
@@ -244,7 +248,7 @@
     };
 
     var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
-    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);*/
+    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
 
     /* MAP END */
 
@@ -416,7 +420,6 @@
 
                         if (this.bfinalDx == true){
                             loadMapFrame();
-                            console.log('leafMap loaded');
                         }
 
                         myPrepArr = [];
@@ -488,7 +491,6 @@
                 // OU match
                 if (ArrRet[a].ou == myData.rows[i][2]){
 
-
                     //BASELINE (.ACTUAL CatOptCombo)
                     if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
                         ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
@@ -506,23 +508,23 @@
                     // TARGET (.TARGET CatOptCombo)
                     if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
                         ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    } else {
-                        // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
+                    } 
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     }
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(myData.rows[i][0]) >= 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+
 
 
                     // YTD actual
@@ -548,51 +550,65 @@
                     }
 
 
-                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peArr[0]) ) {
-                        ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        //cumulative actual
-                        ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    /* QTR 1  */
+                    if (myData.rows[i][1] == peArr[0]) {
+                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            //cumulative actual
+                            ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
                             ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                     }
-
-                    if (peArr.length >= 2){
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peArr[1]) ) {
+                    /* QTR 2  */
+                    if ( (peArr.length >= 2) && (myData.rows[i][1] == peArr[1]) ) {
+                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
                             ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peArr[1]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 2) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
                     }
-                    if (peArr.length >= 3){
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peArr[2]) ) {
+                    /* QTR 3  */
+                    if ( (peArr.length >= 3) && (myData.rows[i][1] == peArr[2]) ) {
+                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
                             ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peArr[2]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 3) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
                     }
-                    if (peArr.length >= 4){
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peArr[3]) ) {
+                    /* QTR 4  */
+                    if ( (peArr.length == 4) && (myData.rows[i][1] == peArr[3]) ) {
+                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
                             ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peArr[3]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 4) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                     }
 
@@ -606,18 +622,21 @@
         var sRem = '';
 
         for (var a = 0; a < ArrRet.length; a++){
+            if ( (dxSingleTarget).indexOf(dx) >= 0){
+                ArrRet[a].YTDtarget = ArrRet[a].LASTtarget;
+            }
             ArrRet[a].GrandTotAll = (ArrRet[a].baseline + ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
             if (ArrRet[a].GrandTotAll == 0){
                 sRem += (a + ',');
             } else {
                 ArrRet[a].YTDgapNum = parseFloat(ArrRet[a].YTDtarget - ArrRet[a].YTDactual).toFixed(1);
-
                 if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
                     ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1);
                 } else {
                     ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1);
                 }
             }
+
         }
 
         if (sRem.length > 0){
@@ -635,6 +654,9 @@
             ArrRet[a].position = (a+1);
         }
 */
+        
+console.log(dx);
+console.log(ArrRet);
 
         return ArrRet;
 
@@ -972,7 +994,7 @@ function LoadHTMLresultsTable(myData,sDestination){
 function buildCUSTOMHtmlTable(myList,selector,dx) {
   //var columns = addAllColumnHeaders(myList, selector);
   for (var i = 0; i < myList.length; i++) {
-    if ( (i < 10) || (i > (myList.length-10)) ){
+    if ( (i < perfCount) || (i > (myList.length-(perfCount+1))) ){
 
         var row$ = $('<tr/>');
 
@@ -998,11 +1020,9 @@ function buildCUSTOMHtmlTable(myList,selector,dx) {
 
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
-            //var iW = parseFloat(parseFloat(myList[i].YTDactual) / parseFloat(100) * 100 ).toFixed(0);
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         } else {
-            //var iW = parseFloat(parseFloat(myList[i].YTDactual) / parseFloat(myList[i].YTDtarget) * 100 ).toFixed(0);
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         }
@@ -1026,19 +1046,11 @@ function buildCUSTOMHtmlTable(myList,selector,dx) {
             row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].QTR4));
         }
 
-/*
-        for (var colIndex = 0; colIndex < columns.length; colIndex++) {
-        var cellValue = myList[i][columns[colIndex]];
-        if (cellValue == null) cellValue = "";
-        row$.append($('<td/>').html(cellValue));
-        }
-*/
         $(selector).append(row$);
     }
   }
   document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
   document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
-  console.log('leafMap resized');
 }
 
 
@@ -1080,17 +1092,21 @@ function addAllColumnHeaders(myList, selector) {
 function loadMapFrame(){
 
     //URL for parent-OU 
-    var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
+    //var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
+    if (dhis2.report.organisationUnitHierarchy.length > 1){
+        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
+    } else {
+        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,coordinates,level,featureType');
+    }
 
     $.ajax({
         url: sOU,
         error: function (xhr, ajaxOptions, thrownError) {
-            console.log('error: Data Element Lookup');
+            console.log('error: OrgUnit Lookup');
         },
         success : function(dataOU){
 
-
-            geojson_decode = function(geoFeatures, levelOrder, tyFilter) {
+            geojson_decode = function(geoFeatures, levelOrder) {
                 /*var geojson = {
                     type: 'FeatureCollection',
                     crs: {
@@ -1105,59 +1121,52 @@ function loadMapFrame(){
                     type: 'FeatureCollection',
                     features: []
                 };
+
                 levelOrder = levelOrder || 'ASC';
 
-                if (tyFilter == 'Polygon'){
+                for (var i = 0; i < geoFeatures.organisationUnits.length; i++) {
 
-                    if ((geoFeatures.featureType).indexOf('POLYGON') >= 0) {
+                    if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
 
                         geojson.features.push({
                             type: 'Feature',
                             geometry: {
                                 type: 'LineString',
-                                coordinates: JSON.parse(dataOU.coordinates)[0][0]
+                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
                             },
                             properties: {
-                                id: geoFeatures.id,
-                                name: geoFeatures.name,
-                                shortName: 	geoFeatures.shortName,
+                                id: geoFeatures.organisationUnits[i].id,
+                                name: geoFeatures.organisationUnits[i].name,
+                                shortName: 	geoFeatures.organisationUnits[i].shortName,
+                                level: geoFeatures.organisationUnits[i].level
+                            } 
+                        });
+
+                    } else {
+
+                        geojson.features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: geoFeatures.organisationUnits[i].featureType,
+                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
+                            },
+                            properties: {
+                                id: geoFeatures.organisationUnits[i].id,
+                                name: geoFeatures.organisationUnits[i].name,
+                                shortName: geoFeatures.organisationUnits[i].shortName,
                                 hasCoordinatesDown: '',
                                 hasCoordinatesUp: '',
-                                level: geoFeatures.level,
+                                level: geoFeatures.organisationUnits[i].level,
                                 grandParentParentGraph: '',
                                 grandParentId: '',
                                 parentGraph: '',
                                 parentId: '',
                                 parentName: '',
                                 type: ''
-                            } 
+                            }
                         });
 
                     }
-                } else {
-
-                    geojson.features.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: geoFeatures.featureType,
-                            coordinates: JSON.parse(geoFeatures.coordinates)
-                        },
-                        properties: {
-                            id: geoFeatures.id,
-                            name: geoFeatures.name,
-                            shortName: geoFeatures.shortName,
-                            hasCoordinatesDown: '',
-                            hasCoordinatesUp: '',
-                            level: geoFeatures.level,
-                            grandParentParentGraph: '',
-                            grandParentId: '',
-                            parentGraph: '',
-                            parentId: '',
-                            parentName: '',
-                            type: ''
-                        } 
-                    });
-
                 }
 
                 return geojson;
@@ -1165,17 +1174,19 @@ function loadMapFrame(){
 
             var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
 
+            console.log(g_geoJSONlayerData);
+
             var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
                 style: AdaptStyle
             }).addTo(g_map);
 
             setTimeout(function () { g_map.fitBounds(g_geoJSONlayerObj.getBounds()); }, 1000 ) ;
 
-            g_map.dragging.disable();
-            g_map.touchZoom.disable();
+            //g_map.dragging.disable();
+            //g_map.touchZoom.disable();
             g_map.doubleClickZoom.disable();
-            g_map.scrollWheelZoom.disable();
-            g_map.boxZoom.disable();
+            //g_map.scrollWheelZoom.disable();
+            //g_map.boxZoom.disable();
             g_map.keyboard.disable();
 
             //document.getElementById('SentimentSummary').innerText = 'some positive sentiment, some concerns, etc etc, blah blah blah text container';
@@ -1188,25 +1199,25 @@ function loadMapFrame(){
 
 function AdaptStyle(feature){
 
-    if (feature.properties['id'] == ou)	{
+    if (feature.properties['id'] == getParameterByName('ou'))	{
         return {
             weight: 2,
-            opacity: 0.9,
-            color: '#916464', //000 with 0.65
-            dashArray: '10,2',
-            fillOpacity: 0.25,
+            opacity: 0.85,
+            color: '#8A3F3F', //000 with 0.65 //916464 dark-red
+            dashArray: '0',
+            fillOpacity: 0.1,
             fill: '#000'
         }
     } else {
-        return {
-            weight: 1,
-            opacity: 0.85, 
-            color: '#606060', 
-            dashArray: '0',
-            fillOpacity: 0.85,
-            fillColor: '#ffffff', 
-            radius: 20,
-            className: 'pointShadow'
+        if (feature.properties['id'] != getParameterByName('ou'))	{
+            return {
+                weight: 2,
+                opacity: 0.15, 
+                color: '#606060', 
+                dashArray: '0',
+                fillOpacity: 0.85,
+                fillColor: '#fff'
+            }
         }
     }
 
