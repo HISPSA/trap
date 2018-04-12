@@ -54,7 +54,7 @@
 	</style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
 
-    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+    <script src="https://rawgit.com/HISPSA/nhird2/master/js/leaflet.js"></script>
 	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
 
 	<script language=javascript>
@@ -182,7 +182,7 @@
 			</tr>
 			<tr>
 				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 3. &nbsp; 90-90-90 HIV cascade</strong>
+					<strong>&nbsp; 3. &nbsp; 90-90-90 HIV Cascade</strong>
 			</tr>
 			<tr>
 				<td colspan=3>
@@ -1459,8 +1459,8 @@ function loadMapFrame(){
 						geojson.features.push({
 							type: 'Feature',
 							geometry: {
-								type: 'Polygon',
-								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0] //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+								type: 'MultiPolygon',
+								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates) //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
 							},
 							properties: {
 								id: geoFeatures.organisationUnits[i].id,
