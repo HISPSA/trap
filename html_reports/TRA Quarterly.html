@@ -5,7 +5,7 @@
 	<style>
 
 		table.MainTbl{
-			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;
+			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;width:800px;
 		}
 		table.SecondaryTbl{
 			border-left:1px solid #000;border-top:1px solid #000;border-right:1px solid #000;
@@ -31,10 +31,11 @@
 		table.perfBar { width:100%;height:100;padding:0; }
 		#reportOverview {padding:4px;display:none;}
 
-		table, td, div, span {font-family:Calibri}
+		table, th, td, div, span, a, textarea {font-family:Calibri,sans-serif,Arial;}
 		li {padding:4px;}
 		.tableTitle {padding:20px 0px 10px 4px;font-weight: 400;}
 		#chart1Title {padding:12px 0px 4px 8px;font-weight: 400;}
+        #chart1 {width:800px;height:400px;}
 
 
         #tblMaster {display:none;}
@@ -52,11 +53,20 @@
         .leaflet-control-attribution {display:none;}
         .leaflet-control-layers-list {text-align: left;}
 
+        textarea.quantative {border:1px solid #fff;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;}
+
+        .input:focus {
+            outline: none !important;
+            border:1px solid rgba(0, 0, 255, 0.377);
+            box-shadow: 0 0 10px rgb(27, 38, 49);
+        }
+
         @media all {
             .page-break	{ display: none; }
         }
         @media print {
             footer {page-break-after: always;}
+            .leaflet-control { display: none !important; }
         }
 
 	</style>
@@ -78,8 +88,9 @@
 
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
-        var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : 5);
-        var perfCount = ((getParameterByName('perfcount').length > 0) ? getParameterByName('perfcount') : 10);
+        var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : (dhis2.report.organisationUnitHierarchy.length+1));
+        var perfCount = ((getParameterByName('perfcount').length > 0) ? getParameterByName('perfcount') : 0);
+        var perfPercent = ((getParameterByName('perfperc').length > 0) ? getParameterByName('perfperc') : 0);
 
 	</script>
 
@@ -102,7 +113,7 @@
             </tr>
 			<tr>
                 <td colspan=3 style='text-align:center;'>
-                    <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
+                    <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION <br>QUARTERLY REPORT</strong>
                 </td>
             </tr>
 			<tr>
@@ -136,45 +147,183 @@
                     &nbsp;
                 </td>
             </tr>
-
-            <!-- <tr>
-                <td colspan=3 style='padding:30px 30px 0px 30px;'>
-                    <div id='SentimentSummary'>
-                            The UNAIDS 90-90-90 target calls on countries to reach the following goals:<br><br>
-
-                            &#x2bc8; 90% of people living with HIV diagnosed by 2020<br>
-                            &#x2bc8; 90% of diagnosed people on antiretroviral treatment by 2020<br>
-                            &#x2bc8; 90% of people in treatment with fully suppressed viral load by 2020<br>
-                    </div>
+            <tr>
+                <td colspan=3>
+                    <textarea class="quantative" style="width:99%;height:66px;font-size:12pt;" id='genDetails'></textarea>
                 </td>
-            </tr>-->
-
+            </tr>
 			<tr>
-                <td colspan=3 style='text-align:center;padding:0 0 4px 0;'>
-                    <div style='font-size:10pt;' id='genDetails'></div>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
                 </td>
             </tr>
         </table>
 
         <footer></footer>
 
-        <table id='subHeader' style=""></table>
 
-			<tr>
-				<td colspan=3>
+        <table id='subHeader1' style="">
 
-					<div id='chart1Title'></div>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <strong>&nbsp; 1. &nbsp; BACKGROUND</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    South Africa adopted the UNAIDS 90, 90, 90 targets for HIV in 2014, which aim to ensure that by 2020:<br><br>
+                    •	 90% of all people living with HIV will know their HIV status<br>
+                    •	 90% of all people with diagnosed HIV infection will receive sustained antiretroviral therapy<br>
+                    •	 90% of all people receiving antiretroviral therapy will have viral suppression.<br><br>
+                    It’s estimated that 7.1 million South Africans are living with HIV, of which 3.8 million are on ART. The National Department of Health is committed to achieving the above targets by addressing the challenges contributing to HIV programme suboptimal performance.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+    
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <strong>&nbsp; 2. &nbsp; PURPOSE</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                    The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The indicators listed below must be monitored closely against set targets.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <strong>&nbsp; 3. &nbsp; 90-90-90 HIV cascade</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                    Cascades are used to track performance towards achieving the 90-90-90 targets. The indicators below are used for this purpose:<br><br>
 
-					<div id="chart1"></div>
+                    1st bar: The total population living with HIV (LHIV). This is generated from the Thembisa estimate model.<br><br>
+                        
+                    2nd bar: LHIV who know their status.  It is estimated that 75% of those LHIV in South Africa already know their HIV status. In order to reach the 90% target another 15% of the LHIV population must still be diagnosed<br><br>
+                        
+                    3rd bar: LHIV with known status on ART. At least 90% of the LHIV population who know their HIV status must be on ART. The acual number of clients on ART (TROA) is generated from the Provincial integrated webDHIS instances.<br><br>
+                        
+                    4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br><br>
 
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
+                    5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
 
-				<div id="" style="padding:0">
+                    <div id='chart1Title'></div>
 
-						<div id='table1Title' class='tableTitle'></div>
+                    <div id="chart1"></div>
+
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <strong>&nbsp; 4. &nbsp; How indicators are monitored</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    The coloured bars provide a quick way of tracking progress made with regard to a particular indicator. The indicators are represented by green, yellow, red and blue bars. The colours mean the following:<br><br>
+                    <div style="color:#FD3838">Red: Critical</div>
+                    <div style="color:#FCDC65">Orange: Need to improve</div>
+                    <div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
+                    <div style="color:#656AFC">Blue: Needs explanation</div><br>
+                    <!-- Colour ranges for the indicators have been set as follows: -->
+                    The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The following indicators must be monitored closely against set targets:
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <!-- <div id='dxList'></div> -->
+                    Colour ranges for the indicators have been set as follows:<br>
+                    <table>
+                        <tr>
+                            <td>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
+
+        <footer></footer>
+
+        <table id='subHeader2' style="">
+
+                <tr>
+                    <td colspan=3 style='text-align:left;'>
+                        <strong>&nbsp; 5. &nbsp;Summary</strong>
+                </tr>
+                <tr>
+                    <td colspan=3>
+                        &nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=3>
+                        &nbsp;The following tables provide a summary of progress for the current financial year.
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=3 style='text-align:left;'>
+    
+                    <div id="" style="padding:0">
 
 						<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
 							<thead>
@@ -351,8 +500,6 @@
 
 			for (var p = 0; p < dxCoreArr.length; p++){
 
-				dxSummaryCounter.push ( { dx: dxCoreArr[p], counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
-
 				myYTDCALCvals.push ({
 					ou: ou,
                     ouName: dhis2.report.organisationUnit.name,
@@ -375,6 +522,8 @@
 
 			}
 
+            var tblCounter = 1;
+
 			for (var p = 0; p < dxCoreArr.length; p++){
 
                 var dxCoreCat = '';
@@ -385,63 +534,166 @@
 
                 dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
 
-                var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + OUlevel + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID';
-                //dxCurrent = dxCoreArr[p];
-                //console.log(dxCoreArr[p] + ': ' + sDataGet);
+                for (var ouL = OUlevel; ouL <= (OUlevel+1); ouL++){
 
-                var dv1 = document.createElement('div');
-                dv1.setAttribute('id','title_'+dxCoreArr[p]);
-                dv1.setAttribute('class','tableTitle');
-                dv1.innerText = ('Table '+(p+1)+'. ');
+                    if (ouL <= 5){
 
-                document.getElementById('mainPage').appendChild(dv1);
+                        dxSummaryCounter.push ( { dx: dxCoreArr[p], ouLevel: ouL, counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
 
-                var dv1 = document.createElement('div');
-                dv1.setAttribute('id','dv_'+dxCoreArr[p]);
-                dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]);
-                document.getElementById('mainPage').appendChild(dv1);
+                        var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+                        console.log(sDataGet);
 
-                //console.log(p + ': ' + dxCoreArr[p]);
+                        var dv1 = document.createElement('div');
+                        dv1.setAttribute('id','title_'+dxCoreArr[p]+'_'+ouL);
+                        dv1.setAttribute('class','tableTitle');
+                        dv1.innerText = ('Table '+(tblCounter)+'. ');
 
-                $.ajax({
-                    url: sDataGet,
-                    dx: dxCoreArr[p],
-                    idxItem: (p+1),
-                    bfinalDx: (p == (dxCoreArr.length-1)),
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        console.log('error: Data Element Lookup');
-                    },
-                    success : function(dataDE){
+                        tblCounter +=1;
 
-						document.getElementById('title_'+this.dx).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
-                        document.getElementById('tbl_'+this.dx).innerHTML = (document.getElementById('tbl_'+this.dx).innerHTML.replace('tblMaster','tbl_'+this.dx).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
+                        document.getElementById('mainPage').appendChild(dv1);
 
-                        var myPrepArr = returnPrepArray(dataDE,this.dx);
+                        var dv1 = document.createElement('div');
+                        dv1.setAttribute('id','dv_'+dxCoreArr[p]+'_'+ouL);
+                        dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]+'_'+ouL);
+                        document.getElementById('mainPage').appendChild(dv1);
 
-                        buildCUSTOMHtmlTable(myPrepArr,'#tbl_'+this.dx,this.dx)
+                        $.ajax({
+                            url: sDataGet,
+                            dx: dxCoreArr[p],
+                            oulevel: ouL,
+                            idxItem: (p+1),
+                            dxSummaryArray: (tblCounter-1),
+                            bfinalDx: (p == (dxCoreArr.length-1)),
+                            error: function (xhr, ajaxOptions, thrownError) {
+                                console.log('error: Data Element Lookup');
+                            },
+                            success : function(dataDE){
 
-                        //console.log(myPrepArr);
+                                document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                                document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
 
-                        if (this.bfinalDx == true){
-                            loadMapFrame();
-                        }
+                                var myPrepArr = returnPrepArray(dataDE,this.dx);
 
-                        myPrepArr = [];
+                                buildCUSTOMHtmlTable(myPrepArr,'#tbl_'+this.dx+'_'+this.oulevel,this.dx,this.oulevel)
+
+                                if ( (this.bfinalDx == true) && (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1) ) {
+                                    loadChart();
+                                    loadMapFrame();
+                                    resizeTextAreas();
+                                }
+
+                                buildCUSTOMsummaryTable(this.dx,this.oulevel,this.dxSummaryArray)
+
+                                var txt$ = $('<textarea class="quantative" style="width:99%;height:16px;">Comments:</textarea>');
+                                $('#dv_'+this.dx+'_'+this.oulevel).append(txt$);
+
+                                myPrepArr = [];
+
+                            }
+
+                        });
 
                     }
 
-                });
+                }
 
             }
 
 
             document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
             document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' quarter [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
-            document.getElementById('genDetails').innerHTML = '<i>report created </i>' + todayDate();
+            document.getElementById('genDetails').value = 'Compiled By: \nDesignation/Position: \nDate Compiled: ' + todayDate();
 
 		}
 	
 	 })
+
+    function resizeTextAreas(){
+        $(".quantative").each(
+            function() { 
+                $(this).width((document.getElementById("tbl_"+dxCoreArr[0]+'_'+(dhis2.report.organisationUnitHierarchy.length+1)).offsetWidth + 'px'));
+            }
+        );
+    }
+
+    function buildCUSTOMsummaryTable(dx,ouLevel){
+
+        var n = 0;
+
+        var tbl = document.createElement('table');
+        tbl.setAttribute("style","");
+        document.getElementById('dv_'+dx+'_'+ouLevel).appendChild(tbl);
+
+        var tr = document.createElement('tr');
+        tbl.appendChild(tr);
+        var td = document.createElement('td');
+        td.setAttribute("style",'padding:3px;border-bottom:1px solid #fff;width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+        tr.appendChild(td);
+
+        for (var g = 0; g < dxSummaryCounter.length; g++){
+
+            if (( dxSummaryCounter[g].dx == dx ) && ( dxSummaryCounter[g].ouLevel == ouLevel ) ){
+                n = g;
+            }
+
+        }
+
+        var sInner = 'Out of ' + dxSummaryCounter[n].counter + ' participating orgunits:<br>'
+        td.innerHTML = sInner;
+
+        if (dxSummaryCounter[n].colorMatch['red'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['red']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['red']+') scored in <span style="background-Color:#FC6565;color:#fff;width:50px;">[RED]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['red_progress']/(dxSummaryCounter[n].colorMatch['red'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['orange'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FCDC65;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['green'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#90FC65;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['blue'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['blue']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['blue']+') scored in <span style="background-Color:#656AFC;color:#fff;width:50px;">[BLUE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['blue_progress']/(dxSummaryCounter[n].colorMatch['blue'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+    }
 
     function todayDate() {
         var today = new Date();
@@ -466,6 +718,7 @@
             ArrRet.push ({
                 ou: myData.metaData.dimensions.ou[o], 
                 ouName: myData.metaData.items[myData.metaData.dimensions.ou[o]].name, 
+                ouHierarchy: myData.metaData.ouNameHierarchy[myData.metaData.dimensions.ou[o]], 
                 baseline: 0,
                 FYtarget: 0,
                 YTDtarget: 0,
@@ -629,7 +882,7 @@
             if ( (dxSingleTarget).indexOf(dx) >= 0){
                 ArrRet[a].YTDtarget = ArrRet[a].LASTtarget;
             }
-            ArrRet[a].GrandTotAll = (ArrRet[a].baseline + ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
+            ArrRet[a].GrandTotAll = (ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
             if (ArrRet[a].GrandTotAll == 0){
                 sRem += (a + ',');
             } else {
@@ -658,9 +911,6 @@
             ArrRet[a].position = (a+1);
         }
 */
-
-//console.log(dx);
-//console.log(ArrRet);
 
         return ArrRet;
 
@@ -701,7 +951,7 @@
 	function loadChart(){
 
 		document.getElementById("chart1Title").innerText = 'Chart 1. Current 90-90-90 Treatment Cascade and Pillars';
-		document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
+		//document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
 
 		chartPlugin.url = "../";
 		//chartPlugin.username = "<username>";
@@ -845,78 +1095,78 @@
 				if (dx == 'Og44c6zMLLT'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+                        }
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 75) && (parseFloat(varVal) <= 100) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('green',dx,parseFloat(varVal));
+                        }
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 60) && (parseFloat(varVal) < 75) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+                        }
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 60){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('red',dx,parseFloat(varVal));
+                        }
 						return '#FC6565'; // red
 					}
 				}
 				if (dx == 'YrrIYRXd82h'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+                        }
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('green',dx,parseFloat(varVal));
+    					}
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+                        }
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 65){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('red',dx,parseFloat(varVal));
+                        }
 						return '#FC6565'; // red
 					}
 				}
 				if (dx == 'NsrFeZdWd14'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+                        }
 						return '#656AFC'; // blue
 					}
 					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('green',dx,parseFloat(varVal));
+                        }
 						return '#90FC65'; // green
 					}
 					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+                        }
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 24){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('red',dx,parseFloat(varVal));
+                        }
 						return '#FC6565'; // red
 					}
 				}
@@ -979,33 +1229,41 @@ function LoadHTMLresultsTable(myData,sDestination){
 	sReturn += '</tbody></table>';
 	$('#'+sDestination).html(sReturn);
 }
-	function sortTable(table_id, sortColumn){
-		//console.log('sortTable("'+table_id+'",'+sortColumn+')');
-		var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
-		var rowData = tableData.getElementsByTagName('tr');            
-		for(var i = 0; i < rowData.length - 1; i++){
-			for(var j = 0; j < rowData.length - (i + 1); j++){
-				//if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
-				if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
-					tableData.insertBefore(rowData.item(j+1),rowData.item(j));
-				}
-			}
-		}
-	}
+
+function sortTable(table_id, sortColumn){
+    var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
+    var rowData = tableData.getElementsByTagName('tr');            
+    for(var i = 0; i < rowData.length - 1; i++){
+        for(var j = 0; j < rowData.length - (i + 1); j++){
+            //if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
+            if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
+                tableData.insertBefore(rowData.item(j+1),rowData.item(j));
+            }
+        }
+    }
+}
 
 
 // Builds the HTML Table out of myList.
-function buildCUSTOMHtmlTable(myList,selector,dx) {
+function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
   //var columns = addAllColumnHeaders(myList, selector);
+  var myCount = ( (parseInt(perfCount) > 0) ? parseInt(perfCount) : ( (parseInt(perfPercent) > 0) ? Math.ceil( (myList.length+1) * (parseInt(perfPercent)/100) )  : (myList.length+1)) );
   for (var i = 0; i < myList.length; i++) {
-    if ( (i < perfCount) || (i > (myList.length-(perfCount+1))) ){
+    if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
         var row$ = $('<tr/>');
 
         /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
 
         // # Rank + OUname: 1
-        row$.append($('<td class="rowItemLeft"/>').html('#'+(i+1)+'&nbsp;'+myList[i].ouName));
+        if (ouLevel == 5){
+            var iH = 22, sStyleOffs = 'position:relative;top:2px;';
+            var ArrTemp = myList[i].ouHierarchy.toString().split('/');
+            row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;">'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">#'+(i+1)+'&nbsp;'+myList[i].ouName+'</div>'));
+        } else {
+            var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
+            row$.append($('<td class="rowItemLeft"/>').html('#'+(i+1)+'&nbsp;'+myList[i].ouName));
+        }
 
         //prevY BASELINE: 2
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
@@ -1025,10 +1283,10 @@ function buildCUSTOMHtmlTable(myList,selector,dx) {
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
             var iW = parseFloat(myList[i].YTDgapPer);
-            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         } else {
             var iW = parseFloat(myList[i].YTDgapPer);
-            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         }
 
         //QTR TARGET: 9
@@ -1053,10 +1311,11 @@ function buildCUSTOMHtmlTable(myList,selector,dx) {
         $(selector).append(row$);
     }
   }
-  document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
-  document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx).offsetWidth + 'px');
+  document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx+'_'+(dhis2.report.organisationUnitHierarchy.length+1)).offsetWidth + 'px');
+  document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx+'_'+(dhis2.report.organisationUnitHierarchy.length+1)).offsetWidth + 'px');
+  document.getElementById("subHeader1").style.width = (document.getElementById("tbl_"+dx+'_'+(dhis2.report.organisationUnitHierarchy.length+1)).offsetWidth + 'px');
+  document.getElementById("subHeader2").style.width = (document.getElementById("tbl_"+dx+'_'+(dhis2.report.organisationUnitHierarchy.length+1)).offsetWidth + 'px');
 }
-
 
 // Builds the HTML Table out of myList.
 function buildHtmlTable(myList,selector) {
@@ -1098,10 +1357,12 @@ function loadMapFrame(){
     //URL for parent-OU 
     //var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
     if (dhis2.report.organisationUnitHierarchy.length > 1){
-        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
+        //var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
+        var sOU = ('../api/organisationUnits.json?filter=id:in:['+ou+']&fields=id,name,coordinates,level,featureType,children[id,name,coordinates,level,featureType]');
     } else {
-        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,coordinates,level,featureType');
+        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,coordinates,level,featureType,children[id,name,coordinates,level,featureType]');
     }
+    console.log(sOU);
 
     $.ajax({
         url: sOU,
@@ -1130,47 +1391,110 @@ function loadMapFrame(){
 
                 for (var i = 0; i < geoFeatures.organisationUnits.length; i++) {
 
-                    if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+                    if (geoFeatures.organisationUnits[i].level >= 1){
 
-                        console.log(JSON.stringify(JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]));
+                        if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
 
-                        geojson.features.push({
-                            type: 'Feature',
-                            geometry: {
-                                type: 'Polygon',
-                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0] //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
-                            },
-                            properties: {
-                                id: geoFeatures.organisationUnits[i].id,
-                                name: geoFeatures.organisationUnits[i].name,
-                                shortName: 	geoFeatures.organisationUnits[i].shortName,
-                                level: geoFeatures.organisationUnits[i].level
-                            } 
-                        });
+                            if (geoFeatures.organisationUnits[i].coordinates != undefined){
 
-                    } else {
+                                geojson.features.push({
+                                    type: 'Feature',
+                                    geometry: {
+                                        type: 'Polygon',
+                                        coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0] //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+                                    },
+                                    properties: {
+                                        id: geoFeatures.organisationUnits[i].id,
+                                        name: geoFeatures.organisationUnits[i].name,
+                                        shortName: 	geoFeatures.organisationUnits[i].shortName,
+                                        level: geoFeatures.organisationUnits[i].level
+                                    } 
+                                });
 
-                        geojson.features.push({
-                            type: 'Feature',
-                            geometry: {
-                                type: geoFeatures.organisationUnits[i].featureType,
-                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
-                            },
-                            properties: {
-                                id: geoFeatures.organisationUnits[i].id,
-                                name: geoFeatures.organisationUnits[i].name,
-                                shortName: geoFeatures.organisationUnits[i].shortName,
-                                hasCoordinatesDown: '',
-                                hasCoordinatesUp: '',
-                                level: geoFeatures.organisationUnits[i].level,
-                                grandParentParentGraph: '',
-                                grandParentId: '',
-                                parentGraph: '',
-                                parentId: '',
-                                parentName: '',
-                                type: ''
                             }
-                        });
+
+                        } else {
+
+                            if (geoFeatures.organisationUnits[i].coordinates != undefined){
+
+                                geojson.features.push({
+                                    type: 'Feature',
+                                    geometry: {
+                                        type: geoFeatures.organisationUnits[i].featureType,
+                                        coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
+                                    },
+                                    properties: {
+                                        id: geoFeatures.organisationUnits[i].id,
+                                        name: geoFeatures.organisationUnits[i].name,
+                                        shortName: geoFeatures.organisationUnits[i].shortName,
+                                        hasCoordinatesDown: '',
+                                        hasCoordinatesUp: '',
+                                        level: geoFeatures.organisationUnits[i].level,
+                                        grandParentParentGraph: '',
+                                        grandParentId: '',
+                                        parentGraph: '',
+                                        parentId: '',
+                                        parentName: '',
+                                        type: ''
+                                    }
+                                });
+                            }
+                        }
+                    } 
+
+                    {
+
+                        for (var p = 0; p < geoFeatures.organisationUnits[i].children.length; p++) {
+
+                            if ((geoFeatures.organisationUnits[i].children[p].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+
+                                if (geoFeatures.organisationUnits[i].children[p].coordinates != undefined){
+
+                                    geojson.features.push({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: 'Polygon',
+                                            coordinates: JSON.parse(geoFeatures.organisationUnits[i].children[p].coordinates)[0] //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+                                        },
+                                        properties: {
+                                            id: geoFeatures.organisationUnits[i].children[p].id,
+                                            name: geoFeatures.organisationUnits[i].children[p].name,
+                                            shortName: 	geoFeatures.organisationUnits[i].children[p].shortName,
+                                            level: geoFeatures.organisationUnits[i].children[p].level
+                                        } 
+                                    });
+
+                                }
+
+                            } else {
+
+                                if (geoFeatures.organisationUnits[i].children[p].coordinates != undefined){
+
+                                    geojson.features.push({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: geoFeatures.organisationUnits[i].children[p].featureType,
+                                            coordinates: JSON.parse(geoFeatures.organisationUnits[i].children[p].coordinates)
+                                        },
+                                        properties: {
+                                            id: geoFeatures.organisationUnits[i].children[p].id,
+                                            name: geoFeatures.organisationUnits[i].children[p].name,
+                                            shortName: geoFeatures.organisationUnits[i].children[p].shortName,
+                                            hasCoordinatesDown: '',
+                                            hasCoordinatesUp: '',
+                                            level: geoFeatures.organisationUnits[i].children[p].level,
+                                            grandParentParentGraph: '',
+                                            grandParentId: '',
+                                            parentGraph: '',
+                                            parentId: '',
+                                            parentName: '',
+                                            type: ''
+                                        }
+                                    });
+
+                                }
+                            }
+                        }
 
                     }
                 }
@@ -1179,6 +1503,7 @@ function loadMapFrame(){
             }
 
             var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
+console.log(g_geoJSONlayerData);
 
             var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
                 style: AdaptStyle
@@ -1206,9 +1531,8 @@ function loadMapFrame(){
 function AdaptStyle(feature){
 
     if (feature.properties['id'] == getParameterByName('ou'))	{
-
         return {
-            weight: 2,
+            weight: 1,
             opacity: 0.85,
             color: '#8A3F3F', //000 with 0.65 //916464 dark-red
             dashArray: '0',
@@ -1233,12 +1557,12 @@ function AdaptStyle(feature){
                 }
             } else {
                 return {
-                    weight: 2,
-                    opacity: 0.2, 
-                    color: '#606060', 
+                    weight: 1,
+                    opacity: 0.9, 
+                    color: '#8A3F3F', 
                     dashArray: '0',
-                    fillOpacity: 0,
-                    fillColor: '#fff'
+                    fillOpacity: 0.1,
+                    fill: '#000'
                 }
             }
 

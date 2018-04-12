@@ -25,12 +25,36 @@
 		}
 		table.perfBar { width:100%;height:100;padding:0; }
 		#reportOverview {padding:4px;display:none;}
-		table, td, div, span {font-family:Calibri}
+		table, th, td, div, span, a {font-family:Calibri,sans-serif,Arial;}
 		li {padding:4px;}
 		#chart1Title {padding:12px 0 4px 8px;font-weight: 400;}
 		.tableTitle {padding:12px 0 4px 4px;font-weight: 400;}
-	</style>
 
+        #leafMap {
+                    width:1000px;height:800px;
+                    position:relative;top:0;left:0;
+                    padding:0; margin:0;border:2px solid #C0C0C0; 
+                    background-Color:#fff;
+                    -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;
+                    cursor: default; 
+                }
+
+        .landingPage {width:100%; }
+        .leaflet-control-attribution {display:none;}
+        .leaflet-control-layers-list {text-align: left;}
+
+        @media all {
+            .page-break	{ display: none; }
+        }
+        @media print {
+            footer {page-break-after: always;}
+			.leaflet-control { display: none !important; }
+        }
+
+	</style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
 	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
 
 	<script language=javascript>
@@ -44,6 +68,7 @@
 
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
+		var repUID = getParameterByName('uid');
 
 	</script>
 
@@ -52,34 +77,66 @@
 <body>
 
 	<div id="reportHeader">
-		<table id='logoTable' style="">
+
+	<table id='logoTable' class='landingPage'>
 			<tr>
-				<td style='width:225px;text-align:left;'> <img src='http://timesheets.hisp.org/timesheets/images/new%20health%20logo-2.jpg' style='width:225px;height:80px;'> </td>
-				<td > </td>
-				<td style='width:180px;text-align:right;'> <img src='http://timesheets.hisp.org/timesheets/images/southafrica_pepfarlogo.jpg' style='width:155px;height:100px;'> </td>
+				<td style='width:225px;text-align:left;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/new%20health%20logo-2.jpg' style='width:225px;height:80px;'> </td>
+				<td></td>
+				<td style='width:180px;text-align:right;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/southafrica_pepfarlogo.jpg' style='width:155px;height:100px;'> </td>
 			</tr>
 			<tr>
-				<td></td>
-				<td style='text-align:center;'>
-					<strong style='font-size:14pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION QUARTERLY REPORT</strong>
-				</td>
-				<td></td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:center;padding:4px 0 0 0;'>
-					<div style='font-size:12pt;' id='ouName'></div>
+				<td colspan=3 style='padding:10px;'>
+					&nbsp;
 				</td>
 			</tr>
 			<tr>
 				<td colspan=3 style='text-align:center;'>
-					<div style='font-size:12pt;' id='peSummary'></div>
+					<strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION<br>QUARTERLY REPORT</strong>
 				</td>
 			</tr>
 			<tr>
-				<td colspan=3>
+				<td colspan=3 style='padding:2px;'>
 					&nbsp;
 				</td>
 			</tr>
+			<tr>
+				<td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
+					<div style='font-size:14pt;font-weight:400' id='ouName'></div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
+					<div style='font-size:14pt;font-weight:400' id='peSummary'></div>
+				</td>
+			</tr>
+            <tr>
+				<td colspan=3 style='padding:10px;'>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:center;background-Color:#fff;'>
+					<div id='leafMap'></div>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='padding:2px;'>
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td colspan=3 style='text-align:center;padding:200px 0 20px 0;'>
+					<div style='font-size:10pt;' id='genDetails'></div>
+				</td>
+			</tr>
+
+		</table>
+
+		<footer></footer>
+
+
+        <table id='subHeader1' style="">
+
 			<tr>
 				<td colspan=3 style='text-align:left;'>
 					<strong>&nbsp; 1. &nbsp; BACKGROUND</strong>
@@ -173,28 +230,58 @@
 			<tr>
 				<td colspan=3 style='text-align:left;'>
 					The coloured bars provide a quick way of tracking progress made with regard to a particular indicator. The indicators are represented by green, yellow, red and blue bars. The colours mean the following:<br><br>
-					<div style="color:red">Red: Critical</div>
-					<div style="color:orange">Orange: Need to improve</div>
-					<div style="color:green">Green: The indicator is close to or reached its target value</div>
-					<div style="color:blue">Blue: Needs explanation</div><br>
+					<div style="color:#FD3838">Red: Critical</div>
+					<div style="color:#FCDC65">Orange: Need to improve</div>
+					<div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
+					<div style="color:#656AFC">Blue: Needs explanation</div><br>
 					<!-- Colour ranges for the indicators have been set as follows: -->
-					
 					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The following indicators must be monitored closely against set targets:
 				</td>
 			</tr>
 			<tr>
 				<td colspan=3 style='text-align:left;'>
-					<div id='dxList'></div>
+					<!-- <div id='dxList'></div> -->
+					Colour ranges for the indicators have been set as follows:<br>
+					<table>
+						<tr>
+							<td>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+						</tr>
+						<tr>
+							<td>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+						</tr>
+						<tr>
+							<td>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+						</tr>
+						<tr>
+							<td>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+						</tr>
+						<tr>
+							<td>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+						</tr>
+						<tr>
+							<td>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+						</tr>
+						<tr>
+							<td>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
+						</tr>
+
+					</table>
 				</td>
 			</tr>
 			<tr>
-				<td colspan=3>
+				<td colspan=3 style='padding:2px;'>
 					&nbsp;
 				</td>
 			</tr>
+		</table>
+
+		<footer></footer>
+
+		<table id='subHeader2' style="">
+	
 			<tr>
 				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 5. &nbsp;Ranking per indicator</strong>
+					<strong>&nbsp; 5. &nbsp;Summary</strong>
 			</tr>
 			<tr>
 				<td colspan=3>
@@ -203,7 +290,7 @@
 			</tr>
 			<tr>
 				<td colspan=3>
-					&nbsp;Organisational units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators
+					&nbsp;The following tables provide a summary of progress for the current financial year.
 				</td>
 			</tr>
 			<tr>
@@ -237,6 +324,30 @@
 						</table>
 						
 						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3 style='text-align:left;'>
+						<strong>&nbsp; 6. &nbsp;Ranking Per Indicator</strong>
+				</tr>
+				<tr>
+					<td colspan=3>
+						&nbsp;
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3>
+						&nbsp;Organisation units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators.
+					</td>
+				</tr>
+				<tr>
+					<td colspan=3 style='text-align:left;'>
+						<div id='rankedItems' class='tableTitle'></div>
 					</td>
 				</tr>
 		</table>
@@ -291,6 +402,29 @@
 	}
 
 	peQTRcurrYRangeEnd = ((peFcurr+1) + 'Q1');
+
+
+
+    /* MAP START */
+    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+	var g_baseMapLayerOpacity = 0.5;
+
+	var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
+	var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
+	var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
+	var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
+
+	g_baseMapCollection = {
+		"PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
+		"PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
+		"PRINT: StreetMap": Open_StreetMap,
+		"HikeBike":HikeBike_HikeBike
+	};
+
+	var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
+	var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+
+	/* MAP END */
 
 	document.getElementById('1_peFprev').innerHTML = (peFprev + '/' + peFcurrSuff + '<br>Baseline');
 	document.getElementById('1_peFtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Target');
@@ -412,7 +546,7 @@
 				//td.innerText = (dataDE.dataElements[p].name).replace('TRAP_','');
 				td.innerText = (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','');
 
-				document.getElementById('dxList').innerHTML += ('<div style="padding:2px 0 2px 2px"> • ' + (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','')+'</div>')
+				//document.getElementById('dxList').innerHTML += ('<div style="padding:2px 0 2px 2px"> • ' + (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','')+'</div>')
 
 				var td = document.createElement('td');
 				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
@@ -545,12 +679,12 @@
 						dv1.setAttribute('class','tableTitle');
 						dv1.innerText = 'Table '+(n+2)+'. '+(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
 						//dv.appendChild(dv1);
-						document.getElementById('mainPage').appendChild(dv1);
+						document.getElementById('rankedItems').appendChild(dv1);
 
 						var dv = document.createElement('div');
 						dv.setAttribute('id','dv_'+dxCoreArr[n]);
 						dv.setAttribute('style','padding:8px 0 8px 0;');
-						document.getElementById('mainPage').appendChild(dv);
+						document.getElementById('rankedItems').appendChild(dv);
 
 						dv.innerHTML = (template1.replace('tblMaster','tblDx_'+dxCoreArr[n]));
 						dv.innerHTML = (dv.innerHTML).replace('{PLACEHOLDER}',(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','')).replace('TRAP_','');
@@ -589,7 +723,10 @@
 							td.setAttribute("id",dxCoreArr[n]+'_'+dataOU.children[p].id+'_0');
 							tr.appendChild(td);
 
-							td.innerText = (dataOU.children[p].name);
+							//td.innerText = (dataOU.children[p].name);
+							td.innerHTML = '<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+dataOU.children[p].id+'" style="color:#000">' + (dataOU.children[p].name) + '</a>';
+
+							
 
 							var td = document.createElement('td');
 							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
@@ -862,9 +999,11 @@
 
 							document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
 							document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
+							document.getElementById('genDetails').innerHTML = '<i>report created </i>' + todayDate();
 							document.getElementById("logoTable").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
 
 							setTimeout(function () { loadChart(); }, 100);
+							setTimeout(function () { loadMapFrame(); }, 200);
 
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1000 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 1100 ) ;
@@ -873,6 +1012,7 @@
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[5], 5); }, 1500 ) ;
 							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[6], 5); }, 1600 ) ;
+
 
 							for (var n = 0; n < dxCoreArr.length; n++){
 
@@ -943,8 +1083,6 @@
 
 							}
 
-							//LoadHTMLresultsTable(dataVal,'mainPage');
-
 						}
 
 					});
@@ -957,21 +1095,38 @@
 	
 	 })
 
-	 function getPeriodPair(filteredPE){
-		 var peArr = filteredPE.split('Q');
-		 if ( parseInt(peArr[1]) == 1 ){
-			 return ((parseInt(peArr[0])-1)+'Q2');
-		 }
-		 if ( parseInt(peArr[1]) == 2 ){
-			 return ((parseInt(peArr[0])-1)+'Q3');
-		 }
-		 if ( parseInt(peArr[1]) == 3 ){
-			 return ((parseInt(peArr[0])-1)+'Q4');
-		 }
-		 if ( parseInt(peArr[1]) == 4 ){
-			 return (peArr[0]+'Q1');
-		 }
-	 }
+    function todayDate() {
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1; //January is 0!
+        var yyyy = today.getFullYear();
+
+        if(dd<10) {
+            dd = '0'+dd
+        } 
+
+        if(mm<10) {
+            mm = '0'+mm
+        } 
+
+        return ( yyyy + '/' + mm + '/' + dd );
+    }
+
+	function getPeriodPair(filteredPE){
+		var peArr = filteredPE.split('Q');
+		if ( parseInt(peArr[1]) == 1 ){
+			return ((parseInt(peArr[0])-1)+'Q2');
+		}
+		if ( parseInt(peArr[1]) == 2 ){
+			return ((parseInt(peArr[0])-1)+'Q3');
+		}
+		if ( parseInt(peArr[1]) == 3 ){
+			return ((parseInt(peArr[0])-1)+'Q4');
+		}
+		if ( parseInt(peArr[1]) == 4 ){
+			return (peArr[0]+'Q1');
+		}
+	}
 
 	 function getPeriodPairEndMM(filteredPE){
 		 var peArr = filteredPE.split('Q');
@@ -1245,28 +1400,7 @@
 	function formatNumber(num) {
 		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + "," });
 	}
-function LoadHTMLresultsTable(myData,sDestination){
-	var sReturn = '';
-	sReturn += '<table class="listTable gridTable"><thead><tr>';
-	for(var i = 0; i < myData.headers.length; i++) {
-		sReturn += '<th class="pivot-dim-label">' + myData.headers[i].name + '</th>';
-	}
-	sReturn += '</tr></tr></thead>';
-	sReturn += '<tbody>';
-	for(var i = 0; i < myData.rows.length; i++) {
-		sReturn += '<tr>';
-		for(var p = 0; p < myData.headers.length; p++) {
-			if (myData.headers[p].name != 'value'){
-				sReturn += '<td title="' + myData.rows[i][p] + '" class="td-nobreak">' + myData.metaData.items[myData.rows[i][p]].name + '</td>';
-			} else {
-				sReturn += '<td class="td-nobreak">' + myData.rows[i][p] + '</td>';
-			}
-		}
-		sReturn += '</tr>';
-	}
-	sReturn += '</tbody></table>';
-	$('#'+sDestination).html(sReturn);
-}
+
 	function sortTable(table_id, sortColumn){
 		//console.log('sortTable("'+table_id+'",'+sortColumn+')');
 		var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
@@ -1280,6 +1414,161 @@ function LoadHTMLresultsTable(myData,sDestination){
 			}
 		}
 	}
+
+function loadMapFrame(){
+
+	//URL for parent-OU 
+	//var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
+	if (dhis2.report.organisationUnitHierarchy.length > 1){
+		var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
+	} else {
+		var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,coordinates,level,featureType');
+	}
+
+	$.ajax({
+		url: sOU,
+		error: function (xhr, ajaxOptions, thrownError) {
+			console.log('error: OrgUnit Lookup');
+		},
+		success : function(dataOU){
+
+			geojson_decode = function(geoFeatures, levelOrder) {
+				/*var geojson = {
+					type: 'FeatureCollection',
+					crs: {
+						type: 'EPSG',
+						properties: {
+							code: '4326'
+						}
+					},
+					features: []
+				};*/
+				var geojson = {
+					type: 'FeatureCollection',
+					features: []
+				};
+
+				levelOrder = levelOrder || 'ASC';
+
+				for (var i = 0; i < geoFeatures.organisationUnits.length; i++) {
+
+					if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+
+						//console.log(JSON.stringify(JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]));
+
+						geojson.features.push({
+							type: 'Feature',
+							geometry: {
+								type: 'Polygon',
+								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0] //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+							},
+							properties: {
+								id: geoFeatures.organisationUnits[i].id,
+								name: geoFeatures.organisationUnits[i].name,
+								shortName: 	geoFeatures.organisationUnits[i].shortName,
+								level: geoFeatures.organisationUnits[i].level
+							} 
+						});
+
+					} else {
+
+						geojson.features.push({
+							type: 'Feature',
+							geometry: {
+								type: geoFeatures.organisationUnits[i].featureType,
+								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
+							},
+							properties: {
+								id: geoFeatures.organisationUnits[i].id,
+								name: geoFeatures.organisationUnits[i].name,
+								shortName: geoFeatures.organisationUnits[i].shortName,
+								hasCoordinatesDown: '',
+								hasCoordinatesUp: '',
+								level: geoFeatures.organisationUnits[i].level,
+								grandParentParentGraph: '',
+								grandParentId: '',
+								parentGraph: '',
+								parentId: '',
+								parentName: '',
+								type: ''
+							}
+						});
+
+					}
+				}
+
+				return geojson;
+			}
+
+			var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
+
+			var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
+				style: AdaptStyle
+			}).addTo(g_map);
+
+			setTimeout(function () { g_map.fitBounds(g_geoJSONlayerObj.getBounds()); }, 1000 ) ;
+
+
+
+			//g_map.dragging.disable();
+			//g_map.touchZoom.disable();
+			g_map.doubleClickZoom.disable();
+			//g_map.scrollWheelZoom.disable();
+			//g_map.boxZoom.disable();
+			g_map.keyboard.disable();
+
+			//document.getElementById('SentimentSummary').innerText = 'some positive sentiment, some concerns, etc etc, blah blah blah text container';
+
+		}
+	})
+
+}
+
+
+function AdaptStyle(feature){
+
+	if (feature.properties['id'] == getParameterByName('ou'))	{
+
+		return {
+			weight: 2,
+			opacity: 0.65,
+			color: '#8A3F3F', //000 with 0.65 //916464 dark-red
+			dashArray: '0',
+			fillOpacity: 0.1,
+			fill: '#000'
+		}
+
+	} else {
+
+		if (feature.properties['id'] != getParameterByName('ou'))	{
+
+			if (feature.geometry.type == 'Point'){
+				return {
+					weight: 1,
+					opacity: 0.85, 
+					color: '#606060', 
+					dashArray: '0',
+					fillOpacity: 0.85,
+					fillColor: '#ffffff', 
+					radius: 20,
+					className: 'pointShadow'
+				}
+			} else {
+				return {
+					weight: 1,
+					opacity: 0.5, 
+					color: '#606060', 
+					dashArray: '0',
+					fillOpacity: 0,
+					fillColor: '#fff'
+				}
+			}
+
+		}
+
+	}
+
+}
 
 </script>
 
