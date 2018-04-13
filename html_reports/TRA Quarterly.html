@@ -90,8 +90,8 @@
 		var pe = getParameterByName('pe');
         var repUID = getParameterByName('uid');
         var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : (dhis2.report.organisationUnitHierarchy.length+1));
-        var perfCount = ((getParameterByName('perfcount').length > 0) ? getParameterByName('perfcount') : 0);
-        var perfPercent = ((getParameterByName('perfperc').length > 0) ? getParameterByName('perfperc') : 0);
+        var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
+        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
 
 	</script>
 
@@ -257,7 +257,7 @@
             </tr>
             <tr>
                 <td colspan=3 style='text-align:left;'>
-                    The use of color grading provides a quick way to monitor progress made against targets. Indicators progress scores are represented by green, orange, red and blue (horizontal) bars. Indicator progress scores are coloured to represent the following:<br><br>
+                    The use of color grading provides an easy way to monitor progress against targets. Indicator progress scores are colour graded and represented by four outcome groups: green, orange, red and blue (horizontal) bars. These graded colours represent the following:<br><br>
                     <div style="color:#FD3838">Red: Critical</div>
                     <div style="color:#FCDC65">Orange: Need to improve</div>
                     <div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
@@ -380,6 +380,7 @@
 	var peQTRrangeAct = '';
 	var dxSummaryCounter = [];
     var dxCurrent = '';
+    var g_geoJSONlayerObj;
 
     /* MAP START */
 
@@ -401,6 +402,28 @@
 
     var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
     var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+
+        /* on mouseover control START */
+        var g_infoControl = L.control();
+        g_infoControl.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        g_infoControl.update = function (props) {
+            if (props == undefined){
+                this._div.innerHTML = '';
+                this._div.style = ("display:none;");
+            }
+            else{
+                this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
+                var e = window.event;
+                this._div.style = ("display:block;"); 
+            }
+        };
+        g_infoControl.addTo(g_map);
+        /* on mouseover control END */
+
 
     /* MAP END */
 
@@ -1247,8 +1270,11 @@ function sortTable(table_id, sortColumn){
 
 // Builds the HTML Table out of myList.
 function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
-  //var columns = addAllColumnHeaders(myList, selector);
-  var myCount = ( (parseInt(perfCount) > 0) ? parseInt(perfCount) : ( (parseInt(perfPercent) > 0) ? Math.ceil( (myList.length+1) * (parseInt(perfPercent)/100) )  : (myList.length+1)) );
+  if (ouLevel == 5){
+    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? Math.ceil( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
+  } else {
+    var myCount = (myList.length+1);
+  }
   for (var i = 0; i < myList.length; i++) {
     if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
@@ -1273,7 +1299,7 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].FYtarget));
 
         //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDtarget));
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(1).toString().replace('.0','')));
 
         //YTD ACTUAL: 5
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDactual));
@@ -1565,7 +1591,7 @@ function loadMapFrame(){
 
             var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
 
-            var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
+            g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
                 style: AdaptStyle,
                 pointToLayer: function(feature, latlng) {
                     return new L.CircleMarker(latlng);
@@ -1591,12 +1617,57 @@ function loadMapFrame(){
 
 function onEachFeature(feature, layer) {
     layer.on({
-        click: highlightFeature
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
     });
 }
 
 function highlightFeature(e) {
-    console.log(e.target.feature);
+    var layer = e.target;
+    g_infoControl.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+    g_infoControl.update();
+    g_geoJSONlayerObj.resetStyle(e.target);
+}
+
+function ReturnHTMLpreview(myJSONtoString){
+
+	if (myJSONtoString != undefined){
+
+        var MyNewString = myJSONtoString.toString().replace(/{/g,'');
+        MyNewString = MyNewString.replace(/}/g,'');
+        MyNewString = MyNewString.replace(/"/g,'');
+        var myNewArr = MyNewString.split(",");
+        var myInnerObj = myNewArr[1].split(":");
+
+            var dvParent = document.createElement('div');
+            dvParent.setAttribute('style', 'padding:4px;');
+
+            var dv = document.createElement('div');
+            dv.setAttribute('style', 'font-size:7pt;color:#000000;');
+            dvParent.appendChild(dv);
+
+            var tbl = document.createElement('table');
+            tbl.setAttribute('style', 'padding:0 4px 8px 4px;width:100%;height:14px;');
+            dv.appendChild(tbl);
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+
+            var td = document.createElement('td');
+            td.setAttribute('style', 'font-size:11pt;font-weight:700;padding:0 0 2px 0;color:#000000;');
+            tr.appendChild(td);
+
+            var txt = document.createTextNode(myInnerObj[1].toUpperCase());
+            td.appendChild(txt);
+
+            if (dvParent != undefined){
+                return (dvParent.innerHTML);
+            }
+
+    }
 }
 
 function getLargestArrItem(coordArr){
@@ -1630,11 +1701,11 @@ function AdaptStyle(feature){
                 return {
                     weight: 1,
                     opacity: 0.85, 
-                    color: '#044200', 
+                    color: '#000', 
                     dashArray: '0',
-                    fillOpacity: 0.5,
-                    fillColor: '#0B006B', 
-                    radius: 3,
+                    fillOpacity: 0.85,
+                    fillColor: '#00ED6B', 
+                    radius: 4,
                     className: 'pointShadow'
                 }
             } else {
