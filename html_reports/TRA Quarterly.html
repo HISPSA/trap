@@ -52,6 +52,7 @@
         .landingPage {width:100%; }
         .leaflet-control-attribution {display:none;}
         .leaflet-control-layers-list {text-align: left;}
+        .leaflet-control-layers-sliderControl {width:100%;}
 
         textarea.quantative {border:1px solid #fff;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;}
 
@@ -59,6 +60,14 @@
             outline: none !important;
             border:1px solid rgba(0, 0, 255, 0.377);
             box-shadow: 0 0 10px rgb(27, 38, 49);
+        }
+
+        .MenuArea {
+            border:1px solid #C0C0C0;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;
+            background-Color:#f5f5f5;
+            font-size: 8pt;
+            font-family: Calibri,sans-serif,Arial;
+            padding:2px;
         }
 
         @media all {
@@ -391,6 +400,7 @@
 
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
 	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,YrrIYRXd82h,NsrFeZdWd14,Og44c6zMLLT'; //S6BlQpoZVhQ: TB screening REMOVED Temporarily (2018-02-09); replaced (2018-03-20) gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg
+    var dxWeightScheme = '1,1,1,1,1,1,1';
 	var dxCoreSentiment = '1,1,1,1,1,1,-1';
 	var dxCoreArr = dxCore.split(',');
 	var dxCoreSentimentArr = dxCoreSentiment.split(',')
@@ -409,6 +419,7 @@
 	var peQTRcurrYmmRangeEnd = '';
 	var peQTRrangeAct = '';
 	var dxSummaryCounter = [];
+    var ouScoreArr = [];
     var dxCurrent = '';
     var g_geoJSONlayerObj;
 
@@ -1174,7 +1185,6 @@
                         }
                     }
 
-
                 }
 
             }
@@ -1551,10 +1561,10 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         if (ouLevel == 5){
             var iH = 22, sStyleOffs = 'position:relative;top:2px;';
             var ArrTemp = myList[i].ouHierarchy.toString().split('/');
-            row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">#'+(i+1)+'&nbsp;'+myList[i].ouName+'</div>'));
+            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">#'+(i+1)+'&nbsp;'+myList[i].ouName+'</div>'));
         } else {
             var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-            row$.append($('<td class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + '#'+(i+1)+'&nbsp;'+myList[i].ouName + '</a>'));
+            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + '#'+(i+1)+'&nbsp;'+myList[i].ouName + '</a>'));
         }
 
         //prevY BASELINE: 2
@@ -1580,6 +1590,8 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         }
+
+        loadScore(myList[i].ou,dx,iW);
 
         //QTR TARGET: 9
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
@@ -2066,6 +2078,90 @@ function AdaptStyle(feature){
 
 }
 
+function upgradeReportsMenu(){
+    $('.hideInPrint')[0].innerHTML = '<div class="MenuArea">'+getMenu()+'</div>'
+}
+function getMenu(){
+
+    var tbl = document.createElement('table');
+    tbl.setAttribute("style","width:100%;");
+    var tr = document.createElement('tr');
+    tbl.appendChild(tr);
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    tr.appendChild(td);
+    var inp = document.createElement('input');
+    inp.setAttribute("type",'button');
+    inp.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    inp.setAttribute("value",'Print');
+    inp.setAttribute("onclick",'window.print()');
+    td.appendChild(inp);
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    tr.appendChild(td);
+    var inp = document.createElement('input');
+    inp.setAttribute("type",'button');
+    inp.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    inp.setAttribute("value",'Back');
+    inp.setAttribute("onclick",'javascript:window.location.href="displayViewReportForm.action"');
+    td.appendChild(inp);
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    tr.appendChild(td);
+    return tbl.outerHTML;
+
+}
+
+function initialiseScoreArray(ou){
+
+}
+
+function loadScore(ou,dx,val){
+
+    var bFound = 0;
+
+    for (var i = 0; i < ouScoreArr.length; i++) {
+        if (ouScoreArr[i].ou == ou){
+            bFound = 1;
+            for (var p = 0; p < dxCoreArr.length; p++) {
+                if (ouScoreArr[i].dxArr[p].dx == dx){
+                    ouScoreArr[i].dxArr[p].progress = val;
+                }
+            }
+        }
+    }
+
+    if (bFound == 0) {
+        var dxArr = [];
+        for (var p = 0; p < dxCoreArr.length; p++) {
+            if (dxCoreArr[p].dx == dx){
+                dxArr.push ( { dx: dxCoreArr[p], progress: val } );
+            } else {
+                dxArr.push ( { dx: dxCoreArr[p], progress: 0 } );
+            }
+        }
+        ouScoreArr.push ( { ou: ou, dxArr: dxArr, score: 0 } ); 
+    }
+
+}
+
+function averageScores(bRoundDownTo100){
+
+    var dxWeights = dxWeightScheme.split(',');
+
+    for (var i = 0; i < ouScoreArr.length; i++) {
+
+        var iRunningScore = 0;
+
+        for (var p = 0; p < dxCoreArr.length; p++) {
+            iRunningScore += ( ( (bRoundDownTo100) ? ( (parseFloat(ouScoreArr[i].dxArr[p].progress) > 100) ? 100 : parseFloat(ouScoreArr[i].dxArr[p].progress)) : parseFloat(ouScoreArr[i].dxArr[p].progress)) * parseFloat(dxWeights[p]) );
+        }
+
+        ouScoreArr[i].score = (iRunningScore / (dxCoreArr.length));
+
+    }
+
+}
 
 </script>
 
