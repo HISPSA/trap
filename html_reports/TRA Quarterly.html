@@ -102,7 +102,7 @@
         var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
         var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
 
-        document.getElementById('printButton').value = 'Export to PDF';
+        //document.getElementById('printButton').value = 'Export to PDF';
 
 	</script>
 
@@ -293,13 +293,13 @@
                             <td id='dxName_mH17opU6Ivq'>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_YrrIYRXd82h'>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                            <td id='dxName_bTs3h1d6t6Y'>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_NsrFeZdWd14'>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                            <td id='dxName_r0T2RG2Wp1p'>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_Og44c6zMLLT'>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
+                            <td id='dxName_Q0ctiOhPAEq'>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
                         </tr>
 
                     </table>
@@ -399,14 +399,18 @@
  <script language=javascript>
 
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
-	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,YrrIYRXd82h,NsrFeZdWd14,Og44c6zMLLT'; //S6BlQpoZVhQ: TB screening REMOVED Temporarily (2018-02-09); replaced (2018-03-20) gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg
+	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,bTs3h1d6t6Y,r0T2RG2Wp1p,Q0ctiOhPAEq'; //
     var dxWeightScheme = '1,1,1,1,1,1,1';
 	var dxCoreSentiment = '1,1,1,1,1,1,-1';
 	var dxCoreArr = dxCore.split(',');
 	var dxCoreSentimentArr = dxCoreSentiment.split(',')
-	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q,n7P1Zve7Raw';
+	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q,n7P1Zve7Raw'; // ACTUAL, TARGET, GAP
 	var dxOffset = ''; /*gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg*/
-	var dxSingleTarget = 'Og44c6zMLLT,YrrIYRXd82h,NsrFeZdWd14'; 
+	var dxIndicators = 'bTs3h1d6t6Y,r0T2RG2Wp1p,Q0ctiOhPAEq';
+    var dxIndTargets = 'OHvZWlQrEAW,BcerMxmnjMe,KDva1wyAuJ6';
+    var ArrInd = dxIndicators.split(',');
+    var ArrIndTarg = dxIndTargets.split(',');
+    var dxTargetPair = '';
 	var dxCoreCat = '';
 	var lblCat = 'Actual,Target,Gap';
 	var dxMMendOfQtr = 'mH17opU6Ivq';
@@ -592,6 +596,8 @@
             QTR2: 0,
             QTR3: 0,
             QTR4: 0,
+            NumSum: 0,
+            DenSum: 0,
             LASTtarget: 0,
             GrandTotAll: 0,
             position: p
@@ -609,21 +615,26 @@
 
         dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
 
-
-        //URL for Dx Core List
-        //var sDxCore = ('../api/dataElements.json?filter=id:in:['+dxCore+']&fields=id,name,shortName,displayName');
-        var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+        if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
+            dxTargetPair = '';
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+        } else {
+            dxTargetPair = getIndTargetPair(dxCoreArr[p]);
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+            //console.log(sDataGet);
+        }
 
         $.ajax({
             url: sDataGet,
             dx: dxCoreArr[p],
             row: p,
+            dxTargetPair: dxTargetPair,
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log('error: Data Element Lookup');
             },
             success : function(dataOU){
 
-                var OURetTemp = returnPrepArray(dataOU,this.dx);
+                var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
 
                 OURet[this.row].dxName = OURetTemp[0].dxName;
                 OURet[this.row].baseline = OURetTemp[0].baseline;
@@ -639,11 +650,24 @@
                 OURet[this.row].QTR2 = OURetTemp[0].QTR2;
                 OURet[this.row].QTR3 = OURetTemp[0].QTR3;
                 OURet[this.row].QTR4 = OURetTemp[0].QTR4;
+                OURet[this.row].NumSum = OURetTemp[0].NumSum;
+                OURet[this.row].DenSum = OURetTemp[0].DenSum;
+                OURet[this.row].factor = OURetTemp[0].factor;
                 OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
 
             }
 
         });
+
+        function getIndTargetPair(dx){
+
+            for (var m = 0; m < ArrInd.length; m++){
+                if (ArrInd[m] == dx){
+                    return ArrIndTarg[m];
+                }
+            }
+
+        }
 
         for (var ouL = OUlevel; ouL <= (OUlevel+1); ouL++){
 
@@ -651,7 +675,13 @@
 
                 dxSummaryCounter.push ( { dx: dxCoreArr[p], ouLevel: ouL, counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
 
-                var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+                if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
+                    dxTargetPair = '';
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+                } else {
+                    dxTargetPair = getIndTargetPair(dxCoreArr[p]);
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+                }
 
                 var dv1 = document.createElement('div');
                 dv1.setAttribute('id','title_'+dxCoreArr[p]+'_'+ouL);
@@ -674,6 +704,7 @@
                     idxItem: (p+1),
                     dxSummaryArray: (tblCounter-1),
                     bfinalDx: (p == (dxCoreArr.length-1)),
+                    dxTargetPair: dxTargetPair,
                     error: function (xhr, ajaxOptions, thrownError) {
                         console.log('error: Data Element Lookup');
                     },
@@ -686,7 +717,7 @@
                         document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
                         document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
 
-                        var myPrepArr = returnPrepArray(dataDE,this.dx);
+                        var myPrepArr = returnPrepArray(dataDE,this.dx,this.dxTargetPair);
 
                         buildCUSTOMHtmlTable(myPrepArr,'#tbl_'+this.dx+'_'+this.oulevel,this.dx,this.oulevel)
                         buildCUSTOMsummaryTable(this.dx,this.oulevel,this.dxSummaryArray)
@@ -695,7 +726,6 @@
                         $('#dv_'+this.dx+'_'+this.oulevel).append(txt$);
 
                         if ( (this.bfinalDx == true) && (this.oulevel == OUlevel) ) {
-                            //buildOUsummaryTable(OURet,'#tbl_'+ou+'_summary');
                             buildOUsummaryTable(OURet,'#tblMaster');
                             loadChart();
                             loadMapFrame();
@@ -822,15 +852,15 @@
         return ( yyyy + '/' + mm + '/' + dd );
     }
 
-     function returnPrepArray(myData,dx){
+     function returnPrepArray(myData,dx,dxTarg){
         var ArrRet = [];
-        for (var o = 0; o < myData.metaData.dimensions.ou.length; o++){
+        for (var l = 0; l < myData.metaData.dimensions.ou.length; l++){
             ArrRet.push ({
                 dx: dx,
                 dxName: myData.metaData.items[dx].name,
-                ou: myData.metaData.dimensions.ou[o], 
-                ouName: myData.metaData.items[myData.metaData.dimensions.ou[o]].name, 
-                ouHierarchy: myData.metaData.ouNameHierarchy[myData.metaData.dimensions.ou[o]], 
+                ou: myData.metaData.dimensions.ou[l], 
+                ouName: myData.metaData.items[myData.metaData.dimensions.ou[l]].name, 
+                ouHierarchy: myData.metaData.ouNameHierarchy[myData.metaData.dimensions.ou[l]], 
                 baseline: 0,
                 FYtarget: 0,
                 YTDtarget: 0,
@@ -844,6 +874,9 @@
                 QTR2: 0,
                 QTR3: 0,
                 QTR4: 0,
+                NumSum: 0,
+                DenSum: 0,
+                factor: 0,
                 LASTtarget: 0,
                 GrandTotAll: 0,
                 position: 0
@@ -861,47 +894,46 @@
                 if (ArrRet[a].ou == myData.rows[i][2]){
 
                     //BASELINE (.ACTUAL CatOptCombo)
-                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
+                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
                         ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     } else {
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprevJul) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( (myData.rows[i][1] == peFYprevJul) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) ) {
                             ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                         // PE match of Prev-Year-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][1]) >= 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
                             ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                     }
 
-
                     // TARGET (.TARGET CatOptCombo)
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? Math.ceil(parseFloat(myData.rows[i][3])) : 0);
                     } 
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? Math.ceil(parseFloat(myData.rows[i][3])) : 0);
                     }
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
                         ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     }
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    }
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                         ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     }
 
-
+                    if ( ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && (myData.rows[i][1] == peFYprevJul) && ( (dxIndicators).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
 
                     // YTD actual
                     if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
                         ArrRet[a].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     } else {
                         // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
                             ArrRet[a].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].CALCactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
@@ -921,66 +953,111 @@
 
                     /* QTR 1  */
                     if (myData.rows[i][1] == peArr[0]) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[0]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                     }
                     /* QTR 2  */
                     if ( (peArr.length >= 2) && (myData.rows[i][1] == peArr[1]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 2) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( (peArr.length == 2) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if (peArr.length >= 2){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
                         }
                     }
                     /* QTR 3  */
                     if ( (peArr.length >= 3) && (myData.rows[i][1] == peArr[2]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 3) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 3) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if (peArr.length >= 3){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[2]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
                         }
                     }
                     /* QTR 4  */
                     if ( (peArr.length == 4) && (myData.rows[i][1] == peArr[3]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
                         //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 4) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 4) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                             ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
+                    } else {
+                        if (peArr.length > 3){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[3]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                        }
                     }
-
 
                 }
 
@@ -991,18 +1068,29 @@
         var sRem = '';
 
         for (var a = 0; a < ArrRet.length; a++){
-            if ( (dxSingleTarget).indexOf(dx) >= 0){
-                ArrRet[a].YTDtarget = ArrRet[a].LASTtarget;
+            if ( (dxIndicators).indexOf(dx) >= 0){
+                ArrRet[a].YTDtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].FYtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].YTDactual = parseFloat(parseFloat(ArrRet[a].NumSum) / parseFloat(ArrRet[a].DenSum) * parseFloat(ArrRet[a].factor)).toFixed(0).replace('NaN','0');
+                
             }
-            ArrRet[a].GrandTotAll = (ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
+            if ( (dxMMendOfQtr).indexOf(dx) >= 0){
+                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
+            }
+            if ( ( (dxIndicators).indexOf(dx) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
+                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
+            }
+            ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].YTDtarget) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
             if (ArrRet[a].GrandTotAll == 0){
                 sRem += (a + ',');
             } else {
                 ArrRet[a].YTDgapNum = parseFloat(ArrRet[a].YTDtarget - ArrRet[a].YTDactual).toFixed(1);
-                if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
-                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1);
+                if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
+                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1).replace('.0','');
                 } else {
-                    ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1) : 0);
+                    ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1).replace('.0','') : 0);
                 }
             }
 
@@ -1017,198 +1105,6 @@
         ArrRet.sort(function(a, b) {
             return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
         });
-
-/*
-        for (var a = 0; a < ArrRet.length; a++){
-            ArrRet[a].position = (a+1);
-        }
-*/
-
-        return ArrRet;
-
-     }
-
-     function returnOUPrepArray(myData,dxArr){
-
-        var ArrRet = [];
-        var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
-        var peArr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';');
-
-        for (var p = 0; p < dxCoreArr.length; p++){
-
-            ArrRet.push ({
-                dx: dxCoreArr[p],
-                dxName: (myData.metaData.items[dxCoreArr[p]].name).replace('TRAP_',''),
-                ou: ou, 
-                ouHierarchy: '', 
-                baseline: 0,
-                FYtarget: 0,
-                YTDtarget: 0,
-                YTDactual: 0,
-                YTDactualSum: 0,
-                YTDgapNum: 0,
-                YTDgapPer: 0,
-                CALCtarget: 0,
-                CALCactual: 0,
-                QTR1: 0,
-                QTR2: 0,
-                QTR3: 0,
-                QTR4: 0,
-                LASTtarget: 0,
-                GrandTotAll: 0,
-                position: p
-            });
-
-            for (var i = 0; i < myData.rows.length; i++){
-
-                // OU & DX match
-                if ( (ou == myData.rows[i][2]) && (myData.rows[i][0]).indexOf(dxCoreArr[p]) ) {
-
-                    //BASELINE (.ACTUAL CatOptCombo)
-                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[p].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    } else {
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprevJul) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        // PE match of Prev-Year-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][1]) >= 0) ) {
-                            ArrRet[p].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-
-
-                    // TARGET (.TARGET CatOptCombo)
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[p].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    } 
-                    // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[p].FYtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    }
-                    // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    }
-                    // PE match of Current-Range-End-QTR value for End-Of-Month element
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    }
-                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                        ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    }
-
-
-
-                    // YTD actual
-                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[p].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                    } else {
-                        // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[p].CALCactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-
-                    // YTD gap
-                    if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
-                        ArrRet[p].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
-                    } else {
-                        // PE match of Current-Range-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
-                            ArrRet[p].YTDgapPer = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
-                        }
-                    }
-
-
-                    /* QTR 1  */
-                    if (myData.rows[i][1] == peArr[0]) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
-                            ArrRet[p].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            //cumulative actual
-                            ArrRet[p].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                            ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[p].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-                    /* QTR 2  */
-                    if ( (peArr.length >= 2) && (myData.rows[i][1] == peArr[1]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
-                            ArrRet[p].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            //cumulative actual
-                            ArrRet[p].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                            ArrRet[p].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[p].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 2) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-                    /* QTR 3  */
-                    if ( (peArr.length >= 3) && (myData.rows[i][1] == peArr[2]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
-                            ArrRet[p].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            //cumulative actual
-                            ArrRet[p].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                            ArrRet[p].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[p].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 3) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-                    /* QTR 4  */
-                    if ( (peArr.length == 4) && (myData.rows[i][1] == peArr[3]) ) {
-                        if ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) {
-                            ArrRet[p].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            //cumulative actual
-                            ArrRet[p].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        //cumulative target
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) < 0) ) {
-                            ArrRet[p].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            ArrRet[p].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 4) && ( (dxSingleTarget).indexOf(myData.rows[i][0]) >= 0) ) {
-                            ArrRet[p].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
-                    }
-
-                }
-
-            }
-
-        }
-
-        var sRem = '';
-
-        for (var a = 0; a < ArrRet.length; a++){
-            if ( (dxSingleTarget).indexOf(ArrRet[a].dx) >= 0){
-                ArrRet[a].YTDtarget = ArrRet[a].LASTtarget;
-            }
-            ArrRet[a].GrandTotAll = (ArrRet[a].FYtarget + ArrRet[a].YTDtarget + ArrRet[a].YTDactual + ArrRet[a].CALCactual + ArrRet[a].YTDgapNum + ArrRet[a].QTR1 + ArrRet[a].QTR2 + ArrRet[a].QTR3 + ArrRet[a].QTR4);
-            if (ArrRet[a].GrandTotAll == 0){
-                sRem += (a + ',');
-            } else {
-                ArrRet[a].YTDgapNum = parseFloat(ArrRet[a].YTDtarget - ArrRet[a].YTDactual).toFixed(1);
-                if (( (dxOffset).indexOf(ArrRet[a].dx) >= 0) || ( (dxSingleTarget).indexOf(ArrRet[a].dx) >= 0)){
-                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1);
-                } else {
-                    ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1) : 0);
-                }
-            }
-        }
 
         return ArrRet;
 
@@ -1391,7 +1287,7 @@
 					return '#FC6565'; // red
 				}
 			} else {
-				if (dx == 'Og44c6zMLLT'){
+				if (dx == 'Q0ctiOhPAEq'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
@@ -1417,7 +1313,7 @@
 						return '#FC6565'; // red
 					}
 				}
-				if (dx == 'YrrIYRXd82h'){
+				if (dx == 'bTs3h1d6t6Y'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
@@ -1443,7 +1339,7 @@
 						return '#FC6565'; // red
 					}
 				}
-				if (dx == 'NsrFeZdWd14'){
+				if (dx == 'r0T2RG2Wp1p'){
 					if (parseFloat(varVal) > 100){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
@@ -1583,7 +1479,7 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDgapNum));
 
         //YTD PROGRESS %: 8
-        if (( (dxOffset).indexOf(dx) >= 0) || ( (dxSingleTarget).indexOf(dx) >= 0)){
+        if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         } else {
@@ -1591,7 +1487,7 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         }
 
-        loadScore(myList[i].ou,dx,iW);
+        loadScore(myList[i].ou,myList[i].ouName,dx,iW);
 
         //QTR TARGET: 9
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
@@ -1622,8 +1518,18 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
   document.getElementById("subHeader2").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
 }
 
+function initialiseParentOUscores(){
+    var dxArr = [];
+    for (var p = 0; p < dxCoreArr.length; p++) {
+        dxArr.push ( { dx: dxCoreArr[p], progress: 0 } );
+    }
+    ouScoreArr.push ( { ou: dhis2.report.organisationUnit.name, id: ou, dxArr: dxArr, value: 0, Data: 'aggregate Score', numproportion: 1 } );
+}
+
 // Builds the HTML Table out of myList.
 function buildOUsummaryTable(myList,selector) {
+
+  initialiseParentOUscores();
 
   var myCount = (myList.length+1);
 
@@ -1631,7 +1537,7 @@ function buildOUsummaryTable(myList,selector) {
 
     if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
-        if (myList[i].dx == 'YrrIYRXd82h'){
+        if (myList[i].dx == 'bTs3h1d6t6Y'){
 
             var iCols = row$[0].children.length;
             var row$ = $('<tr/>');
@@ -1646,7 +1552,7 @@ function buildOUsummaryTable(myList,selector) {
         /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
 
         var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-        row$.append($('<td class="rowItemLeft"/>').html(myList[i].dxName));
+        row$.append($('<td title="'+myList[i].dx+'" class="rowItemLeft"/>').html(myList[i].dxName));
 
         //prevY BASELINE: 2
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
@@ -1664,13 +1570,15 @@ function buildOUsummaryTable(myList,selector) {
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].YTDgapNum));
 
         //YTD PROGRESS %: 8
-        if (( (dxOffset).indexOf(myList[i].dx) >= 0) || ( (dxSingleTarget).indexOf(myList[i].dx) >= 0)){
+        if (( (dxOffset).indexOf(myList[i].dx) >= 0) || ( (dxIndicators).indexOf(myList[i].dx) >= 0)){
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,myList[i].dx,OUlevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         } else {
             var iW = parseFloat(myList[i].YTDgapPer);
             row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,myList[i].dx,OUlevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
         }
+
+        loadScore(myList[i].ou,myList[i].ouName,myList[i].dx,iW);
 
         //QTR TARGET: 9
         row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
@@ -1735,14 +1643,13 @@ function addAllColumnHeaders(myList, selector) {
 function loadMapFrame(){
 
     //URL for parent-OU 
-    //var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
     if (dhis2.report.organisationUnitHierarchy.length > 1){
         //var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
         var sOU = ('../api/organisationUnits.json?filter=path:like:'+ou+'&fields=id,name,shortName,coordinates,level,featureType&filter=level:in:['+dhis2.report.organisationUnitHierarchy.length+','+OUlevel+']');
     } else {
         var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,shortName,coordinates,level,featureType,children[id,name,shortName,coordinates,level,featureType]');
     }
-console.log(sOU);
+
     $.ajax({
         url: sOU,
         error: function (xhr, ajaxOptions, thrownError) {
@@ -2083,6 +1990,8 @@ function upgradeReportsMenu(){
 }
 function getMenu(){
 
+    var ua = navigator.userAgent;
+
     var tbl = document.createElement('table');
     tbl.setAttribute("style","width:100%;");
     var tr = document.createElement('tr');
@@ -2092,8 +2001,14 @@ function getMenu(){
     tr.appendChild(td);
     var inp = document.createElement('input');
     inp.setAttribute("type",'button');
-    inp.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-    inp.setAttribute("value",'Print');
+    inp.setAttribute("style",'width:100px');
+
+    if(/Chrome/i.test(ua)){
+        inp.setAttribute("value",'Export to PDF');
+    } else {
+        inp.setAttribute("value",'Print');
+    }
+
     inp.setAttribute("onclick",'window.print()');
     td.appendChild(inp);
     var td = document.createElement('td');
@@ -2101,7 +2016,7 @@ function getMenu(){
     tr.appendChild(td);
     var inp = document.createElement('input');
     inp.setAttribute("type",'button');
-    inp.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    inp.setAttribute("style",'width:100px');
     inp.setAttribute("value",'Back');
     inp.setAttribute("onclick",'javascript:window.location.href="displayViewReportForm.action"');
     td.appendChild(inp);
@@ -2116,12 +2031,12 @@ function initialiseScoreArray(ou){
 
 }
 
-function loadScore(ou,dx,val){
+function loadScore(ou,ouName,dx,val){
 
     var bFound = 0;
 
     for (var i = 0; i < ouScoreArr.length; i++) {
-        if (ouScoreArr[i].ou == ou){
+        if (ouScoreArr[i].id == ou){
             bFound = 1;
             for (var p = 0; p < dxCoreArr.length; p++) {
                 if (ouScoreArr[i].dxArr[p].dx == dx){
@@ -2140,7 +2055,7 @@ function loadScore(ou,dx,val){
                 dxArr.push ( { dx: dxCoreArr[p], progress: 0 } );
             }
         }
-        ouScoreArr.push ( { ou: ou, dxArr: dxArr, score: 0 } ); 
+        ouScoreArr.push ( { ou: ouName, id: ou, dxArr: dxArr, value: 0, Data: 'aggregate Score', numproportion: 1 } );
     }
 
 }
@@ -2157,9 +2072,21 @@ function averageScores(bRoundDownTo100){
             iRunningScore += ( ( (bRoundDownTo100) ? ( (parseFloat(ouScoreArr[i].dxArr[p].progress) > 100) ? 100 : parseFloat(ouScoreArr[i].dxArr[p].progress)) : parseFloat(ouScoreArr[i].dxArr[p].progress)) * parseFloat(dxWeights[p]) );
         }
 
-        ouScoreArr[i].score = (iRunningScore / (dxCoreArr.length));
+        ouScoreArr[i].value = (iRunningScore / (dxCoreArr.length));
 
     }
+
+    ouScoreArr.sort(function(a, b) {
+        return parseFloat(a.value) - parseFloat(b.value);
+    });
+
+    var dv = document.createElement('div');
+    dv.setAttribute("id",'scoreDistribution');
+    dv.setAttribute("style",'width:'+document.getElementById("tblMaster").offsetWidth+'px;height:400px');
+    document.getElementById('rankedItems').appendChild(dv);
+
+    createBarChartValueRange('scoreDistribution',document.getElementById("tblMaster").offsetWidth,400,ouScoreArr,dhis2.report.organisationUnit.name,'Score Distribution');
+
 
 }
 
