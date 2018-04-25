@@ -3,8 +3,9 @@
 <head>
 
 	<style>
+
 		table.MainTbl{
-			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;
+			border-left:2px solid #000;border-top:2px solid #000;border-right:2px solid #000;border-bottom:1px solid #000;width:800px;
 		}
 		table.SecondaryTbl{
 			border-left:1px solid #000;border-top:1px solid #000;border-right:1px solid #000;
@@ -15,6 +16,10 @@
 		th.labelquarterName{
 			font-weight:800;border-left:1px solid #000;border-bottom:1pt solid #000;text-align:center;padding:4px;background-Color:#f5f5f5;color:#000;
 		}
+        td.rowItemLeft {padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        td.rowItem {border-bottom:1px solid #000;border-left:1px solid #000;}
+        td.rowItemRight {border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5}
+
 		td.cellNumeric, div.cellNumeric{
 			text-align: right;padding:4px;cursor: default;
 		}
@@ -25,11 +30,15 @@
 		}
 		table.perfBar { width:100%;height:100;padding:0; }
 		#reportOverview {padding:4px;display:none;}
-		table, th, td, div, span, a {font-family:Calibri,sans-serif,Arial;}
-		li {padding:4px;}
-		#chart1Title {padding:12px 0 4px 8px;font-weight: 400;}
-		.tableTitle {padding:12px 0 4px 4px;font-weight: 400;}
 
+		table, th, td, div, span, a, textarea {font-family:Calibri,sans-serif,Arial;}
+		li {padding:4px;}
+		.tableTitle {padding:20px 0px 10px 4px;font-weight: 400;}
+		#chart1Title {padding:12px 0px 4px 8px;font-weight: 400;}
+        #chart1 {width:800px;height:375px;}
+
+
+        /* #tblMaster {display:none;} */
         #leafMap {
                     width:1000px;height:800px;
                     position:relative;top:0;left:0;
@@ -38,29 +47,48 @@
                     -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;
                     cursor: default; 
                 }
+        #SentimentSummary {border:1px solid #C0C0C0; background-Color:#EBEBEB; font-size: 10pt;padding:10px; -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;}
 
-        .landingPage {width:100%; }
+        .landingPage {width:1000px; }
         .leaflet-control-attribution {display:none;}
         .leaflet-control-layers-list {text-align: left;}
-		.leaflet-control-layers-sliderControl {width:100%;}
+        .leaflet-control-layers-sliderControl {width:100%;}
+
+        textarea.quantative {border:1px solid #fff;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;}
+
+        .input:focus {
+            outline: none !important;
+            border:1px solid rgba(0, 0, 255, 0.377);
+            box-shadow: 0 0 10px rgb(27, 38, 49);
+        }
+
+        .MenuArea {
+            /*border:1px solid #C0C0C0;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;*/
+            background-Color:#fff;
+            font-size: 8pt;
+            font-family: Calibri,sans-serif,Arial;
+            padding:2px;
+        }
 
         @media all {
             .page-break	{ display: none; }
         }
         @media print {
             footer {page-break-after: always;}
-			.leaflet-control { display: none !important; }
+            .leaflet-control { display: none !important; }
         }
 
 	</style>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+
+    <link rel="stylesheet" href="https://rawgit.com/HISPSA/nhird2/master/css/leaflet.css" />
 
     <script src="https://rawgit.com/HISPSA/nhird2/master/js/leaflet.js"></script>
-	<script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
+    <script src="//dhis2-cdn.org/v227/plugin/chart.js"></script>
+    <script src="https://rawgit.com/HISPSA/nhird2/master/js/GregAnalytics.js" type="text/javascript"></script>
 
 	<script language=javascript>
 
-		function getParameterByName(name) {0
+		function getParameterByName(name) {
 			name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
 			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
 				results = regex.exec(location.search);
@@ -69,7 +97,11 @@
 
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
-		var repUID = getParameterByName('uid');
+        var repUID = getParameterByName('uid');
+        var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : (dhis2.report.organisationUnitHierarchy.length+1));
+        var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
+        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
+        var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) )
 
 	</script>
 
@@ -79,279 +111,283 @@
 
 	<div id="reportHeader">
 
-	<table id='logoTable' class='landingPage'>
+		<table id='logoTable' class='landingPage'>
 			<tr>
 				<td style='width:225px;text-align:left;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/new%20health%20logo-2.jpg' style='width:225px;height:80px;'> </td>
 				<td></td>
 				<td style='width:180px;text-align:right;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/southafrica_pepfarlogo.jpg' style='width:155px;height:100px;'> </td>
 			</tr>
 			<tr>
-				<td colspan=3 style='padding:10px;'>
-					&nbsp;
-				</td>
-			</tr>
+                <td colspan=3 style='padding:10px;'>
+                    &nbsp;
+                </td>
+            </tr>
 			<tr>
-				<td colspan=3 style='text-align:center;'>
-					<strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION<br>QUARTERLY REPORT</strong>
-				</td>
-			</tr>
+                <td colspan=3 style='text-align:center;'>
+                    <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION <br>QUARTERLY REPORT</strong>
+                </td>
+            </tr>
 			<tr>
-				<td colspan=3 style='padding:2px;'>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
-					<div style='font-size:14pt;font-weight:400' id='ouName'></div>
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
-					<div style='font-size:14pt;font-weight:400' id='peSummary'></div>
-				</td>
-			</tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
             <tr>
-				<td colspan=3 style='padding:10px;'>
-					&nbsp;
-				</td>
-			</tr>
+                <td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
+                    <div style='font-size:14pt;font-weight:400' id='ouName'></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
+                    <div style='font-size:14pt;font-weight:400' id='peSummary'></div>
+                </td>
+            </tr>
+    
+            <tr>
+                <td colspan=3 style='padding:10px;'>
+                    &nbsp;
+                </td>
+            </tr>
 			<tr>
-				<td colspan=3 style='text-align:center;background-Color:#fff;'>
-					<div id='leafMap'></div>
-				</td>
-			</tr>
+                <td colspan=3 style='text-align:center;background-Color:#fff;'>
+                    <div id='leafMap'></div>
+                </td>
+            </tr>
 			<tr>
-				<td colspan=3 style='padding:2px;'>
-					&nbsp;
-				</td>
-			</tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    <textarea class="quantative" style="width:99%;height:70px;font-size:12pt;" id='genDetails'></textarea>
+                </td>
+            </tr>
 			<tr>
-				<td colspan=3 style='text-align:center;padding:200px 0 20px 0;'>
-					<div style='font-size:10pt;' id='genDetails'></div>
-				</td>
-			</tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
 
-		</table>
-
-		<footer></footer>
+        <footer></footer>
 
 
         <table id='subHeader1' style="">
 
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 1. &nbsp; BACKGROUND</strong>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					South Africa adopted the UNAIDS 90, 90, 90 targets for HIV in 2014, which aim to ensure that by 2020:<br><br>
-					•	 90% of all people living with HIV will know their HIV status<br>
-					•	 90% of all people with diagnosed HIV infection will receive sustained antiretroviral therapy<br>
-					•	 90% of all people receiving antiretroviral therapy will have viral suppression.<br><br>
-					It’s estimated that 7.1 million South Africans are living with HIV, of which 3.8 million are on ART. The National Department of Health is committed to achieving the above targets by addressing the challenges contributing to HIV programme suboptimal performance.
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-	
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 2. &nbsp; PURPOSE</strong>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
-					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The indicators listed below must be monitored closely against set targets.
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 3. &nbsp; 90-90-90 HIV Cascade</strong>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
-					Cascades are used to track performance towards achieving the 90-90-90 targets. The indicators below are used for this purpose:<br><br>
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;'>
+                    <strong>&nbsp; 1. &nbsp; BACKGROUND</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    South Africa adopted the UNAIDS 90, 90, 90 targets for HIV in 2014, which aim to ensure that by 2020:<br><br>
+                    •	 90% of all people living with HIV will know their HIV status<br>
+                    •	 90% of all people with diagnosed HIV infection will receive sustained antiretroviral therapy<br>
+                    •	 90% of all people receiving antiretroviral therapy will have viral suppression.<br><br>
+                    It’s estimated that 7.1 million South Africans are living with HIV, of which 3.8 million are on ART. The National Department of Health is committed to achieving the above targets by addressing the challenges contributing to HIV programme suboptimal performance.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+    
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
+                    <strong>&nbsp; 2. &nbsp; PURPOSE</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                    The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The indicators listed below must be monitored closely against set targets.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
+                    <strong>&nbsp; 3. &nbsp; 90-90-90 HIV Cascade</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                    Cascades are used to track performance towards achieving the 90-90-90 targets. The indicators below are used for this purpose:<br><br>
 
-					1st bar: The total population living with HIV (LHIV). This is generated from the Thembisa estimate model.<br><br>
-						
-					2nd bar: LHIV who know their status.  It is estimated that 75% of those LHIV in South Africa already know their HIV status. In order to reach the 90% target another 15% of the LHIV population must still be diagnosed<br><br>
-						
-					3rd bar: LHIV with known status on ART. At least 90% of the LHIV population who know their HIV status must be on ART. The acual number of clients on ART (TROA) is generated from the Provincial integrated webDHIS instances.<br><br>
-						
-					4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br><br>
+                    1st bar: The total population living with HIV (LHIV). This is generated from the Thembisa estimate model.<br><br>
+                        
+                    2nd bar: LHIV who know their status.  It is estimated that 75% of those LHIV in South Africa already know their HIV status. In order to reach the 90% target another 15% of the LHIV population must still be diagnosed<br><br>
+                        
+                    3rd bar: LHIV with known status on ART. At least 90% of the LHIV population who know their HIV status must be on ART. The acual number of clients on ART (TROA) is generated from the Provincial integrated webDHIS instances.<br><br>
+                        
+                    4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br><br>
 
-					5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br>
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3>
+                    5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
 
-					<div id='chart1Title'></div>
+                    <div id='chart1Title'></div>
 
-					<div id="chart1"></div>
+                    <div id="chart1"></div>
 
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 4. &nbsp; How indicators are monitored</strong>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					The coloured bars provide a quick way of tracking progress made with regard to a particular indicator. The indicators are represented by green, yellow, red and blue bars. The colours mean the following:<br><br>
-					<div style="color:#FD3838">Red: Critical</div>
-					<div style="color:#FCDC65">Orange: Need to improve</div>
-					<div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
-					<div style="color:#656AFC">Blue: Needs explanation</div><br>
-					<!-- Colour ranges for the indicators have been set as follows: -->
-					The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The following indicators must be monitored closely against set targets:
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<!-- <div id='dxList'></div> -->
-					Colour ranges for the indicators have been set as follows:<br>
-					<table>
-						<tr>
-							<td>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
-						</tr>
-						<tr>
-							<td>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
-						</tr>
-						<tr>
-							<td>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
-						</tr>
-						<tr>
-							<td>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
-						</tr>
-						<tr>
-							<td>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
-						</tr>
-						<tr>
-							<td>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
-						</tr>
-						<tr>
-							<td>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
-						</tr>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
+                    <strong>&nbsp; 4. &nbsp; How indicators are monitored</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    The use of color grading provides an easy way to monitor progress against targets. Indicator progress scores are colour graded and represented by four outcome groups: green, orange, red and blue (horizontal) bars. These graded colours represent the following:<br><br>
+                    <div style="color:#FD3838">Red: Critical</div>
+                    <div style="color:#FCDC65">Orange: Need to improve</div>
+                    <div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
+                    <div style="color:#656AFC">Blue: Needs explanation</div><br>
+                    <!-- Colour ranges for the indicators have been set as follows: -->
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    The following set of indicators are being closely monitored against their targets with colour ranges having been set as follows:<br>
+                    <table>
+                        <tr>
+                            <td id='dxName_KnQn2N452bE'>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_Bmo4lk1FhgP'>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_fG0NDp9ZcQh'>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_mH17opU6Ivq'>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_bTs3h1d6t6Y'>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_r0T2RG2Wp1p'>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                        </tr>
+                        <tr>
+                            <td id='dxName_Q0ctiOhPAEq'>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
+                        </tr>
 
-					</table>
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='padding:2px;'>
-					&nbsp;
-				</td>
-			</tr>
-		</table>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='padding:2px;'>
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
 
-		<footer></footer>
+        <footer></footer>
 
-		<table id='subHeader2' style="">
-	
-			<tr>
-				<td colspan=3 style='text-align:left;'>
-					<strong>&nbsp; 5. &nbsp;Summary</strong>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3>
-					&nbsp;The following tables provide a summary of progress for the current financial year.
-				</td>
-			</tr>
-			<tr>
-				<td colspan=3 style='text-align:left;'>
+        <table id='subHeader2' style="">
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
+                    <strong>&nbsp; 5. &nbsp;Summary</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;The following table provide a summary of progress for the current financial year.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
 
-				<div id="" style="padding:0">
+                    <div id='mainPage' style="padding:0;margin:0;" >
 
-						<div id='table1Title' class='tableTitle'></div>
+                        <div id='table1Title' class='tableTitle'></div>
 
-						<table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
-							<thead>
-								<tr>
-									<th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
-									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
-									<th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
-									<th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
-									<th colspan=1 rowspan=2 class='labelHeader' id='1_peQTRtarget'></th>
-									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ2'></th>
-									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ3'></th>
-									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ4'></th>
-									<th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ1'></th>
-						
-								</tr>
-								<tr>
-									<th colspan=1 class='labelHeader' id='1_peFYTDtarget'></th>
-									<th colspan=1 class='labelHeader' id='1_peFYTDactual'></th>
-									<th colspan=1 class='labelHeader' id='1_peFYTDgap'></th>
-									<th colspan=1 class='labelHeader' id='1_peFYTDprogress'></th>
-								</tr>
-							</thead>
-						</table>
-						
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td colspan=3>
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td colspan=3 style='text-align:left;'>
-						<strong>&nbsp; 6. &nbsp;Ranking Per Indicator</strong>
-				</tr>
-				<tr>
-					<td colspan=3>
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td colspan=3>
-						&nbsp;Organisation units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators.
-					</td>
-				</tr>
-				<tr>
-					<td colspan=3 style='text-align:left;'>
-						<div id='rankedItems' class='tableTitle'></div>
-					</td>
-				</tr>
-		</table>
+                        <table border=0 cellpadding=0 cellspacing=0 style='min-width:75%;' id='tblMaster' class='MainTbl rounded'>
+                            <thead>
+                                <tr>
+                                    <th colspan=1 rowspan=2 class='labelHeader' style='border-left:0;'>{PLACEHOLDER}</th>
+                                    <th colspan=1 rowspan=2 class='labelHeader' id='1_peFprev'></th>
+                                    <th colspan=1 rowspan=2 class='labelHeader' id='1_peFtarget'></th>
+                                    <th colspan=4 rowspan=1 class='labelHeader' id='1_FYspan'></th>
+                                    <th colspan=1 rowspan=2 class='labelHeader' id='1_peQTRtarget'></th>
+                                    <th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ2'></th>
+                                    <th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ3'></th>
+                                    <th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ4'></th>
+                                    <th colspan=1 rowspan=2 class='labelquarterName' id='1_peQ1'></th>
+                        
+                                </tr>
+                                <tr>
+                                    <th colspan=1 class='labelHeader' id='1_peFYTDtarget'></th>
+                                    <th colspan=1 class='labelHeader' id='1_peFYTDactual'></th>
+                                    <th colspan=1 class='labelHeader' id='1_peFYTDgap'></th>
+                                    <th colspan=1 class='labelHeader' id='1_peFYTDprogress'></th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                        <textarea class="quantative" style="width:99%;height:18px;" id='tblMasterComment'>Comments:</textarea>
+                        
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
+                    <strong>&nbsp; 6. &nbsp;Ranking Per Indicator</strong>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3>
+                    &nbsp;Organisation units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators.
+                </td>
+            </tr>
+            <tr>
+                <td colspan=3 style='text-align:left;'>
+                    <div id='rankedItems' class=''></div>
+                </td>
+            </tr>
+        </table>
 
 	</div>
 
@@ -359,17 +395,22 @@
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
 
  <script language=javascript>
-
+	var CONST_NUMERIC_DIGIT_SEPARATOR = ",";
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
-	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,YrrIYRXd82h,NsrFeZdWd14,Og44c6zMLLT'; //S6BlQpoZVhQ: TB screening REMOVED Temporarily (2018-02-09); replaced (2018-03-20) gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg
+	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,bTs3h1d6t6Y,r0T2RG2Wp1p,Q0ctiOhPAEq'; //
+    var dxWeightScheme = '1,1,1,1,1,1,1';
 	var dxCoreSentiment = '1,1,1,1,1,1,-1';
 	var dxCoreArr = dxCore.split(',');
 	var dxCoreSentimentArr = dxCoreSentiment.split(',')
-	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q';
+	var dxCat = 'wyZ6KAmjZeD,mLVlvjLwl9q,n7P1Zve7Raw'; // ACTUAL, TARGET, GAP
 	var dxOffset = ''; /*gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg*/
-	var dxSingleTarget = 'Og44c6zMLLT,YrrIYRXd82h,NsrFeZdWd14'; 
+	var dxIndicators = 'bTs3h1d6t6Y,r0T2RG2Wp1p,Q0ctiOhPAEq';
+    var dxIndTargets = 'OHvZWlQrEAW,BcerMxmnjMe,KDva1wyAuJ6';
+    var ArrInd = dxIndicators.split(',');
+    var ArrIndTarg = dxIndTargets.split(',');
+    var dxTargetPair = '';
 	var dxCoreCat = '';
-	var lblCat = 'Actual,Target';
+	var lblCat = 'Actual,Target,Gap';
 	var dxMMendOfQtr = 'mH17opU6Ivq';
 	var peQTRrangeMMending = '';
 	var peQTRrange = '';
@@ -380,6 +421,56 @@
 	var peQTRcurrYmmRangeEnd = '';
 	var peQTRrangeAct = '';
 	var dxSummaryCounter = [];
+    var ouScoreArr = [];
+    var dxCurrent = '';
+    var g_geoJSONlayerObj;
+
+    upgradeReportsMenu();
+
+    /* MAP START */
+
+    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+
+    var g_baseMapLayerOpacity = 0.5;
+
+    var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
+    var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
+    var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
+    var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
+
+    g_baseMapCollection = {
+        "PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
+        "PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
+        "PRINT: StreetMap": Open_StreetMap,
+        "HikeBike":HikeBike_HikeBike
+    };
+
+    var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
+    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+
+        /* on mouseover control START */
+        var g_infoControl = L.control();
+        g_infoControl.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+        g_infoControl.update = function (props) {
+            if (props == undefined){
+                this._div.innerHTML = '';
+                this._div.style = ("display:none;");
+            }
+            else{
+                this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
+                var e = window.event;
+                this._div.style = ("display:block;"); 
+            }
+        };
+        g_infoControl.addTo(g_map);
+        /* on mouseover control END */
+
+
+    /* MAP END */
 
 	var peQcurr = parseInt(pe.split('Q')[1]); //parseInt(pe.substring(4,6));
 	var peFcurr = parseInt(pe.split('Q')[0]); //parseInt(pe.substring(0,4));
@@ -391,11 +482,9 @@
 	var peFprev = (peFcurr-1); //parseInt(((parseInt(peQcurr)<4) ? (peFcurr-1) : peFcurr));
 	var peFcurrSuff = parseInt(peFcurr.toString().substring(2,4));
 	var peFprevSuff = parseInt(peFprev.toString().substring(2,4));
-
 	var peFYcurr = (peFcurr+'April');
 	var peFYprev = (peFprev+'April');
-
-	var peFYprevJul = (peFprev+'July');//dxSingleTarget.indexOf(dxCoreArr[p])
+	var peFYprevJul = (peFprev+'July');
 
 	if (dxMMendOfQtr.length > 0) {
 		peQTRprevYmmRangeEnd = (peFcurr + '03');
@@ -404,39 +493,13 @@
 
 	peQTRcurrYRangeEnd = ((peFcurr+1) + 'Q1');
 
-
-
-    /* MAP START */
-    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
-	var g_baseMapLayerOpacity = 0.5;
-
-	var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
-	var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
-	var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
-	var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
-
-	g_baseMapCollection = {
-		"PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
-		"PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
-		"PRINT: StreetMap": Open_StreetMap,
-		"HikeBike":HikeBike_HikeBike
-	};
-
-	var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
-	var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
-
-	/* MAP END */
-
 	document.getElementById('1_peFprev').innerHTML = (peFprev + '/' + peFcurrSuff + '<br>Baseline');
 	document.getElementById('1_peFtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Target');
-
 	document.getElementById('1_FYspan').innerHTML = ('YTD ' + peFcurr + '/' + ((peFcurrSuff)+1) + '');
-
 	document.getElementById('1_peFYTDtarget').innerHTML = ('Target');
 	document.getElementById('1_peFYTDactual').innerHTML = ('Actual');
 	document.getElementById('1_peFYTDgap').innerHTML = ('Gap');
 	document.getElementById('1_peFYTDprogress').innerHTML = ('Progress');
-
 	document.getElementById('1_peQTRtarget').innerHTML = (peFcurr + '/' + ((peFcurrSuff)+1) + '<br>Quarterly<br>Target');
 
 	for (var p = 2; p <= 4; p++){
@@ -476,625 +539,303 @@
 	}
 
 	var myYTDCALCvals = [];
+    var dxArrCore = dxCore.split(',')
+    var dxArrCat = dxCat.split(',')
+
+    for (var n = 0; n < dxArrCore.length; n++){
+        for (var o = 0; o < dxArrCat.length; o++){
+            dxCoreCat += (dxArrCore[n]+'.'+dxArrCat[o]+';');
+        }
+    }
+
+    dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
+
+    var ArrDx = dxCore.split(',');
+    var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
+    var dxVariations = '';
+
+
+    document.getElementById('table1Title').innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+
+
+    var tblCounter = 2;
+    var OURet = [];
+
+    for (var p = 0; p < dxCoreArr.length; p++){
+
+        OURet.push ({
+            dx: dxCoreArr[p],
+            dxName: '',
+            ou: ou, 
+            ouHierarchy: '', 
+            baseline: 0,
+            FYtarget: 0,
+            YTDtarget: 0,
+            YTDactual: 0,
+            YTDactualSum: 0,
+            YTDgapNum: 0,
+            YTDgapPer: 0,
+            CALCtarget: 0,
+            CALCactual: 0,
+            QTR1: 0,
+            QTR2: 0,
+            QTR3: 0,
+            QTR4: 0,
+            targ1: 0,
+            targ2: 0,
+            targ3: 0,
+            targ4: 0,
+            NumSum: 0,
+            DenSum: 0,
+            LASTtarget: 0,
+            GrandTotAll: 0,
+            position: p
+        });
+
+    }
+
+    for (var p = 0; p < dxCoreArr.length; p++){
+
+        var dxCoreCat = '';
+
+        for (var o = 0; o < dxArrCat.length; o++){
+            dxCoreCat += (dxCoreArr[p]+'.'+dxArrCat[o]+';');
+        }
+
+        dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
+
+        if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
+            dxTargetPair = '';
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+        } else {
+            dxTargetPair = getIndTargetPair(dxCoreArr[p]);
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+        }
+
+        $.ajax({
+            url: sDataGet,
+            dx: dxCoreArr[p],
+            row: p,
+            dxTargetPair: dxTargetPair,
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.log('error: Data Element Lookup');
+            },
+            success : function(dataOU){
+
+                var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
+
+                OURet[this.row].dxName = OURetTemp[0].dxName;
+                OURet[this.row].baseline = OURetTemp[0].baseline;
+                OURet[this.row].FYtarget = OURetTemp[0].FYtarget;
+                OURet[this.row].YTDtarget = OURetTemp[0].YTDtarget;
+                OURet[this.row].YTDactual = OURetTemp[0].YTDactual;
+                OURet[this.row].YTDactualSum = OURetTemp[0].YTDactualSum;
+                OURet[this.row].YTDgapNum = OURetTemp[0].YTDgapNum;
+                OURet[this.row].YTDgapPer = OURetTemp[0].YTDgapPer;
+                OURet[this.row].CALCtarget = OURetTemp[0].CALCtarget;
+                OURet[this.row].CALCactual = OURetTemp[0].CALCactual;
+                OURet[this.row].QTR1 = OURetTemp[0].QTR1;
+                OURet[this.row].QTR2 = OURetTemp[0].QTR2;
+                OURet[this.row].QTR3 = OURetTemp[0].QTR3;
+                OURet[this.row].QTR4 = OURetTemp[0].QTR4;
+                OURet[this.row].targ1 = OURetTemp[0].targ1;
+                OURet[this.row].targ2 = OURetTemp[0].targ2;
+                OURet[this.row].targ3 = OURetTemp[0].targ3;
+                OURet[this.row].targ4 = OURetTemp[0].targ4;
+                OURet[this.row].NumSum = OURetTemp[0].NumSum;
+                OURet[this.row].DenSum = OURetTemp[0].DenSum;
+                OURet[this.row].factor = OURetTemp[0].factor;
+                OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
 
-	//URL for Dx Core List
-	var sDxCore = ('../api/dataElements.json?filter=id:in:['+dxCore+']&fields=id,name,shortName,displayName');
-
-	 $.ajax({
-		url: sDxCore,
-		error: function (xhr, ajaxOptions, thrownError) {
-			console.log('error: Data Element Lookup');
-		},
-		success : function(dataDE){
-
-			var ArrDx = dxCore.split(',');
-			var tbl1 = document.getElementById('tblMaster');
-			var tbody = document.createElement('tbody');
-			tbl1.appendChild(tbody);
-
-			var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
-
-			//for (var p = 0; p < dataDE.dataElements.length; p++){
-			for (var p = 0; p < dxCoreArr.length; p++){
-
-				dxSummaryCounter.push ( { dx: dxCoreArr[p], counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
-
-				myYTDCALCvals.push ({
-					ou: ou,
-					dx: dxCoreArr[p],
-					baseline: 0,
-					FYtarget: 0,
-					YTDtarget: 0,
-					YTDactual: 0,
-					YTDgapNum: 0,
-					YTDgapPer: 0,
-					CALCtarget: 0,
-					CALCactual: 0,
-					GrandTotAll: 0,
-					QTR02: 0,
-					QTR03: 0,
-					QTR04: 0,
-					QTR01: 0,
-					LASTtarget: 0
-				});
-
-				if (dxCoreArr[p] == 'YrrIYRXd82h'){
-
-					var iCols = (tr.childNodes.length + 1);
-
-					var tr = document.createElement('tr');
-					tr.setAttribute("id",dxCoreArr[p]+'_'+ou+'_rowHeader');
-					tbody.appendChild(tr);
-
-					var td = document.createElement('td');
-					td.setAttribute("style",'font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-					td.setAttribute("colspan",iCols);
-					tr.appendChild(td);
-
-					td.innerText = 'Generated from patient cohort starting treatment 6 - 9 months before';
-
-				}
-
-				var tr = document.createElement('tr');
-				tr.setAttribute("id",dxCoreArr[p]+'_'+ou+'_row');
-				tbody.appendChild(tr);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-				td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
-				tr.appendChild(td);
-
-				//td.innerText = (dataDE.dataElements[p].name).replace('TRAP_','');
-				td.innerText = (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','');
-
-				//document.getElementById('dxList').innerHTML += ('<div style="padding:2px 0 2px 2px"> • ' + (getElementName(dataDE,dxCoreArr[p])).replace('TRAP_','')+'</div>')
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_1');
-				if (dxSingleTarget.indexOf(dxCoreArr[p]) < 0){
-					td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprev);
-				} else {
-					td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+peFYprevJul);
-				}
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_2');
-				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peFYcurr);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("storedValue",'');
-				td.setAttribute("id",dxCoreArr[p]+'.YTDtarget_'+ou+'_'+peFYcurr );
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("storedValue",'');
-				td.setAttribute("id",dxCoreArr[p]+'.YTDactual_'+ou+'_'+peFYcurr);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				td.setAttribute("id",dxCoreArr[p]+'.DifferenceGap_'+ou+'_'+peFYcurr);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				//td.setAttribute("class",'cellNumeric');
-				//td.setAttribute("id",'1_'+dxCoreArr[p]+'_6');
-				td.setAttribute("id",dxCoreArr[p]+'.DifferencePercentage_'+ou+'_'+peFYcurr);
-				tr.appendChild(td);
-
-				var td = document.createElement('td');
-				td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-				td.setAttribute("class",'cellNumeric');
-				td.setAttribute("id",dxCoreArr[p]+'.mLVlvjLwl9q_'+ou+'_'+peQTRrange.split(';')[0]);
-				tr.appendChild(td);
-
-				for (var r = 2; r <= 4; r++){
-					if ( (r <= peQcurr) || (peQcurr == 1) ){
-						var td = document.createElement('td');
-						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
-						td.setAttribute("class",'cellNumeric');
-						//td.setAttribute("id",'1_'+dxCoreArr[p]+'_QTR_'+peFcurr+paddNumeric(r,2));
-						if (dxOffset.indexOf(dxCoreArr[p]) >= 0 ){
-							td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+getPeriodPair(peFcurr+'Q'+r));
-						} else {
-							if (dxMMendOfQtr.indexOf(dxCoreArr[p]) >= 0 ){
-								td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+getPeriodPairEndMM(peFcurr+'Q'+r));
-							} else {
-								td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+(peFcurr+'Q'+r));
-							}
-						}
-						tr.appendChild(td);
-					}
-				}
-				for (var r = 1; r <= 1; r++){
-					if ( (r >= peQcurr)  ){
-						var td = document.createElement('td');
-						td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
-						td.setAttribute("class",'cellNumeric');
-						//td.setAttribute("id",'1_'+dxCoreArr[p]+'_QTR_'+(peFcurr+1)+paddNumeric(r,2));
-						if (dxOffset.indexOf(dxCoreArr[p]) >= 0 ){
-							td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+getPeriodPair((peFcurr+1)+'Q'+r));
-						} else {
-							if (dxMMendOfQtr.indexOf(dxCoreArr[p]) >= 0 ){
-								td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+getPeriodPairEndMM((peFcurr+1)+'Q'+r));
-							} else {
-								td.setAttribute("id",dxCoreArr[p]+'.wyZ6KAmjZeD_'+ou+'_'+((peFcurr+1)+'Q'+r));
-							}
-						}
-						tr.appendChild(td);
-					}
-				}
-
-			}
-
-			var dv = document.createElement('div');
-			dv.setAttribute('class','tableTitle');
-			dv.innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
-			document.getElementById('table1Title').appendChild(dv);
-
-			var dxArrCore = dxCore.split(',')
-			var dxArrCat = dxCat.split(',')
-
-			for (var n = 0; n < dxArrCore.length; n++){
-				for (var o = 0; o < dxArrCat.length; o++){
-					dxCoreCat += (dxArrCore[n]+'.'+dxArrCat[o]+';');
-				}
-			}
-
-			dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
-
-			//URL for parent-OU 
-			var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,level,children[id,name,displayName,displayShortName,level]');
-
-			$.ajax({
-				url: sOU,
-				error: function (xhr, ajaxOptions, thrownError) {
-					console.log('error: Data Element Lookup');
-				},
-				success : function(dataOU){
-
-					var OUchildren = '';
-
-					for (var p = 0; p < dataOU.children.length; p++){
-						OUchildren += (dataOU.children[p].id + ';');
-					}
-
-					OUchildren = OUchildren.substring(OUchildren,OUchildren.length-1);
-
-					//for (var n = 0; n < dataDE.dataElements.length; n++){
-					for (var n = 0; n < dxCoreArr.length; n++){
-
-						var dv1 = document.createElement('div');
-						dv1.setAttribute('class','tableTitle');
-						dv1.innerText = 'Table '+(n+2)+'. '+(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','') + ' ('+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
-						//dv.appendChild(dv1);
-						document.getElementById('rankedItems').appendChild(dv1);
-
-						var dv = document.createElement('div');
-						dv.setAttribute('id','dv_'+dxCoreArr[n]);
-						dv.setAttribute('style','padding:8px 0 8px 0;');
-						document.getElementById('rankedItems').appendChild(dv);
-
-						dv.innerHTML = (template1.replace('tblMaster','tblDx_'+dxCoreArr[n]));
-						dv.innerHTML = (dv.innerHTML).replace('{PLACEHOLDER}',(getElementName(dataDE,dxCoreArr[n])).replace('TRAP_','')).replace('TRAP_','');
-
-						var tbl1 = document.getElementById('tblDx_'+dxCoreArr[n]);
-						var tbody = document.createElement('tbody');
-						tbl1.appendChild(tbody);
-
-						for (var p = 0; p < dataOU.children.length; p++){
-
-							myYTDCALCvals.push ({
-								ou: dataOU.children[p].id,
-								dx: dxCoreArr[n],
-								baseline: 0,
-								FYtarget: 0,
-								YTDtarget: 0,
-								YTDactual: 0,
-								YTDgapNum: 0,
-								YTDgapPer: 0,
-								CALCtarget: 0,
-								CALCactual: 0,
-								GrandTotAll: 0,
-								QTR02: 0,
-								QTR03: 0,
-								QTR04: 0,
-								QTR01: 0,
-								LASTtarget: 0
-							});
-
-							var tr = document.createElement('tr');
-							tr.setAttribute("id",dxCoreArr[n]+'_'+dataOU.children[p].id+'_row');
-							tbody.appendChild(tr);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-							td.setAttribute("id",dxCoreArr[n]+'_'+dataOU.children[p].id+'_0');
-							tr.appendChild(td);
-
-							//td.innerText = (dataOU.children[p].name);
-							td.innerHTML = '<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+dataOU.children[p].id+'" style="color:#000">' + (dataOU.children[p].name) + '</a>';
-
-							
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							
-							if (dxSingleTarget.indexOf(dxCoreArr[n]) < 0){
-								td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprev);
-							} else {
-								td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+peFYprevJul);
-							}
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peFYcurr);
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.YTDtarget_'+dataOU.children[p].id+'_'+peFYcurr);
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.YTDactual_'+dataOU.children[p].id+'_'+peFYcurr);
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.DifferenceGap_'+dataOU.children[p].id+'_'+peFYcurr);
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							//td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.DifferencePercentage_'+dataOU.children[p].id+'_'+peFYcurr);
-							tr.appendChild(td);
-
-							var td = document.createElement('td');
-							td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;');
-							td.setAttribute("class",'cellNumeric');
-							td.setAttribute("id",dxCoreArr[n]+'.mLVlvjLwl9q_'+dataOU.children[p].id+'_'+peQTRrange.split(';')[0]);
-							tr.appendChild(td);
-
-							for (var r = 2; r <= 4; r++){
-								if ( (r <= peQcurr) || (peQcurr == 1) ){
-									var td = document.createElement('td');
-									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
-									td.setAttribute("class",'cellNumeric');
-									if (dxOffset.indexOf(dxCoreArr[n]) >= 0 ){
-										td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+getPeriodPair(peFcurr+'Q'+r));
-									} else {
-										if (dxMMendOfQtr.indexOf(dxCoreArr[n]) >= 0 ){
-											td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+getPeriodPairEndMM(peFcurr+'Q'+r));
-										} else {
-											td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+(peFcurr+'Q'+r));
-										}
-									}
-									tr.appendChild(td);
-								}
-							}
-							for (var r = 1; r <= 1; r++){
-								if ( (r >= peQcurr)  ){
-									var td = document.createElement('td');
-									td.setAttribute("style",'border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5');
-									td.setAttribute("class",'cellNumeric');
-									if (dxOffset.indexOf(dxCoreArr[n]) >= 0 ){
-										td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+getPeriodPair((peFcurr+1)+'Q'+r));
-									} else {
-										if (dxMMendOfQtr.indexOf(dxCoreArr[n]) >= 0 ){
-											td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+getPeriodPairEndMM(((peFcurr+1)+'Q'+r)));
-										} else {
-											td.setAttribute("id",dxCoreArr[n]+'.wyZ6KAmjZeD_'+dataOU.children[p].id+'_'+((peFcurr+1)+'Q'+r));
-										}
-									}
-									tr.appendChild(td);
-								}
-							}
-
-						}
-
-					}
-
-					var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCore.replace(',',';')+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+';'+OUchildren+'&displayProperty=NAME&outputIdScheme=UID';
-					console.log(sDataGet);
-
-					$.ajax({
-						url: sDataGet,
-						error: function (xhr, ajaxOptions, thrownError) {
-							console.log('error: getting report data values');
-						},
-						success : function(dataVal){
-
-							var comboRESULTALL = [];
-
-							for (var i = 0; i < dataVal.rows.length; i++){
-
-								var myRowID = (dataVal.rows[i][0] + '_' + dataVal.rows[i][2] + '_' + dataVal.rows[i][1]);
-								var myValue = dataVal.rows[i][3];
-
-								comboRESULTALL.push ({ id: myRowID, value: myValue });
-
-								try {
-									document.getElementById(myRowID).innerText = formatNumber(parseFloat(myValue).toFixed(1).toString().replace('.0',''));
-								}
-								catch(err) {
-									//console.log('No match: '+myRowID +': ['+myValue+']')
-								}
-
-							}
-
-							for (var a = 0; a < myYTDCALCvals.length; a++){
-
-								for (var i = 0; i < comboRESULTALL.length; i++){
-
-									// DX and OU match
-									if ( ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].dx) >= 0) && ( (comboRESULTALL[i].id).indexOf(myYTDCALCvals[a].ou) >= 0) ){
-
-										if ( ( (comboRESULTALL[i].id).indexOf(peFYprev) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) < 0) ) {
-											myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-										} else {
-											if ( ( (comboRESULTALL[i].id).indexOf(peFYprevJul) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-											// PE match of Prev-Year-End-QTR value for End-Of-Month element
-											if ( ( (comboRESULTALL[i].id).indexOf(peQTRprevYmmRangeEnd) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].baseline = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-										}
-
-										// YTD target
-										if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(peFYcurr) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) ) {
-											myYTDCALCvals[a].FYtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-										} else {
-											// PE match of Current-Range-End-QTR value for End-Of-Month element
-											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(peQTRcurrYmmRangeEnd ) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].FYtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-											// PE match of Current-Range-End-QTR value for End-Of-Month element
-											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(ArrPEmmEnd[ArrPEmmEnd.length-1] ) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-											// PE match of Current-Range-End-QTR value for End-Of-Month element
-											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1]) ) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												//myYTDCALCvals[a].LASTtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-											if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && ( (comboRESULTALL[i].id).indexOf(getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1]) ) >= 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												//myYTDCALCvals[a].LASTtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-										}
-
-										// YTD actual
-										if ( ( (comboRESULTALL[i].id).indexOf('wyZ6KAmjZeD') >= 0) && ( (comboRESULTALL[i].id).indexOf(peFYcurr) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0) ) {
-											myYTDCALCvals[a].YTDactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-										} else {
-											// PE match of Current-Range-End-QTR value for End-Of-Month element
-											if ( ( (comboRESULTALL[i].id).indexOf('wyZ6KAmjZeD') >= 0) && ( (comboRESULTALL[i].id).indexOf(ArrPEmmEnd[ArrPEmmEnd.length-1]) >= 0) && ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-												myYTDCALCvals[a].YTDactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												myYTDCALCvals[a].CALCactual = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-										}
-
-										var PEarr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';')
-
-										for (var p = 0; p < PEarr.length; p++){
-											if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) < 0){
-												// YTD CALC of TARGET
-												if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) < 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) < 0) ) {
-													myYTDCALCvals[a].YTDtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												}
-												/*if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-													//console.log(PEarr[p] + ': ' + comboRESULTALL[i].id + ' = ' + comboRESULTALL[i].value);
-													myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												}*/
-												if ( ( (comboRESULTALL[i].id).indexOf('mLVlvjLwl9q') >= 0) && (p == (PEarr.length-1)) && ( (comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) && ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-													//console.log(PEarr[p] + ': ' + comboRESULTALL[i].id + ' = ' + comboRESULTALL[i].value);
-													myYTDCALCvals[a].YTDtarget = (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												}
-											}
-											// YTD CALC of TARGET
-											if ( ( (comboRESULTALL[i].id).indexOf('.mLVlvjLwl9q') >= 0) && ((comboRESULTALL[i].id).indexOf(PEarr[p]) >= 0) ) {
-												myYTDCALCvals[a].CALCtarget += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											}
-											// ACTUAL
-											if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf(getPeriodPair(PEarr[p])) >= 0) && (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) < 0) ) {
-												myYTDCALCvals[a].CALCactual += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-											} else {
-												if ( ( (comboRESULTALL[i].id).indexOf('.wyZ6KAmjZeD') >= 0) && ((comboRESULTALL[i].id).indexOf((PEarr[p])) >= 0) && (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-													myYTDCALCvals[a].CALCactual += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-												}
-											}
-
-										}
-
-										myYTDCALCvals[a].GrandTotAll += (isNumber(comboRESULTALL[i].value) ? parseFloat(comboRESULTALL[i].value) : 0);
-
-									}
-
-								}
-
-							}
-
-
-							for (var a = 0; a < myYTDCALCvals.length; a++){
-
-								if (dxSingleTarget.indexOf(myYTDCALCvals[a].dx) < 0){
-									document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprev).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
-								} else {
-									document.getElementById(myYTDCALCvals[a].dx+'.wyZ6KAmjZeD_'+myYTDCALCvals[a].ou+'_'+peFYprevJul).innerText = formatNumber( parseFloat(myYTDCALCvals[a].baseline) );
-								}
-								document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].FYtarget) );
-								document.getElementById(myYTDCALCvals[a].dx+'.YTDtarget_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) ); //formatNumber( ( (dxOffset.indexOf(myYTDCALCvals[a].dx)>=0) ? parseFloat(myYTDCALCvals[a].FYtarget) : parseFloat(myYTDCALCvals[a].YTDtarget) )  );
-
-								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
-									// do nothing
-								} else {
-									if ( ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) || ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0) ) {
-										myYTDCALCvals[a].YTDactual = parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length)).toFixed(1);
-									} else {
-										/*if ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0){
-											myYTDCALCvals[a].YTDactual = parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length)).toFixed(1);
-										}*/
-										// do nothing
-									}
-								}
-
-								if (myYTDCALCvals[a].YTDtarget > 0) {
-									if (( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0) || ( (dxSingleTarget).indexOf(myYTDCALCvals[a].dx) >= 0)){
-										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0);
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(100) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx,(myYTDCALCvals[a].ou==ou))+';">&nbsp;</div></div>';
-									} else {
-										var iW = parseFloat(parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0);
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferencePercentage_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerHTML = '<div class="perfBar"><div class="cellNumeric" style="padding:4px 4px 0px 4px">' + formatNumber( (parseFloat(myYTDCALCvals[a].YTDactual) / parseFloat(myYTDCALCvals[a].YTDtarget) * 100 ).toFixed(0)) + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:1px solid #f5f5f5;background-Color:'+getBackgroundPerformanceColor(iW,myYTDCALCvals[a].dx,(myYTDCALCvals[a].ou==ou))+';">&nbsp;</div></div>';
-									}
-								}
-
-								if ( (dxMMendOfQtr).indexOf(myYTDCALCvals[a].dx) >= 0){
-									document.getElementById(myYTDCALCvals[a].dx+'.mLVlvjLwl9q_'+myYTDCALCvals[a].ou+'_'+peQTRrange.split(';')[0]).innerHTML = formatNumber( parseFloat(myYTDCALCvals[a].YTDtarget) );
-									document.getElementById(myYTDCALCvals[a].dx+'.YTDactual_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDactual) );
-									document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual)).toFixed(0) );
-								} else {
-
-									if ( (dxOffset).indexOf(myYTDCALCvals[a].dx) >= 0){
-										document.getElementById(myYTDCALCvals[a].dx+'.YTDactual_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length)).toFixed(1) );
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(parseFloat(myYTDCALCvals[a].CALCactual) / (PEarr.length))).toFixed(0) );
-
-									} else {
-										document.getElementById(myYTDCALCvals[a].dx+'.YTDactual_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( parseFloat(myYTDCALCvals[a].YTDactual).toFixed(1) );
-										document.getElementById(myYTDCALCvals[a].dx+'.DifferenceGap_'+myYTDCALCvals[a].ou+'_'+peFYcurr).innerText = formatNumber( (parseFloat(myYTDCALCvals[a].YTDtarget) - parseFloat(myYTDCALCvals[a].YTDactual)).toFixed(0) );
-
-									}
-								}
-
-
-
-								if (myYTDCALCvals[a].GrandTotAll == 0) { 
-									if (myYTDCALCvals[a].ou != ou){
-										incrDxSummaryMissing(myYTDCALCvals[a].dx);
-									}
-									document.getElementById(myYTDCALCvals[a].dx+'_'+myYTDCALCvals[a].ou+'_row').style.display = 'none';
-								}
-
-							}
-
-							document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
-							document.getElementById('peSummary').innerText = ('Financial year ' + peFcurr + '/' + ((peFcurrSuff)+1) + ', quarter ending ' + peQTRlabelEnd.replace('<br>',' '));
-							document.getElementById('genDetails').innerHTML = '<i>report created </i>' + todayDate();
-							document.getElementById("logoTable").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
-
-							setTimeout(function () { loadChart(); }, 100);
-							setTimeout(function () { loadMapFrame(); }, 200);
-
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[0], 5); }, 1000 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[1], 5); }, 1100 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[2], 5); }, 1200 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[3], 5); }, 1300 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[4], 5); }, 1400 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[5], 5); }, 1500 ) ;
-							setTimeout(function () { sortTable('tblDx_'+dxCoreArr[6], 5); }, 1600 ) ;
-
-
-							for (var n = 0; n < dxCoreArr.length; n++){
-
-								var tbl = document.createElement('table');
-								tbl.setAttribute("style","");
-								document.getElementById('dv_'+dxCoreArr[n]).appendChild(tbl);
-
-								var tr = document.createElement('tr');
-								tbl.appendChild(tr);
-								var td = document.createElement('td');
-								td.setAttribute("style",'padding:3px;border-bottom:1px solid #fff;width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
-								tr.appendChild(td);
-
-								var sInner = 'Out of ' + dxSummaryCounter[n].counter + ' participating orgunits:<br>'
-								td.innerHTML = sInner;
-
-								if (dxSummaryCounter[n].colorMatch['red'] > 0){
-
-									var tr = document.createElement('tr');
-									tbl.appendChild(tr);
-									var td = document.createElement('td');
-									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
-									tr.appendChild(td);
-
-									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['red']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['red']+') scored in <span style="background-Color:#FC6565;color:#fff;width:50px;">[RED]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['red_progress']/(dxSummaryCounter[n].colorMatch['red'])).toFixed(1) + '%];</div>';
-									td.innerHTML = sInner;
-
-								}
-
-								if (dxSummaryCounter[n].colorMatch['orange'] > 0){
-
-									var tr = document.createElement('tr');
-									tbl.appendChild(tr);
-									var td = document.createElement('td');
-									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
-									tr.appendChild(td);
-
-									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FCDC65;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
-									td.innerHTML = sInner;
-
-								}
-
-								if (dxSummaryCounter[n].colorMatch['green'] > 0){
-
-									var tr = document.createElement('tr');
-									tbl.appendChild(tr);
-									var td = document.createElement('td');
-									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
-									tr.appendChild(td);
-
-									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#90FC65;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
-									td.innerHTML = sInner;
-
-								}
-
-								if (dxSummaryCounter[n].colorMatch['blue'] > 0){
-
-									var tr = document.createElement('tr');
-									tbl.appendChild(tr);
-									var td = document.createElement('td');
-									td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
-									tr.appendChild(td);
-
-									sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['blue']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['blue']+') scored in <span style="background-Color:#656AFC;color:#fff;width:50px;">[BLUE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['blue_progress']/(dxSummaryCounter[n].colorMatch['blue'])).toFixed(1) + '%];</div>';
-									td.innerHTML = sInner;
-
-								}
-
-							}
-
-						}
-
-					});
-					
-				}
-
-			});
-
-		}
-	
-	 })
+            }
+
+        });
+
+        function getIndTargetPair(dx){
+
+            for (var m = 0; m < ArrInd.length; m++){
+                if (ArrInd[m] == dx){
+                    return ArrIndTarg[m];
+                }
+            }
+
+        }
+
+        for (var ouL = OUlevel; ouL <= (OUlevel+1); ouL++){
+
+            if (ouL <= 5){
+
+                dxSummaryCounter.push ( { dx: dxCoreArr[p], ouLevel: ouL, counter: 0, missing: 0, colorMatch: { "blue": 0, "blue_progress":0, "green": 0, "green_progress":0, "orange": 0, "orange_progress":0, "red": 0, "red_progress":0 } } );
+
+                if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
+                    dxTargetPair = '';
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+                } else {
+                    dxTargetPair = getIndTargetPair(dxCoreArr[p]);
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+                }
+
+                var dv1 = document.createElement('div');
+                dv1.setAttribute('id','title_'+dxCoreArr[p]+'_'+ouL);
+                dv1.setAttribute('class','tableTitle');
+                dv1.innerText = ('Table '+(tblCounter)+'. ');
+
+                tblCounter +=1;
+
+                document.getElementById('rankedItems').appendChild(dv1);
+
+                var dv1 = document.createElement('div');
+                dv1.setAttribute('id','dv_'+dxCoreArr[p]+'_'+ouL);
+                dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]+'_'+ouL);
+                document.getElementById('rankedItems').appendChild(dv1);
+
+                $.ajax({
+                    url: sDataGet,
+                    dx: dxCoreArr[p],
+                    oulevel: ouL,
+                    idxItem: (p+1),
+                    dxSummaryArray: (tblCounter-1),
+                    bfinalDx: (p == (dxCoreArr.length-1)),
+                    dxTargetPair: dxTargetPair,
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log('error: Data Element Lookup');
+                    },
+                    success : function(dataDE){
+
+                        if (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1){
+                            document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
+                        }
+
+                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                        document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
+
+                        var myPrepArr = returnPrepArray(dataDE,this.dx,this.dxTargetPair);
+
+                        buildCUSTOMHtmlTable(myPrepArr,'#tbl_'+this.dx+'_'+this.oulevel,this.dx,this.oulevel)
+                        if (bUseRankingGroupHeaders != true){
+                            buildCUSTOMsummaryTable(this.dx,this.oulevel,this.dxSummaryArray)
+                        }
+
+                        var txt$ = $('<textarea class="quantative" style="width:99%;height:18px;">Comments:</textarea>');
+                        $('#dv_'+this.dx+'_'+this.oulevel).append(txt$);
+
+                        if ( (this.bfinalDx == true) && (this.oulevel == OUlevel) ) {
+                            buildOUsummaryTable(OURet,'#tblMaster');
+                            loadChart();
+                            loadMapFrame();
+                            resizeTextAreas();
+                        }
+
+                        myPrepArr = [];
+
+                    }
+
+                });
+
+            }
+
+        }
+
+    }
+
+
+    document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
+    document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' quarter [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
+    document.getElementById('genDetails').value = 'Compiled By: \nDesignation/Position: \nDate Compiled: ' + todayDate();
+
+
+    function resizeTextAreas(){
+        $(".quantative").each(
+            function() {
+                if (this.id=='genDetails'){
+                    $(this).width(((document.getElementById('leafMap').offsetWidth-4) + 'px'));
+                } else {
+                    if (this.id=='tblMasterComment'){
+                        $(this).width(((document.getElementById('tblMaster').offsetWidth-8) + 'px'));
+                    } else {
+                        $(this).width((document.getElementById('tbl_'+dxCoreArr[0]+'_'+OUlevel).offsetWidth + 'px'));
+                    }
+                }
+            }
+        );
+    }
+
+    function buildCUSTOMsummaryTable(dx,ouLevel){
+
+        var n = 0;
+
+        var tbl = document.createElement('table');
+        tbl.setAttribute("style","");
+        document.getElementById('dv_'+dx+'_'+ouLevel).appendChild(tbl);
+
+        var tr = document.createElement('tr');
+        tbl.appendChild(tr);
+        var td = document.createElement('td');
+        td.setAttribute("style",'padding:3px;border-bottom:1px solid #fff;width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+        tr.appendChild(td);
+
+        for (var g = 0; g < dxSummaryCounter.length; g++){
+            if (( dxSummaryCounter[g].dx == dx ) && ( dxSummaryCounter[g].ouLevel == ouLevel ) ){
+                n = g;
+            }
+        }
+
+        var sInner = 'Out of ' + dxSummaryCounter[n].counter + ' participating orgunits:<br>'
+        td.innerHTML = sInner;
+
+        if (dxSummaryCounter[n].colorMatch['red'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['red']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['red']+') scored in <span style="background-Color:#FC6565;color:#fff;width:50px;">[RED]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['red_progress']/(dxSummaryCounter[n].colorMatch['red'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['orange'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FCDC65;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['green'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#90FC65;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+        if (dxSummaryCounter[n].colorMatch['blue'] > 0){
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+            var td = document.createElement('td');
+            td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
+            tr.appendChild(td);
+
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['blue']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['blue']+') scored in <span style="background-Color:#656AFC;color:#fff;width:50px;">[BLUE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['blue_progress']/(dxSummaryCounter[n].colorMatch['blue'])).toFixed(1) + '%];</div>';
+            td.innerHTML = sInner;
+
+        }
+
+    }
 
     function todayDate() {
         var today = new Date();
@@ -1113,21 +854,313 @@
         return ( yyyy + '/' + mm + '/' + dd );
     }
 
-	function getPeriodPair(filteredPE){
-		var peArr = filteredPE.split('Q');
-		if ( parseInt(peArr[1]) == 1 ){
-			return ((parseInt(peArr[0])-1)+'Q2');
+     function returnPrepArray(myData,dx,dxTarg){
+        var ArrRet = [];
+        for (var l = 0; l < myData.metaData.dimensions.ou.length; l++){
+            ArrRet.push ({
+                dx: dx,
+                dxName: myData.metaData.items[dx].name,
+                ou: myData.metaData.dimensions.ou[l], 
+                ouName: myData.metaData.items[myData.metaData.dimensions.ou[l]].name, 
+                ouHierarchy: myData.metaData.ouNameHierarchy[myData.metaData.dimensions.ou[l]], 
+                baseline: 0,
+                FYtarget: 0,
+                YTDtarget: 0,
+                YTDactual: 0,
+                YTDactualSum: 0,
+                YTDgapNum: 0,
+                YTDgapPer: 0,
+                CALCtarget: 0,
+                CALCactual: 0,
+                QTR1: 0,
+                QTR2: 0,
+                QTR3: 0,
+                QTR4: 0,
+                targ1: 0,
+                targ2: 0,
+                targ3: 0,
+                targ4: 0,
+                NumSum: 0,
+                DenSum: 0,
+                factor: 0,
+                LASTtarget: 0,
+                GrandTotAll: 0,
+                position: 0
+            })
+        }
+
+        var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
+        var peArr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';');
+
+        for (var a = 0; a < ArrRet.length; a++){
+
+            for (var i = 0; i < myData.rows.length; i++){
+
+                // OU match
+                if (ArrRet[a].ou == myData.rows[i][2]){
+
+                    //BASELINE (.ACTUAL CatOptCombo)
+                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (myData.rows[i][0]).indexOf(dxMMendOfQtr) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
+                        ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    } else {
+                        if ( (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][1]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
+                            ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+						// PE match of Prev-Year-End-QTR value for End-Of-Month element
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
+							ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                    }
+
+                    // TARGET (.TARGET CatOptCombo)
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
+                    } 
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
+                    }
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+                    // PE match of Current-Range-End-QTR value for End-Of-Month element
+                    if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+
+                    if ( ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && (myData.rows[i][1] == peFYprevJul) && ( (dxIndicators).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    }
+
+                    // YTD actual
+                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                        ArrRet[a].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                    } else {
+                        // PE match of Current-Range-End-QTR value for End-Of-Month element
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                            ArrRet[a].YTDactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].CALCactual = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    }
+
+                    // YTD gap
+                    if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
+                        ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
+                    } else {
+                        // PE match of Current-Range-End-QTR value for End-Of-Month element
+                        if ( ( (myData.rows[i][0]).indexOf('.n7P1Zve7Raw') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) >= 0) ) {
+                            ArrRet[a].YTDgapNum = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
+                            ArrRet[a].YTDgapPer = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]).toFixed(1) : 0);
+                        }
+                    }
+
+
+                    /* QTR 1  */
+                    if (myData.rows[i][1] == peArr[0]) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            //cumulative actual
+                            ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].targ1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        } 
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
+                        //cumulative target
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[0]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                            ArrRet[a].QTR1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[0])) ) {
+                            ArrRet[a].targ1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    }
+                    /* QTR 2  */
+                    if ( (peArr.length >= 2) && (myData.rows[i][1] == peArr[1]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            //cumulative actual
+                            ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].targ2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        } 
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
+                        //cumulative target
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( (peArr.length == 2) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if (peArr.length >= 2){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                            if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[1])) ) {
+                                ArrRet[a].targ2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                        }
+                    }
+                    /* QTR 3  */
+                    if ( (peArr.length >= 3) && (myData.rows[i][1] == peArr[2]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            //cumulative actual
+                            ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].targ3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        } 
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
+                        //cumulative target
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 3) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if (peArr.length >= 3){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[2]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                            if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[2])) ) {
+                                ArrRet[a].targ3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                        }
+                    }
+                    /* QTR 4  */
+                    if ( (peArr.length == 4) && (myData.rows[i][1] == peArr[3]) ) {
+                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            //cumulative actual
+                            ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].targ4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        } 
+                        if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
+                            ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
+                            ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
+                            ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
+                        }
+                        //cumulative target
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxOffset).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].LASTtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (peArr.length == 4) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                            ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
+                    } else {
+                        if (peArr.length > 3){
+                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[3]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+                                ArrRet[a].QTR4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                            if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[3])) ) {
+                                ArrRet[a].targ4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+        var sRem = '';
+
+        for (var a = 0; a < ArrRet.length; a++){
+            if ( (dxIndicators).indexOf(dx) >= 0){
+                ArrRet[a].YTDtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].FYtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].YTDactual = parseFloat(parseFloat(ArrRet[a].NumSum) / parseFloat(ArrRet[a].DenSum) * parseFloat(ArrRet[a].factor)).toFixed(0).replace('NaN','0');
+                
+            }
+            if ( (dxMMendOfQtr).indexOf(dx) >= 0){
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
+            }
+            if ( ( (dxIndicators).indexOf(dx) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+                ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
+            }
+            ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].YTDtarget) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
+            if (ArrRet[a].GrandTotAll == 0){
+                sRem += (a + ',');
+            } else {
+                ArrRet[a].YTDgapNum = parseFloat(ArrRet[a].YTDtarget - ArrRet[a].YTDactual).toFixed(1);
+                if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
+                    ArrRet[a].YTDgapPer = parseFloat(parseFloat(ArrRet[a].YTDactual / 100) * 100 ).toFixed(1).replace('.0','');
+                } else {
+                    ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1).replace('.0','') : 0);
+                }
+            }
+
+        }
+
+        if (sRem.length > 0){
+            var arrRem = sRem.substring(sRem,sRem.length-1).split(',');
+            for (var i = arrRem.length -1; i >= 0; i--)
+            ArrRet.splice(arrRem[i],1);
+        }
+
+		if (getGrowthSentiment(dx) > 0){
+			ArrRet.sort(function(a, b) {
+				return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
+			});
+		} else {
+			ArrRet.sort(function(a, b) {
+				return parseFloat(a.YTDgapNum) - parseFloat(b.YTDgapNum);
+			});
 		}
-		if ( parseInt(peArr[1]) == 2 ){
-			return ((parseInt(peArr[0])-1)+'Q3');
-		}
-		if ( parseInt(peArr[1]) == 3 ){
-			return ((parseInt(peArr[0])-1)+'Q4');
-		}
-		if ( parseInt(peArr[1]) == 4 ){
-			return (peArr[0]+'Q1');
-		}
-	}
+
+        return ArrRet;
+
+     }
+
+	 function getPeriodPair(filteredPE){
+		 var peArr = filteredPE.split('Q');
+		 if ( parseInt(peArr[1]) == 1 ){
+			 return ((parseInt(peArr[0])-1)+'Q2');
+		 }
+		 if ( parseInt(peArr[1]) == 2 ){
+			 return ((parseInt(peArr[0])-1)+'Q3');
+		 }
+		 if ( parseInt(peArr[1]) == 3 ){
+			 return ((parseInt(peArr[0])-1)+'Q4');
+		 }
+		 if ( parseInt(peArr[1]) == 4 ){
+			 return (peArr[0]+'Q1');
+		 }
+	 }
 
 	 function getPeriodPairEndMM(filteredPE){
 		 var peArr = filteredPE.split('Q');
@@ -1148,7 +1181,7 @@
 	function loadChart(){
 
 		document.getElementById("chart1Title").innerText = 'Chart 1. Current 90-90-90 Treatment Cascade and Pillars';
-		document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
+		//document.getElementById("chart1").style.width = (document.getElementById("tblMaster").offsetWidth + 'px');
 
 		chartPlugin.url = "../";
 		//chartPlugin.username = "<username>";
@@ -1248,9 +1281,9 @@
 		}
 	}
 
-	function incrDxSummaryCounter(sCol,dx,varVal){
+	function incrDxSummaryCounter(sCol,dx,ouLev,varVal){
 		for(var i = 0; i < dxSummaryCounter.length; i++){
-			if (dxSummaryCounter[i].dx == dx){
+			if ( (dxSummaryCounter[i].dx == dx) && (dxSummaryCounter[i].ouLevel == ouLev) ){
 				dxSummaryCounter[i].counter += 1;
 				dxSummaryCounter[i].colorMatch[sCol] += 1;
 				dxSummaryCounter[i].colorMatch[sCol+'_progress'] += varVal;
@@ -1258,112 +1291,113 @@
 		}
 	}
 
-	function getBackgroundPerformanceColor(varVal,dx,bSkipIncr){
-		//var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,gOOE6omxMyL,IsqRJtrTAP6,ePxyv7IJofg';
+	function getBackgroundPerformanceColor(varVal,dx,ouLev,bSkipIncr){
+
 		var dxOne = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq';
+
 		if (isNumber(varVal)) {
 
 			if (dxOne.indexOf(dx) >= 0){
 				if (parseFloat(varVal) > 110){
 					if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
+						incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
 					}
 					return '#656AFC'; // blue
 				}
 				if ( (parseFloat(varVal) >= 90) && (parseFloat(varVal) <= 110) ){
 					if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
+						incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
 					}
 					return '#90FC65'; // green
 				}
 				if ( (parseFloat(varVal) >= 70) && (parseFloat(varVal) < 90) ){
 					if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
+						incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
 					}
 					return '#FCDC65'; // orange
 				}
 				if (parseFloat(varVal) < 70){
 					if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+						incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
 					}
 					return '#FC6565'; // red
 				}
 			} else {
-				if (dx == 'Og44c6zMLLT'){
-					if (parseFloat(varVal) > 100){
+				if (dx == 'Q0ctiOhPAEq'){
+					if (parseFloat(varVal) > 60){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
+                        }
 						return '#656AFC'; // blue
 					}
-					if ( (parseFloat(varVal) >= 75) && (parseFloat(varVal) <= 100) ){
+					if ( (parseFloat(varVal) >= 31) && (parseFloat(varVal) <= 60) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
-						return '#90FC65'; // green
-					}
-					if ( (parseFloat(varVal) >= 60) && (parseFloat(varVal) < 75) ){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
-						return '#FCDC65'; // orange
-					}
-					if (parseFloat(varVal) < 60){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
+                        }
 						return '#FC6565'; // red
 					}
-				}
-				if (dx == 'YrrIYRXd82h'){
-					if (parseFloat(varVal) > 100){
+					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 31) ){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
-						return '#656AFC'; // blue
-					}
-					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
-						return '#90FC65'; // green
-					}
-					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
-						return '#FCDC65'; // orange
-					}
-					if (parseFloat(varVal) < 65){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
-					}
-						return '#FC6565'; // red
-					}
-				}
-				if (dx == 'NsrFeZdWd14'){
-					if (parseFloat(varVal) > 100){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('blue',dx,parseFloat(varVal));
-					}
-						return '#656AFC'; // blue
-					}
-					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('green',dx,parseFloat(varVal));
-					}
-						return '#90FC65'; // green
-					}
-					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
-						if (bSkipIncr != true){
-						incrDxSummaryCounter('orange',dx,parseFloat(varVal));
-					}
+                            incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
+                        }
 						return '#FCDC65'; // orange
 					}
 					if (parseFloat(varVal) < 24){
 						if (bSkipIncr != true){
-						incrDxSummaryCounter('red',dx,parseFloat(varVal));
+                            incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#90FC65'; // green
 					}
+				}
+				if (dx == 'bTs3h1d6t6Y'){
+					if (parseFloat(varVal) > 100){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#656AFC'; // blue
+					}
+					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
+    					}
+						return '#90FC65'; // green
+					}
+					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#FCDC65'; // orange
+					}
+					if (parseFloat(varVal) < 65){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#FC6565'; // red
+					}
+				}
+				if (dx == 'r0T2RG2Wp1p'){
+					if (parseFloat(varVal) > 100){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#656AFC'; // blue
+					}
+					if ( (parseFloat(varVal) >= 85) && (parseFloat(varVal) <= 100) ){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#90FC65'; // green
+					}
+					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
+                        }
+						return '#FCDC65'; // orange
+					}
+					if (parseFloat(varVal) < 24){
+						if (bSkipIncr != true){
+                            incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
+                        }
 						return '#FC6565'; // red
 					}
 				}
@@ -1399,175 +1433,937 @@
 	}
 
 	function formatNumber(num) {
-		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + "," });
+		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + CONST_NUMERIC_DIGIT_SEPARATOR });
 	}
 
-	function sortTable(table_id, sortColumn){
-		//console.log('sortTable("'+table_id+'",'+sortColumn+')');
-		var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
-		var rowData = tableData.getElementsByTagName('tr');            
-		for(var i = 0; i < rowData.length - 1; i++){
-			for(var j = 0; j < rowData.length - (i + 1); j++){
-				//if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
-				if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
-					tableData.insertBefore(rowData.item(j+1),rowData.item(j));
-				}
+
+
+function LoadHTMLresultsTable(myData,sDestination){
+	var sReturn = '';
+	sReturn += '<table class="listTable gridTable"><thead><tr>';
+	for(var i = 0; i < myData.headers.length; i++) {
+		sReturn += '<th class="pivot-dim-label">' + myData.headers[i].name + '</th>';
+	}
+	sReturn += '</tr></tr></thead>';
+	sReturn += '<tbody>';
+	for(var i = 0; i < myData.rows.length; i++) {
+		sReturn += '<tr>';
+		for(var p = 0; p < myData.headers.length; p++) {
+			if (myData.headers[p].name != 'value'){
+				sReturn += '<td title="' + myData.rows[i][p] + '" class="td-nobreak">' + myData.metaData.items[myData.rows[i][p]].name + '</td>';
+			} else {
+				sReturn += '<td class="td-nobreak">' + myData.rows[i][p] + '</td>';
 			}
 		}
+		sReturn += '</tr>';
 	}
+	sReturn += '</tbody></table>';
+	$('#'+sDestination).html(sReturn);
+}
 
-function loadMapFrame(){
+function sortTable(table_id, sortColumn){
+    var tableData = document.getElementById(table_id).getElementsByTagName('tbody').item(0);
+    var rowData = tableData.getElementsByTagName('tr');            
+    for(var i = 0; i < rowData.length - 1; i++){
+        for(var j = 0; j < rowData.length - (i + 1); j++){
+            //if(Number(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, "")) < Number(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(/[^0-9\.]+/g, ""))){
+            if(parseFloat(rowData.item(j).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", "")) < parseFloat(rowData.item(j+1).getElementsByTagName('td').item(sortColumn).innerHTML.replace(",", ""))){
+                tableData.insertBefore(rowData.item(j+1),rowData.item(j));
+            }
+        }
+    }
+}
 
-	//URL for parent-OU 
-	//var sOU = ('../api/organisationUnits/' + ou + '.json?fields=id,name,displayName,displayShortName,coordinates,featureType,level');
-	if (dhis2.report.organisationUnitHierarchy.length > 1){
-		var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
-	} else {
-		var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,coordinates,level,featureType');
-	}
+function getGrowthSentiment(dx){
+    for(var a=0;a<dxCoreArr.length-1;a++){
+        if (dxCoreArr[a] == dx){
+            return dxCoreSentimentArr[a];
+        }
+    }
+}
 
-	$.ajax({
-		url: sOU,
-		error: function (xhr, ajaxOptions, thrownError) {
-			console.log('error: OrgUnit Lookup');
-		},
-		success : function(dataOU){
+// Builds the HTML Table out of myList.
+function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
+  if (ouLevel == 5){
+    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
+  } else {
+    var myCount = (myList.length+1);
+  }
+  var iGS = getGrowthSentiment(dx);
+  for (var i = 0; i < myList.length; i++) {
+    if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
-			geojson_decode = function(geoFeatures, levelOrder) {
-				/*var geojson = {
-					type: 'FeatureCollection',
-					crs: {
-						type: 'EPSG',
-						properties: {
-							code: '4326'
-						}
-					},
-					features: []
-				};*/
-				var geojson = {
-					type: 'FeatureCollection',
-					features: []
-				};
+        if ( (bUseRankingGroupHeaders) && (i == 0) ){
+            var row$ = $('<tr/>');    
+            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+            $(selector).append(row$);
+        }
 
-				levelOrder = levelOrder || 'ASC';
+        if ( (bUseRankingGroupHeaders) && ((i+1) == ((myList.length-(parseInt(myCount+1))+2))) ){
+            var row$ = $('<tr/>');    
+            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+            $(selector).append(row$);
+        }
 
-				for (var i = 0; i < geoFeatures.organisationUnits.length; i++) {
+        var row$ = $('<tr/>');
 
-					if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+        /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
 
-						//console.log(JSON.stringify(JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]));
+        // # Rank + OUname: 1
+        if (ouLevel == 5){
+            var iH = 22, sStyleOffs = 'position:relative;top:2px;';
+            var ArrTemp = myList[i].ouHierarchy.toString().split('/');
+            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
+        } else {
+            var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
+            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
+        }
 
-						geojson.features.push({
-							type: 'Feature',
-							geometry: {
-								type: 'MultiPolygon',
-								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates) //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
-							},
-							properties: {
-								id: geoFeatures.organisationUnits[i].id,
-								name: geoFeatures.organisationUnits[i].name,
-								shortName: 	geoFeatures.organisationUnits[i].shortName,
-								level: geoFeatures.organisationUnits[i].level
-							} 
-						});
+        //prevY BASELINE: 2
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
 
-					} else {
+        //prevY TARGET: 3 
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0)));
 
-						geojson.features.push({
-							type: 'Feature',
-							geometry: {
-								type: geoFeatures.organisationUnits[i].featureType,
-								coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
-							},
-							properties: {
-								id: geoFeatures.organisationUnits[i].id,
-								name: geoFeatures.organisationUnits[i].name,
-								shortName: geoFeatures.organisationUnits[i].shortName,
-								hasCoordinatesDown: '',
-								hasCoordinatesUp: '',
-								level: geoFeatures.organisationUnits[i].level,
-								grandParentParentGraph: '',
-								grandParentId: '',
-								parentGraph: '',
-								parentId: '',
-								parentName: '',
-								type: ''
-							}
-						});
+        //YTD TARGET: 4
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0)));
 
-					}
-				}
+        //YTD ACTUAL: 5
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
 
-				return geojson;
-			}
+        //YTD GAP Number: 7
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
 
-			var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
+        //YTD PROGRESS %: 8
+        if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        } else {
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        }
 
-			var g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
-				style: AdaptStyle
-			}).addTo(g_map);
+        loadScore(myList[i].ou,myList[i].ouName,dx,iW);
 
-			setTimeout(function () { g_map.fitBounds(g_geoJSONlayerObj.getBounds()); }, 1000 ) ;
+        //QTR TARGET: 9
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
 
+        var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
+        //QTR 1: 11
+        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR1));
 
-			//g_map.dragging.disable();
-			//g_map.touchZoom.disable();
-			g_map.doubleClickZoom.disable();
-			//g_map.scrollWheelZoom.disable();
-			//g_map.boxZoom.disable();
-			g_map.keyboard.disable();
+        if ( (peQcurr > 2) || (peQcurr == 1) ) {
+            var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 2: 12
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR2));
+        }
+        if ( (peQcurr > 3) || (peQcurr == 1) ) {
+            var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 3: 13
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR3));
+        }
+        if (peQcurr == 1){
+            var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 4: 14
+            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR4));
+        }
 
-			//document.getElementById('SentimentSummary').innerText = 'some positive sentiment, some concerns, etc etc, blah blah blah text container';
+        $(selector).append(row$);
+    }
+  }
 
-		}
-	})
+  document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
+  //document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
+  document.getElementById("subHeader1").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
+  document.getElementById("subHeader2").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
+}
+
+function initialiseParentOUscores(){
+    var dxArr = [];
+    for (var p = 0; p < dxCoreArr.length; p++) {
+        dxArr.push ( { dx: dxCoreArr[p], progress: 0 } );
+    }
+    ouScoreArr.push ( { ou: dhis2.report.organisationUnit.name, id: ou, dxArr: dxArr, value: 0, Data: 'aggregate Score', numproportion: 1 } );
+}
+
+// Builds the HTML Table out of myList.
+function buildOUsummaryTable(myList,selector) {
+
+  initialiseParentOUscores();
+
+  var myCount = (myList.length+1);
+
+  for (var i = 0; i < myList.length; i++) {
+
+    if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
+
+        if (myList[i].dx == 'bTs3h1d6t6Y'){
+
+            var iCols = row$[0].children.length;
+            var row$ = $('<tr/>');
+
+            row$.append($('<td colspan="'+iCols+'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('Generated from patient cohort starting treatment 6 - 9 months before'));
+            $(selector).append(row$);
+
+        }
+
+        var row$ = $('<tr/>');
+
+        /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
+
+        var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
+        row$.append($('<td title="'+myList[i].dx+'" class="rowItemLeft"/>').html(myList[i].dxName));
+
+        //prevY BASELINE: 2
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+
+        //prevY TARGET: 3 
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0) ));
+
+        //YTD TARGET: 4
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0) ));
+
+        //YTD ACTUAL: 5
+        row$.append($('<td title="(' + myList[i].NumSum + ' / ' + myList[i].DenSum + ' x ' + myList[i].factor + ')"  class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
+
+        //YTD GAP Number: 7
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
+
+        //YTD PROGRESS %: 8
+        if (( (dxOffset).indexOf(myList[i].dx) >= 0) || ( (dxIndicators).indexOf(myList[i].dx) >= 0)){
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,myList[i].dx,OUlevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        } else {
+            var iW = parseFloat(myList[i].YTDgapPer);
+            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,myList[i].dx,OUlevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+        }
+
+        loadScore(myList[i].ou,myList[i].ouName,myList[i].dx,iW);
+
+        //QTR TARGET: 9
+        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+
+        var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
+
+        //QTR 1: 11
+        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR1));
+
+        if ( (peQcurr > 2) || (peQcurr == 1) ) {
+            var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 2: 12
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR2));
+        }
+        if ( (peQcurr > 3) || (peQcurr == 1) ) {
+            var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 3: 13
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR3));
+        }
+        if (peQcurr == 1){
+            var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
+            //QTR 4: 14
+            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR4));
+        }
+
+        $(selector).append(row$);
+    }
+  }
 
 }
 
+// Builds the HTML Table out of myList.
+function buildHtmlTable(myList,selector) {
+  var columns = addAllColumnHeaders(myList, selector);
+  for (var i = 0; i < myList.length; i++) {
+    var row$ = $('<tr/>');
+    for (var colIndex = 0; colIndex < columns.length; colIndex++) {
+      var cellValue = myList[i][columns[colIndex]];
+      if (cellValue == null) cellValue = "";
+      row$.append($('<td/>').html(cellValue));
+    }
+    $(selector).append(row$);
+  }
+}
+
+// Adds a header row to the table and returns the set of columns.
+// Need to do union of keys from all records as some records may not contain
+// all records.
+function addAllColumnHeaders(myList, selector) {
+  var columnSet = [];
+  var headerTr$ = $('<tr/>');
+
+  for (var i = 0; i < myList.length; i++) {
+    var rowHash = myList[i];
+    for (var key in rowHash) {
+      if ($.inArray(key, columnSet) == -1) {
+        columnSet.push(key);
+        headerTr$.append($('<th/>').html(key));
+      }
+    }
+  }
+  $(selector).append(headerTr$);
+
+  return columnSet;
+}
+
+function loadMapFrame(){
+
+    //URL for parent-OU 
+    if (dhis2.report.organisationUnitHierarchy.length > 1){
+        //var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+','+dhis2.report.organisationUnitHierarchy[1].id+']&fields=id,name,coordinates,level,featureType');
+        var sOU = ('../api/organisationUnits.json?filter=path:like:'+ou+'&fields=id,name,shortName,coordinates,level,featureType&filter=level:in:['+dhis2.report.organisationUnitHierarchy.length+','+OUlevel+']');
+    } else {
+        var sOU = ('../api/organisationUnits.json?filter=id:in:['+dhis2.report.organisationUnitHierarchy[0].id+']&fields=id,name,shortName,coordinates,level,featureType,children[id,name,shortName,coordinates,level,featureType]');
+    }
+
+    $.ajax({
+        url: sOU,
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log('error: OrgUnit Lookup');
+        },
+        success : function(dataOU){
+
+            geojson_decode = function(geoFeatures, levelOrder) {
+                /*var geojson = {
+                    type: 'FeatureCollection',
+                    crs: {
+                        type: 'EPSG',
+                        properties: {
+                            code: '4326'
+                        }
+                    },
+                    features: []
+                };*/
+                var geojson = {
+                    type: 'FeatureCollection',
+                    features: []
+                };
+
+                levelOrder = levelOrder || 'ASC';
+
+                for (var i = 0; i < geoFeatures.organisationUnits.length; i++) {
+
+                    if (geoFeatures.organisationUnits[i].level >= 1){
+
+                        if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+
+                            if (geoFeatures.organisationUnits[i].coordinates != undefined){
+
+                                var CoordArr = (((geoFeatures.organisationUnits[i].coordinates.length > 1)) ? getLargestArrItem(geoFeatures.organisationUnits[i].coordinates) : 0);
+
+                                geojson.features.push({
+                                    type: 'Feature',
+                                    geometry: {
+                                        type: 'MultiPolygon',
+                                        coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates) //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+                                    },
+                                    properties: {
+                                        id: geoFeatures.organisationUnits[i].id,
+                                        name: geoFeatures.organisationUnits[i].name,
+                                        shortName: 	geoFeatures.organisationUnits[i].shortName,
+                                        level: geoFeatures.organisationUnits[i].level
+                                    } 
+                                });
+
+                            }
+
+                        } else {
+
+                            if (geoFeatures.organisationUnits[i].coordinates != undefined){
+
+                                if ((geoFeatures.organisationUnits[i].featureType).toUpperCase().indexOf('POINT') >= 0) {
+
+                                    geojson.features.push({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: 'Point',
+                                            coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
+                                        },
+                                        properties: {
+                                            id: geoFeatures.organisationUnits[i].id,
+                                            name: geoFeatures.organisationUnits[i].name,
+                                            shortName: geoFeatures.organisationUnits[i].shortName,
+                                            hasCoordinatesDown: '',
+                                            hasCoordinatesUp: '',
+                                            level: geoFeatures.organisationUnits[i].level,
+                                            grandParentParentGraph: '',
+                                            grandParentId: '',
+                                            parentGraph: '',
+                                            parentId: '',
+                                            parentName: '',
+                                            type: ''
+                                        }
+                                    });
+
+                                } else {
+
+                                    geojson.features.push({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: geoFeatures.organisationUnits[i].featureType,
+                                            coordinates: JSON.parse(geoFeatures.organisationUnits[i].coordinates)
+                                        },
+                                        properties: {
+                                            id: geoFeatures.organisationUnits[i].id,
+                                            name: geoFeatures.organisationUnits[i].name,
+                                            shortName: geoFeatures.organisationUnits[i].shortName,
+                                            hasCoordinatesDown: '',
+                                            hasCoordinatesUp: '',
+                                            level: geoFeatures.organisationUnits[i].level,
+                                            grandParentParentGraph: '',
+                                            grandParentId: '',
+                                            parentGraph: '',
+                                            parentId: '',
+                                            parentName: '',
+                                            type: ''
+                                        }
+                                    });
+
+                                }
+                            }
+                        }
+                    } 
+
+                    if (geoFeatures.organisationUnits[i].children != undefined) {
+
+                        for (var p = 0; p < geoFeatures.organisationUnits[i].children.length; p++) {
+
+                            if ((geoFeatures.organisationUnits[i].children[p].featureType).toUpperCase().indexOf('POLYGON') >= 0) {
+
+                                if (geoFeatures.organisationUnits[i].children[p].coordinates != undefined){
+
+                                    var CoordArr = (((geoFeatures.organisationUnits[i].children[p].coordinates.length > 1)) ? getLargestArrItem(geoFeatures.organisationUnits[i].children[p].coordinates) : 0);
+
+                                    geojson.features.push({
+                                        type: 'Feature',
+                                        geometry: {
+                                            type: 'MultiPolygon',
+                                            coordinates: JSON.parse(geoFeatures.organisationUnits[i].children[p].coordinates) //JSON.parse(geoFeatures.organisationUnits[i].coordinates)[0][0]
+                                        },
+                                        properties: {
+                                            id: geoFeatures.organisationUnits[i].children[p].id,
+                                            name: geoFeatures.organisationUnits[i].children[p].name,
+                                            shortName: 	geoFeatures.organisationUnits[i].children[p].shortName,
+                                            level: geoFeatures.organisationUnits[i].children[p].level
+                                        } 
+                                    });
+
+                                }
+
+                            } else {
+
+                                if (geoFeatures.organisationUnits[i].children[p].coordinates != undefined){
+
+                                    if ((geoFeatures.organisationUnits[i].children[p].featureType).toUpperCase().indexOf('POINT') >= 0) {
+
+                                        geojson.features.push({
+                                            type: 'Feature',
+                                            geometry: {
+                                                type: 'Point',
+                                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].children[p].coordinates)
+                                            },
+                                            properties: {
+                                                id: geoFeatures.organisationUnits[i].children[p].id,
+                                                name: geoFeatures.organisationUnits[i].children[p].name,
+                                                shortName: geoFeatures.organisationUnits[i].children[p].shortName,
+                                                hasCoordinatesDown: '',
+                                                hasCoordinatesUp: '',
+                                                level: geoFeatures.organisationUnits[i].children[p].level,
+                                                grandParentParentGraph: '',
+                                                grandParentId: '',
+                                                parentGraph: '',
+                                                parentId: '',
+                                                parentName: '',
+                                                type: ''
+                                            }
+                                        });
+
+                                    } else {
+
+                                        geojson.features.push({
+                                            type: 'Feature',
+                                            geometry: {
+                                                type: geoFeatures.organisationUnits[i].children[p].featureType,
+                                                coordinates: JSON.parse(geoFeatures.organisationUnits[i].children[p].coordinates)
+                                            },
+                                            properties: {
+                                                id: geoFeatures.organisationUnits[i].children[p].id,
+                                                name: geoFeatures.organisationUnits[i].children[p].name,
+                                                shortName: geoFeatures.organisationUnits[i].children[p].shortName,
+                                                hasCoordinatesDown: '',
+                                                hasCoordinatesUp: '',
+                                                level: geoFeatures.organisationUnits[i].children[p].level,
+                                                grandParentParentGraph: '',
+                                                grandParentId: '',
+                                                parentGraph: '',
+                                                parentId: '',
+                                                parentName: '',
+                                                type: ''
+                                            }
+                                        });
+
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                return geojson;
+            }
+
+            var g_geoJSONlayerData = geojson_decode(dataOU,true,'Polygon');
+
+            g_geoJSONlayerObj = L.geoJson(g_geoJSONlayerData, {
+                style: AdaptStyle,
+                pointToLayer: function(feature, latlng) {
+                    return new L.CircleMarker(latlng);
+                },
+                onEachFeature: onEachFeature
+            }).addTo(g_map);
+
+            //setTimeout(function () { g_map.fitBounds(g_geoJSONlayerObj.getBounds()); }, 1000 ) ;
+            g_map.fitBounds(g_geoJSONlayerObj.getBounds());
+
+            //g_map.dragging.disable();
+            //g_map.touchZoom.disable();
+            g_map.doubleClickZoom.disable();
+            //g_map.scrollWheelZoom.disable();
+            //g_map.boxZoom.disable();
+            g_map.keyboard.disable();
+
+            //document.getElementById('SentimentSummary').innerText = 'some positive sentiment, some concerns, etc etc, blah blah blah text container';
+
+        }
+    })
+
+}
+
+function onEachFeature(feature, layer) {
+    layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight
+    });
+}
+
+function highlightFeature(e) {
+    var layer = e.target;
+    g_infoControl.update(layer.feature.properties);
+}
+
+function resetHighlight(e) {
+    g_infoControl.update();
+    g_geoJSONlayerObj.resetStyle(e.target);
+}
+
+function ReturnHTMLpreview(myJSONtoString){
+
+	if (myJSONtoString != undefined){
+
+        var MyNewString = myJSONtoString.toString().replace(/{/g,'');
+        MyNewString = MyNewString.replace(/}/g,'');
+        MyNewString = MyNewString.replace(/"/g,'');
+        var myNewArr = MyNewString.split(",");
+        var myInnerObj = myNewArr[1].split(":");
+
+            var dvParent = document.createElement('div');
+            dvParent.setAttribute('style', 'padding:4px;');
+
+            var dv = document.createElement('div');
+            dv.setAttribute('style', 'font-size:7pt;color:#000000;');
+            dvParent.appendChild(dv);
+
+            var tbl = document.createElement('table');
+            tbl.setAttribute('style', 'padding:0 4px 8px 4px;width:100%;height:14px;');
+            dv.appendChild(tbl);
+
+            var tr = document.createElement('tr');
+            tbl.appendChild(tr);
+
+            var td = document.createElement('td');
+            td.setAttribute('style', 'font-size:11pt;font-weight:700;padding:0 0 2px 0;color:#000000;');
+            tr.appendChild(td);
+
+            var txt = document.createTextNode(myInnerObj[1].toUpperCase());
+            td.appendChild(txt);
+
+            if (dvParent != undefined){
+                return (dvParent.innerHTML);
+            }
+
+    }
+}
+
+function getLargestArrItem(coordArr){
+    var iLast = 0, iRet = 0;
+    var ArrNew = [];
+    for (var c = 0; c < coordArr.length; c++) {
+        if (iLast < coordArr[c][0].length){
+            iLast = coordArr[c][0].length;
+            iRet = c;
+        }
+    }
+    return iRet;
+}
 
 function AdaptStyle(feature){
 
-	if (feature.properties['id'] == getParameterByName('ou'))	{
+    if (feature.properties['id'] == getParameterByName('ou'))	{
+        return {
+            weight: 1,
+            opacity: 0.85,
+            color: '#8A3F3F', //000 with 0.65 //916464 dark-red
+            dashArray: '0',
+            fillOpacity: 0.1,
+            fill: '#000'
+        }
+    } else {
 
-		return {
-			weight: 2,
-			opacity: 0.65,
-			color: '#8A3F3F', //000 with 0.65 //916464 dark-red
-			dashArray: '0',
-			fillOpacity: 0.1,
-			fill: '#000'
-		}
+        if (feature.properties['id'] != getParameterByName('ou'))	{
 
-	} else {
+            if (feature.geometry.type == 'Point'){
+                return {
+                    weight: 1,
+                    opacity: 0.85, 
+                    color: '#000', 
+                    dashArray: '0',
+                    fillOpacity: 0.85,
+                    fillColor: '#00ED6B', 
+                    radius: 4,
+                    className: 'pointShadow'
+                }
+            } else {
+                return {
+                    weight: 1,
+                    opacity: 0.9, 
+                    color: '#8A3F3F', 
+                    dashArray: '0',
+                    fillOpacity: 0.1,
+                    fill: '#000'
+                }
+            }
 
-		if (feature.properties['id'] != getParameterByName('ou'))	{
+        }
 
-			if (feature.geometry.type == 'Point'){
-				return {
-					weight: 1,
-					opacity: 0.85, 
-					color: '#606060', 
-					dashArray: '0',
-					fillOpacity: 0.85,
-					fillColor: '#ffffff', 
-					radius: 20,
-					className: 'pointShadow'
-				}
-			} else {
-				return {
-					weight: 1,
-					opacity: 0.5, 
-					color: '#606060', 
-					dashArray: '0',
-					fillOpacity: 0,
-					fillColor: '#fff'
-				}
-			}
+    }
 
-		}
+}
 
-	}
+function upgradeReportsMenu(){
+    if(/Chrome/i.test(navigator.userAgent)){
+        document.getElementById('printButton').value = 'Export to PDF';
+    }
+    getMenu();
+}
+function getMenu(){
+
+    var dvReturn = document.createElement('div');
+
+    var tbl = document.createElement('table');
+    tbl.setAttribute("style","margin:0 0 16px 0;border:1px solid #D6D6D6;width:"+document.getElementById("leafMap").offsetWidth+"px;");
+	tbl.setAttribute("class","rounded");
+    dvReturn.appendChild(tbl);
+
+    var tr = document.createElement('tr');
+    tbl.appendChild(tr);
+
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;background-Color:#808080;color:#fff;padding:4px;');
+    td.setAttribute("class","rounded");
+    td.setAttribute("colspan",3);
+    tr.appendChild(td);
+    var lbl = document.createElement('label');
+    lbl.setAttribute("style",'font-weight:800;font-size:10pt;c');
+    lbl.innerHTML = 'Report Filters';
+    td.appendChild(lbl);
+
+    var tr = document.createElement('tr');
+    tr.setAttribute("style","height:26px;");
+    tbl.appendChild(tr);
+
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    tr.appendChild(td);
+    var lbl = document.createElement('label');
+    lbl.setAttribute("style",'width:100px;');
+    lbl.innerHTML = 'Top/Bottom Performers: ';
+    td.appendChild(lbl);
+
+    var perfSel = document.createElement('select');
+    perfSel.setAttribute("style",'width:100px;');
+    perfSel.setAttribute("id",'performers');
+    td.appendChild(perfSel);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'all');
+        opt.innerHTML = '&lt;ALL&gt;';
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_1');
+        opt.innerHTML = '1 %';
+        if (limitPercent == 1){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_5');
+        opt.innerHTML = '5 %';
+        if (limitPercent == 5){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_10');
+        opt.innerHTML = '10 %';
+        if (limitPercent == 10){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_20');
+        opt.innerHTML = '20 %';
+        if (limitPercent == 20){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_25');
+        opt.innerHTML = '25 %';
+        if (limitPercent == 25){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitperc_33');
+        opt.innerHTML = '33 %';
+        if (limitPercent == 33){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_3');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 3';
+        if (limitCount == 3){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_5');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 5';
+        if (limitCount == 5){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_10');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 10';
+        if (limitCount == 10){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_20');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 20';
+        if (limitCount == 20){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_50');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 50';
+        if (limitCount == 50){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'limitcount_100');
+        opt.setAttribute("style",'background-Color:#f5f5f5;');
+        opt.innerHTML = 'count 100';
+        if (limitCount == 100){
+            opt.setAttribute("selected",true);
+        }
+        perfSel.appendChild(opt);
+
+
+    var td = document.createElement('td');
+    td.setAttribute("style",'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;');
+    tr.appendChild(td);
+    var lbl = document.createElement('label');
+    lbl.setAttribute("style",'width:100px;');
+    lbl.innerHTML = 'Output level: ';
+    td.appendChild(lbl);
+
+    var ouLev = document.createElement('select');
+    ouLev.setAttribute("style",'');
+    ouLev.setAttribute("id",'oulevels');
+    td.appendChild(ouLev);
+
+        var opt = document.createElement('option');
+        opt.setAttribute("value",'0');
+        opt.innerHTML = '&lt;ALL&gt;';
+        ouLev.appendChild(opt);
+
+    var td = document.createElement('td');
+    td.setAttribute("style",'width:75%');
+    td.setAttribute("colspan",'1');
+    tr.appendChild(td);
+
+    var inp = document.createElement('input');
+    inp.setAttribute("type",'button');
+    inp.setAttribute("style",'width:100px');
+    inp.setAttribute("value",'refresh');
+    inp.setAttribute("onclick",'updateReportCriteria(true)');
+    td.appendChild(inp);
+
+    var tr = document.createElement('tr');
+    tbl.appendChild(tr);
+
+    var td = document.createElement('td');
+    td.setAttribute("style",'');
+    td.setAttribute("colspan",3);
+    td.innerHTML = '&nbsp;';
+    tr.appendChild(td);
+
+    $('.hideInPrint')[0].innerHTML = (dvReturn.innerHTML + $('.hideInPrint')[0].innerHTML);
+
+	var sOuLevs = ('../api/organisationUnitLevels.json?fields=level,name&order=level&filter=level:gt:'+(dhis2.report.organisationUnitHierarchy.length)+'&filter=level:lt:6');
+
+    $.ajax({
+        url: sOuLevs,
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log('error: OrgUnit-Level Lookup');
+        },
+        success : function(dataOUlevs){
+            var u = 0;
+            for (var o = 0; o < dataOUlevs.organisationUnitLevels.length; o++){
+                u+=1;
+                var opt = document.createElement('option');
+                opt.value = dataOUlevs.organisationUnitLevels[o].level;
+                if (u < dataOUlevs.organisationUnitLevels.length){
+                    opt.innerHTML = (dataOUlevs.organisationUnitLevels[o].name + ', ' + dataOUlevs.organisationUnitLevels[u].name);
+                } else {
+                    opt.innerHTML = dataOUlevs.organisationUnitLevels[o].name;    
+                }
+                if (OUlevel == dataOUlevs.organisationUnitLevels[o].level ){
+                    opt.selected = 'selected';
+                }
+                document.getElementById('oulevels').appendChild(opt);
+            }
+        }
+    });
+
+}
+
+function updateReportCriteria(bRefresh){
+    var sBaseStr = getLocationTrimmed(true);
+    var sPerfCrit = getPerfCrit();
+    var loc = (sBaseStr+'oulevel='+( (document.getElementById('oulevels').value>0) ? document.getElementById('oulevels').value : '' )+'&'+sPerfCrit);
+    if (bRefresh){
+        window.location = loc;
+    } else {
+        console.log(loc);
+    }
+}
+
+function getLocationTrimmed(bCombined){
+    var ArrM = window.location.toString().split('?');
+    var ArrT = ArrM[1].split('&');
+    var sRet = '';
+    if (bCombined){
+        sRet += ArrM[0]+'?';
+    }
+    for (var i = 0; i < ArrT.length; i++) {
+        if (( (ArrT[i]).indexOf('limit') < 0) && ( (ArrT[i]).indexOf('oulevel=') < 0) ) {
+            sRet += (ArrT[i] + '&');
+        }
+    }
+    return sRet;
+}
+
+function getPerfCrit(){
+    if (document.getElementById('performers').value == 'all'){
+        return "";
+    } else {
+        return ( ( (document.getElementById('performers').value).indexOf('limitcount')<0) ? ( ( (document.getElementById('performers').value).indexOf('limitperc')<0) ? '' : 'limitperc='+(document.getElementById('performers').value).split('_')[1]) : 'limitcount='+(document.getElementById('performers').value).split('_')[1] );
+    }
+}
+
+function loadScore(ou,ouName,dx,val){
+
+    var bFound = 0;
+
+    for (var i = 0; i < ouScoreArr.length; i++) {
+        if (ouScoreArr[i].id == ou){
+            bFound = 1;
+            for (var p = 0; p < dxCoreArr.length; p++) {
+                if (ouScoreArr[i].dxArr[p].dx == dx){
+                    ouScoreArr[i].dxArr[p].progress = val;
+                }
+            }
+        }
+    }
+
+    if (bFound == 0) {
+        var dxArr = [];
+        for (var p = 0; p < dxCoreArr.length; p++) {
+            if (dxCoreArr[p].dx == dx){
+                dxArr.push ( { dx: dxCoreArr[p], progress: val } );
+            } else {
+                dxArr.push ( { dx: dxCoreArr[p], progress: 0 } );
+            }
+        }
+        ouScoreArr.push ( { ou: ouName, id: ou, dxArr: dxArr, value: 0, Data: 'aggregate Score', numproportion: 1 } );
+    }
+
+}
+
+function averageScores(bRoundDownTo100){
+
+    var dxWeights = dxWeightScheme.split(',');
+
+    for (var i = 0; i < ouScoreArr.length; i++) {
+
+        var iRunningScore = 0;
+
+        for (var p = 0; p < dxCoreArr.length; p++) {
+            iRunningScore += ( ( (bRoundDownTo100) ? ( (parseFloat(ouScoreArr[i].dxArr[p].progress) > 100) ? 100 : parseFloat(ouScoreArr[i].dxArr[p].progress)) : parseFloat(ouScoreArr[i].dxArr[p].progress)) * parseFloat(dxWeights[p]) );
+        }
+
+        ouScoreArr[i].value = (iRunningScore / (dxCoreArr.length));
+
+    }
+
+    ouScoreArr.sort(function(a, b) {
+        return parseFloat(a.value) - parseFloat(b.value);
+    });
+
+    var dv = document.createElement('div');
+    dv.setAttribute("id",'scoreDistribution');
+    dv.setAttribute("style",'width:'+document.getElementById("tblMaster").offsetWidth+'px;height:400px');
+    document.getElementById('rankedItems').appendChild(dv);
+
+    createBarChartValueRange('scoreDistribution',document.getElementById("tblMaster").offsetWidth,400,ouScoreArr,dhis2.report.organisationUnit.name,'Score Distribution');
+
 
 }
 

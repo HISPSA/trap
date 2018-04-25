@@ -611,7 +611,7 @@
         } else {
             dxTargetPair = getIndTargetPair(dxCoreArr[p]);
             var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
-            //console.log(sDataGet);
+            console.log(sDataGet);
         }
 
         $.ajax({
@@ -908,10 +908,10 @@
                         if ( (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) ) {
                             ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        // PE match of Prev-Year-End-QTR value for End-Of-Month element
-                        if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                            ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        }
+						// PE match of Prev-Year-End-QTR value for End-Of-Month element
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peQTRprevYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
+							ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
                     }
 
                     // TARGET (.TARGET CatOptCombo)
@@ -1134,9 +1134,15 @@
             ArrRet.splice(arrRem[i],1);
         }
 
-        ArrRet.sort(function(a, b) {
-            return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
-        });
+		if (getGrowthSentiment(dx) > 0){
+			ArrRet.sort(function(a, b) {
+				return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
+			});
+		} else {
+			ArrRet.sort(function(a, b) {
+				return parseFloat(a.YTDgapNum) - parseFloat(b.YTDgapNum);
+			});
+		}
 
         return ArrRet;
 

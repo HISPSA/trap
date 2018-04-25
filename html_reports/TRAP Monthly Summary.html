@@ -102,7 +102,6 @@
         var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
         var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
         var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) )
-        //document.getElementById('printButton').value = 'Export to PDF';
 
 	</script>
 
@@ -404,7 +403,7 @@
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
 
  <script language=javascript>
-
+	var CONST_NUMERIC_DIGIT_SEPARATOR = ",";
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
 	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq'; //
@@ -421,7 +420,7 @@
     var dxTargetPair = '';
 	var dxCoreCat = '';
 	var lblCat = 'Actual,Target,Gap';
-	var dxMMendOfQtr = '';
+	var dxMMendOfQtr = 'mH17opU6Ivq';
 	var peQTRrangeMMending = '';
 	var peQTRrange = '';
 	var peQTRrangeEnd = '';
@@ -514,26 +513,20 @@
 
 	for (var p = 4; p <= 12; p++){
 		document.getElementById('1_peMM'+paddNumeric(p,2)).innerHTML = ((months[p-1]).toString() +'<br>'+peFcurrSuff);
-		if ( (p > peMMcurr) && (peMMcurr > 1) ){
+		if ( (p > peMMcurr) && (peMMcurr > 3) ){
 			document.getElementById('1_peMM'+paddNumeric(p,2)).style.display='none';
 		} else {
 			peQTRrange += ((peFcurr+paddNumeric(p,2))+';');
-			//peQTRrangeAct += (getPeriodPair(peFcurr+'Q'+p)+';');
-			peQTRlabelEnd = ((months[p-1]).toString()+'<br>'+peFcurrSuff);
-			//peQTRrangeEnd = (peFcurr+'Q'+p);
-			//peQTRrangeMMending += getPeriodPairEndMM(peFcurr+'Q'+p)+';';
+			peQTRlabelEnd = ((months[peMMcurr-1]).toString()+'<br>'+peFcurrSuff);
 		}
 	}
-	for (var p = 1; p <= 3; p++){
+	for (var p = 1; p < 4; p++){
 		document.getElementById('1_peMM'+paddNumeric(p,2)).innerHTML = ((months[p-1]).toString()+'<br>'+(peFcurrSuff+1));
-		if (peMMcurr > p){
+		if ( (p > peMMcurr) || (peMMcurr > 3) ) {
 			document.getElementById('1_peMM'+paddNumeric(p,2)).style.display='none';
 		} else {
 			peQTRrange += ((peFcurr+1)+paddNumeric(p,2)+';');
-			//peQTRrangeAct += (getPeriodPair((peFcurr+1)+'Q'+p)+';');
-			peQTRlabelEnd = ((months[p-1]).toString()+'<br>'+(peFcurrSuff+1));
-			//peQTRrangeEnd = ((peFcurrSuff+1)+'Q'+p);
-			//peQTRrangeMMending += getPeriodPairEndMM((peFcurr+1)+'Q'+p)+';';
+			peQTRlabelEnd = ((months[peMMcurr-1]).toString()+'<br>'+peFcurrSuff);
 		}
 	}
 
@@ -565,7 +558,7 @@
     var dxVariations = '';
 
 
-    document.getElementById('table1Title').innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+    document.getElementById('table1Title').innerText = 'Table 1. Monthly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
 
 
     var tblCounter = 2;
@@ -638,7 +631,7 @@
             var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
         }
 
-		console.log(sDataGet);
+		//console.log(sDataGet);
 
         $.ajax({
             url: sDataGet,
@@ -750,7 +743,7 @@
                             document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
                         }
 
-                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
                         document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
 
                         var myPrepArr = returnPrepArray(dataDE,this.dx,this.dxTargetPair);
@@ -784,7 +777,7 @@
 
 
     document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
-    document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' quarter [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
+    document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' month ending [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
     document.getElementById('genDetails').value = 'Compiled By: \nDesignation/Position: \nDate Compiled: ' + todayDate();
 
 
@@ -960,10 +953,10 @@
                 if (ArrRet[a].ou == myData.rows[i][2]){
 
                     //BASELINE (.ACTUAL CatOptCombo)
-                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
+                    if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == peFYprev) && ( (myData.rows[i][0]).indexOf(dxMMendOfQtr) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) < 0) ) {
                         ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                     } else {
-                        if ( (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) ) {
+                        if ( (myData.rows[i][1] == peFYprev) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) && ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0) && ( (dxMMendOfQtr).indexOf(myData.rows[i][0]) < 0) ) {
                             ArrRet[a].baseline = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
                         // PE match of Prev-Year-End-QTR value for End-Of-Month element
@@ -974,19 +967,19 @@
 
                     // TARGET (.TARGET CatOptCombo)
                     if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peFYcurr) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
-                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? Math.ceil(parseFloat(myData.rows[i][3])) : 0);
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
                     } 
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
                     if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == peQTRcurrYmmRangeEnd) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? Math.ceil(parseFloat(myData.rows[i][3])) : 0);
+                        ArrRet[a].FYtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
                     }
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
                     if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[ArrPEmmEnd.length-1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
                     }
                     // PE match of Current-Range-End-QTR value for End-Of-Month element
                     if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && (myData.rows[i][1] == getPeriodPair(ArrPEmmEnd[ArrPEmmEnd.length-1])) && ( (dxOffset).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
-                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        ArrRet[a].YTDtarget = (isNumber(myData.rows[i][3]) ? (parseFloat(myData.rows[i][3])) : 0);
                     }
 
                     if ( ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && (myData.rows[i][1] == peFYprevJul) && ( (dxIndicators).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dxTarg) >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
@@ -1443,18 +1436,18 @@
 
         for (var a = 0; a < ArrRet.length; a++){
             if ( (dxIndicators).indexOf(dx) >= 0){
-                ArrRet[a].YTDtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
-                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
-                ArrRet[a].FYtarget = Math.ceil(parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].YTDtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
+                ArrRet[a].FYtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
                 ArrRet[a].YTDactual = parseFloat(parseFloat(ArrRet[a].NumSum) / parseFloat(ArrRet[a].DenSum) * parseFloat(ArrRet[a].factor)).toFixed(0).replace('NaN','0');
                 
             }
             if ( (dxMMendOfQtr).indexOf(dx) >= 0){
-                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
             }
             if ( ( (dxIndicators).indexOf(dx) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
                 ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
-                ArrRet[a].CALCtarget = Math.ceil(parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
+                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
             }
             ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].YTDtarget) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
             if (ArrRet[a].GrandTotAll == 0){
@@ -1476,9 +1469,15 @@
             ArrRet.splice(arrRem[i],1);
         }
 
-        ArrRet.sort(function(a, b) {
-            return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
-        });
+		if (getGrowthSentiment(dx) > 0){
+			ArrRet.sort(function(a, b) {
+				return parseFloat(b.YTDgapNum) - parseFloat(a.YTDgapNum);
+			});
+		} else {
+			ArrRet.sort(function(a, b) {
+				return parseFloat(a.YTDgapNum) - parseFloat(b.YTDgapNum);
+			});
+		}
 
         return ArrRet;
 
@@ -1662,29 +1661,29 @@
 				}
 			} else {
 				if (dx == 'Q0ctiOhPAEq'){
-					if (parseFloat(varVal) > 100){
+					if (parseFloat(varVal) > 60){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('blue',dx,ouLev,parseFloat(varVal));
                         }
 						return '#656AFC'; // blue
 					}
-					if ( (parseFloat(varVal) >= 75) && (parseFloat(varVal) <= 100) ){
+					if ( (parseFloat(varVal) >= 31) && (parseFloat(varVal) <= 60) ){
 						if (bSkipIncr != true){
-                            incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
+                            incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
                         }
-						return '#90FC65'; // green
+						return '#FC6565'; // red
 					}
-					if ( (parseFloat(varVal) >= 60) && (parseFloat(varVal) < 75) ){
+					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 31) ){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
                         }
 						return '#FCDC65'; // orange
 					}
-					if (parseFloat(varVal) < 60){
+					if (parseFloat(varVal) < 24){
 						if (bSkipIncr != true){
-                            incrDxSummaryCounter('red',dx,ouLev,parseFloat(varVal));
+                            incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
                         }
-						return '#FC6565'; // red
+						return '#90FC65'; // green
 					}
 				}
 				if (dx == 'bTs3h1d6t6Y'){
@@ -1771,7 +1770,7 @@
 	}
 
 	function formatNumber(num) {
-		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + "," });
+		return ("" + num).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, function($1) { return $1 + CONST_NUMERIC_DIGIT_SEPARATOR });
 	}
 
 
@@ -1823,7 +1822,7 @@ function getGrowthSentiment(dx){
 // Builds the HTML Table out of myList.
 function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
   if (ouLevel == 5){
-    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? Math.ceil( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
+    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
   } else {
     var myCount = (myList.length+1);
   }
