@@ -21,7 +21,7 @@
         td.rowItemRight {border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5}
 
 		td.cellNumeric, div.cellNumeric{
-			text-align: right;padding:4px;cursor: default;
+			text-align: right;padding:4px 2px 4px 2px;cursor: default;white-space:nowrap;
 		}
 		.rounded{
 		    -webkit-border-radius: 4px 4px 4px 4px;
@@ -95,13 +95,16 @@
 			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
+		var bDATA_TABLES_ONLY = false;
+		var destDataTables = 'rankedItems';
+
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
         var repUID = getParameterByName('uid');
-        var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : (dhis2.report.organisationUnitHierarchy.length+1));
+        var OUlevel = parseInt((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : ( (bDATA_TABLES_ONLY) ? 5 : (dhis2.report.organisationUnitHierarchy.length+1) ) );
         var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
-        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
-        var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) )
+        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : ( (bDATA_TABLES_ONLY) ? 1 : 0 ) );
+        var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) || (bDATA_TABLES_ONLY) );
 
 	</script>
 
@@ -124,7 +127,7 @@
             </tr>
 			<tr>
                 <td colspan=3 style='text-align:center;'>
-                    <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION <br>QUARTERLY REPORT</strong>
+                    <strong style='font-size:17pt;'>90-90-90 RETENTION ACCELERATION <br>QUARTERLY REPORT</strong>
                 </td>
             </tr>
 			<tr>
@@ -395,7 +398,7 @@
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
 
  <script language=javascript>
-	var CONST_NUMERIC_DIGIT_SEPARATOR = ",";
+	var CONST_NUMERIC_DIGIT_SEPARATOR = " ";
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
 	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq,bTs3h1d6t6Y,r0T2RG2Wp1p,Q0ctiOhPAEq'; //
     var dxWeightScheme = '1,1,1,1,1,1,1';
@@ -424,53 +427,68 @@
     var ouScoreArr = [];
     var dxCurrent = '';
     var g_geoJSONlayerObj;
+	var ArrOUlevels = [];
+	var OUlevelLoopIncr = ( (bDATA_TABLES_ONLY) ? 0 : 1);
 
     upgradeReportsMenu();
 
-    /* MAP START */
+	if (bDATA_TABLES_ONLY){
 
-    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+		var dv1 = document.createElement('div');
+		dv1.setAttribute('id','dv_new_body');
+		document.getElementById('reportHeader').parentElement.appendChild(dv1);
+		destDataTables = 'dv_new_body';
+		document.getElementById('reportHeader').style.display = 'none';
 
-    var g_baseMapLayerOpacity = 0.5;
+	}
 
-    var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
-    var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
-    var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
-    var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
+	if (bDATA_TABLES_ONLY != true){
 
-    g_baseMapCollection = {
-        "PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
-        "PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
-        "PRINT: StreetMap": Open_StreetMap,
-        "HikeBike":HikeBike_HikeBike
-    };
+		/* MAP START */
 
-    var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
-    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+		var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
 
-        /* on mouseover control START */
-        var g_infoControl = L.control();
-        g_infoControl.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-        g_infoControl.update = function (props) {
-            if (props == undefined){
-                this._div.innerHTML = '';
-                this._div.style = ("display:none;");
-            }
-            else{
-                this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
-                var e = window.event;
-                this._div.style = ("display:block;"); 
-            }
-        };
-        g_infoControl.addTo(g_map);
-        /* on mouseover control END */
+		var g_baseMapLayerOpacity = 0.5;
 
+		var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
+		var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
+		var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
+		var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
 
-    /* MAP END */
+		g_baseMapCollection = {
+			"PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
+			"PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
+			"PRINT: StreetMap": Open_StreetMap,
+			"HikeBike":HikeBike_HikeBike
+		};
+
+		var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
+		var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+
+			/* on mouseover control START */
+			var g_infoControl = L.control();
+			g_infoControl.onAdd = function (map) {
+				this._div = L.DomUtil.create('div', 'info');
+				this.update();
+				return this._div;
+			};
+			g_infoControl.update = function (props) {
+				if (props == undefined){
+					this._div.innerHTML = '';
+					this._div.style = ("display:none;");
+				}
+				else{
+					this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
+					var e = window.event;
+					this._div.style = ("display:block;"); 
+				}
+			};
+			g_infoControl.addTo(g_map);
+			/* on mouseover control END */
+
+		/* MAP END */
+
+	}
 
 	var peQcurr = parseInt(pe.split('Q')[1]); //parseInt(pe.substring(4,6));
 	var peFcurr = parseInt(pe.split('Q')[0]); //parseInt(pe.substring(0,4));
@@ -554,11 +572,13 @@
     var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
     var dxVariations = '';
 
+	if (bDATA_TABLES_ONLY != true){
+		var tblCounter = 2;
+    	document.getElementById('table1Title').innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+	} else {
+		var tblCounter = 1;
+	}
 
-    document.getElementById('table1Title').innerText = 'Table 1. Quarterly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
-
-
-    var tblCounter = 2;
     var OURet = [];
 
     for (var p = 0; p < dxCoreArr.length; p++){
@@ -622,30 +642,34 @@
             },
             success : function(dataOU){
 
-                var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
+				if (bDATA_TABLES_ONLY != true){
 
-                OURet[this.row].dxName = OURetTemp[0].dxName;
-                OURet[this.row].baseline = OURetTemp[0].baseline;
-                OURet[this.row].FYtarget = OURetTemp[0].FYtarget;
-                OURet[this.row].YTDtarget = OURetTemp[0].YTDtarget;
-                OURet[this.row].YTDactual = OURetTemp[0].YTDactual;
-                OURet[this.row].YTDactualSum = OURetTemp[0].YTDactualSum;
-                OURet[this.row].YTDgapNum = OURetTemp[0].YTDgapNum;
-                OURet[this.row].YTDgapPer = OURetTemp[0].YTDgapPer;
-                OURet[this.row].CALCtarget = OURetTemp[0].CALCtarget;
-                OURet[this.row].CALCactual = OURetTemp[0].CALCactual;
-                OURet[this.row].QTR1 = OURetTemp[0].QTR1;
-                OURet[this.row].QTR2 = OURetTemp[0].QTR2;
-                OURet[this.row].QTR3 = OURetTemp[0].QTR3;
-                OURet[this.row].QTR4 = OURetTemp[0].QTR4;
-                OURet[this.row].targ1 = OURetTemp[0].targ1;
-                OURet[this.row].targ2 = OURetTemp[0].targ2;
-                OURet[this.row].targ3 = OURetTemp[0].targ3;
-                OURet[this.row].targ4 = OURetTemp[0].targ4;
-                OURet[this.row].NumSum = OURetTemp[0].NumSum;
-                OURet[this.row].DenSum = OURetTemp[0].DenSum;
-                OURet[this.row].factor = OURetTemp[0].factor;
-                OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
+					var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
+
+					OURet[this.row].dxName = OURetTemp[0].dxName;
+					OURet[this.row].baseline = OURetTemp[0].baseline;
+					OURet[this.row].FYtarget = OURetTemp[0].FYtarget;
+					OURet[this.row].YTDtarget = OURetTemp[0].YTDtarget;
+					OURet[this.row].YTDactual = OURetTemp[0].YTDactual;
+					OURet[this.row].YTDactualSum = OURetTemp[0].YTDactualSum;
+					OURet[this.row].YTDgapNum = OURetTemp[0].YTDgapNum;
+					OURet[this.row].YTDgapPer = OURetTemp[0].YTDgapPer;
+					OURet[this.row].CALCtarget = OURetTemp[0].CALCtarget;
+					OURet[this.row].CALCactual = OURetTemp[0].CALCactual;
+					OURet[this.row].QTR1 = OURetTemp[0].QTR1;
+					OURet[this.row].QTR2 = OURetTemp[0].QTR2;
+					OURet[this.row].QTR3 = OURetTemp[0].QTR3;
+					OURet[this.row].QTR4 = OURetTemp[0].QTR4;
+					OURet[this.row].targ1 = OURetTemp[0].targ1;
+					OURet[this.row].targ2 = OURetTemp[0].targ2;
+					OURet[this.row].targ3 = OURetTemp[0].targ3;
+					OURet[this.row].targ4 = OURetTemp[0].targ4;
+					OURet[this.row].NumSum = OURetTemp[0].NumSum;
+					OURet[this.row].DenSum = OURetTemp[0].DenSum;
+					OURet[this.row].factor = OURetTemp[0].factor;
+					OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
+
+				}
 
             }
 
@@ -661,7 +685,7 @@
 
         }
 
-        for (var ouL = OUlevel; ouL <= (OUlevel+1); ouL++){
+        for (var ouL = OUlevel; ouL <= (OUlevel+parseInt(OUlevelLoopIncr)); ouL++){
 
             if (ouL <= 5){
 
@@ -682,12 +706,12 @@
 
                 tblCounter +=1;
 
-                document.getElementById('rankedItems').appendChild(dv1);
+                document.getElementById(destDataTables).appendChild(dv1);
 
                 var dv1 = document.createElement('div');
                 dv1.setAttribute('id','dv_'+dxCoreArr[p]+'_'+ouL);
                 dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]+'_'+ouL);
-                document.getElementById('rankedItems').appendChild(dv1);
+                document.getElementById(destDataTables).appendChild(dv1);
 
                 $.ajax({
                     url: sDataGet,
@@ -702,11 +726,13 @@
                     },
                     success : function(dataDE){
 
-                        if (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1){
-                            document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
-                        }
+                        if (bDATA_TABLES_ONLY != true){
+							if (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1){
+								document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
+							}
+						}
 
-                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' ('+getMatchOUlevelName(this.oulevel)+' level below '+dhis2.report.organisationUnit.name+', quarter [' + peQTRlabelEnd.replace('<br>',' ') + '])';
                         document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
 
                         var myPrepArr = returnPrepArray(dataDE,this.dx,this.dxTargetPair);
@@ -720,10 +746,12 @@
                         $('#dv_'+this.dx+'_'+this.oulevel).append(txt$);
 
                         if ( (this.bfinalDx == true) && (this.oulevel == OUlevel) ) {
-                            buildOUsummaryTable(OURet,'#tblMaster');
-                            loadChart();
-                            loadMapFrame();
-                            resizeTextAreas();
+							if (bDATA_TABLES_ONLY != true){
+								buildOUsummaryTable(OURet,'#tblMaster');
+								loadChart();
+								loadMapFrame();
+							}
+                            resizeReportSections();
                         }
 
                         myPrepArr = [];
@@ -740,11 +768,26 @@
 
 
     document.getElementById('ouName').innerText = dhis2.report.organisationUnit.name;
-    document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' quarter [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
+    document.getElementById('peSummary').innerHTML = ('F' + peFcurr + '/' + ((peFcurrSuff)+1) + ' quarter ending [' + peQTRlabelEnd.replace('<br>',' ') + ']' );
     document.getElementById('genDetails').value = 'Compiled By: \nDesignation/Position: \nDate Compiled: ' + todayDate();
 
 
-    function resizeTextAreas(){
+    function getMatchOUlevelName(iOUlevel){
+        for (var z=0; z<ArrOUlevels.length; z++){
+            if (ArrOUlevels[z].level == iOUlevel){
+                return ArrOUlevels[z].name;
+            }
+        }
+    }
+
+    function resizeReportSections(){
+		if (bDATA_TABLES_ONLY != true){
+			$(".SecondaryTbl").each(
+				function() {
+					$(this).width(((document.getElementById('tblMaster').offsetWidth-4) + 'px'));
+				}
+			);
+		}
         $(".quantative").each(
             function() {
                 if (this.id=='genDetails'){
@@ -1103,7 +1146,6 @@
                 ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
                 ArrRet[a].FYtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
                 ArrRet[a].YTDactual = parseFloat(parseFloat(ArrRet[a].NumSum) / parseFloat(ArrRet[a].DenSum) * parseFloat(ArrRet[a].factor)).toFixed(0).replace('NaN','0');
-                
             }
             if ( (dxMMendOfQtr).indexOf(dx) >= 0){
                 ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
@@ -1123,7 +1165,6 @@
                     ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1).replace('.0','') : 0);
                 }
             }
-
         }
 
         if (sRem.length > 0){
@@ -1484,26 +1525,31 @@ function getGrowthSentiment(dx){
 
 // Builds the HTML Table out of myList.
 function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
-  if (ouLevel == 5){
-    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
-  } else {
-    var myCount = (myList.length+1);
-  }
+
+	if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
+		var myCount = Math.ceil( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
+	} else {
+		var myCount = (myList.length+1);
+	}
+
   var iGS = getGrowthSentiment(dx);
   for (var i = 0; i < myList.length; i++) {
     if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
-        if ( (bUseRankingGroupHeaders) && (i == 0) ){
-            var row$ = $('<tr/>');    
-            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-            $(selector).append(row$);
-        }
-
-        if ( (bUseRankingGroupHeaders) && ((i+1) == ((myList.length-(parseInt(myCount+1))+2))) ){
-            var row$ = $('<tr/>');    
-            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-            $(selector).append(row$);
-        }
+        if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
+			// First Summary Header
+			if (i == 0) {
+				var row$ = $('<tr/>');    
+				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+				$(selector).append(row$);
+			}
+			// Second Summary Header
+			if ( (i+1) == ((myList.length-(parseInt(myCount+1))+2)) ) {
+				var row$ = $('<tr/>');    
+				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+				$(selector).append(row$);
+			}
+		}
 
         var row$ = $('<tr/>');
 
@@ -1513,26 +1559,26 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         if (ouLevel == 5){
             var iH = 22, sStyleOffs = 'position:relative;top:2px;';
             var ArrTemp = myList[i].ouHierarchy.toString().split('/');
-            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
+            row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
         } else {
             var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
+            row$.append($('<td class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
         }
 
         //prevY BASELINE: 2
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline))));
 
         //prevY TARGET: 3 
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0)));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0)) ));
 
         //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0)));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0)) ));
 
         //YTD ACTUAL: 5
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
 
         //YTD GAP Number: 7
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
 
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
@@ -1546,27 +1592,27 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         loadScore(myList[i].ou,myList[i].ouName,dx,iW);
 
         //QTR TARGET: 9
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
 
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //QTR 1: 11
-        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR1));
+        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
 
         if ( (peQcurr > 2) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 2: 12
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR2));
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
         }
         if ( (peQcurr > 3) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 3: 13
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR3));
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
         }
         if (peQcurr == 1){
             var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 4: 14
-            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR4));
+            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
         }
 
         $(selector).append(row$);
@@ -1613,22 +1659,22 @@ function buildOUsummaryTable(myList,selector) {
         /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
 
         var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-        row$.append($('<td title="'+myList[i].dx+'" class="rowItemLeft"/>').html(myList[i].dxName));
+        row$.append($('<td class="rowItemLeft"/>').html(myList[i].dxName));
 
         //prevY BASELINE: 2
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline)) ));
 
         //prevY TARGET: 3 
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0)) ));
 
         //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0)) ));
 
         //YTD ACTUAL: 5
-        row$.append($('<td title="(' + myList[i].NumSum + ' / ' + myList[i].DenSum + ' x ' + myList[i].factor + ')"  class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
+        row$.append($('<td title="(' + myList[i].NumSum + ' / ' + myList[i].DenSum + ' x ' + myList[i].factor + ')"  class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
 
         //YTD GAP Number: 7
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
 
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(myList[i].dx) >= 0) || ( (dxIndicators).indexOf(myList[i].dx) >= 0)){
@@ -1642,27 +1688,27 @@ function buildOUsummaryTable(myList,selector) {
         loadScore(myList[i].ou,myList[i].ouName,myList[i].dx,iW);
 
         //QTR TARGET: 9
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
 
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //QTR 1: 11
-        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR1));
+        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
 
         if ( (peQcurr > 2) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 2: 12
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR2));
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
         }
         if ( (peQcurr > 3) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 3: 13
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR3));
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
         }
         if (peQcurr == 1){
             var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 4: 14
-            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].QTR4));
+            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
         }
 
         $(selector).append(row$);
@@ -2076,7 +2122,7 @@ function getMenu(){
     tr.appendChild(td);
     var lbl = document.createElement('label');
     lbl.setAttribute("style",'font-weight:800;font-size:10pt;c');
-    lbl.innerHTML = 'Report Filters';
+    lbl.innerHTML = 'Report Options';
     td.appendChild(lbl);
 
     var tr = document.createElement('tr');
@@ -2256,10 +2302,11 @@ function getMenu(){
         success : function(dataOUlevs){
             var u = 0;
             for (var o = 0; o < dataOUlevs.organisationUnitLevels.length; o++){
+				ArrOUlevels.push ( {level: dataOUlevs.organisationUnitLevels[o].level, name: dataOUlevs.organisationUnitLevels[o].name } )
                 u+=1;
                 var opt = document.createElement('option');
                 opt.value = dataOUlevs.organisationUnitLevels[o].level;
-                if (u < dataOUlevs.organisationUnitLevels.length){
+                if ( (u < dataOUlevs.organisationUnitLevels.length) && (bDATA_TABLES_ONLY!= true) ) {
                     opt.innerHTML = (dataOUlevs.organisationUnitLevels[o].name + ', ' + dataOUlevs.organisationUnitLevels[u].name);
                 } else {
                     opt.innerHTML = dataOUlevs.organisationUnitLevels[o].name;    
@@ -2360,7 +2407,7 @@ function averageScores(bRoundDownTo100){
     var dv = document.createElement('div');
     dv.setAttribute("id",'scoreDistribution');
     dv.setAttribute("style",'width:'+document.getElementById("tblMaster").offsetWidth+'px;height:400px');
-    document.getElementById('rankedItems').appendChild(dv);
+    document.getElementById(destDataTables).appendChild(dv);
 
     createBarChartValueRange('scoreDistribution',document.getElementById("tblMaster").offsetWidth,400,ouScoreArr,dhis2.report.organisationUnit.name,'Score Distribution');
 

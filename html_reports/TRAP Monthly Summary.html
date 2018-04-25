@@ -21,7 +21,7 @@
         td.rowItemRight {border-bottom:1px solid #000;border-left:1px solid #000;background-Color:#f5f5f5}
 
 		td.cellNumeric, div.cellNumeric{
-			text-align: right;padding:4px;cursor: default;
+			text-align: right;padding:4px 2px 4px 2px;cursor: default;white-space:nowrap;
 		}
 		.rounded{
 		    -webkit-border-radius: 4px 4px 4px 4px;
@@ -40,7 +40,7 @@
 
         /* #tblMaster {display:none;} */
         #leafMap {
-                    width:1000px;height:800px;
+                    width:1200px;height:600px;
                     position:relative;top:0;left:0;
                     padding:0; margin:0;border:2px solid #C0C0C0; 
                     background-Color:#fff;
@@ -95,13 +95,16 @@
 			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
+		var bDATA_TABLES_ONLY = false;
+		var destDataTables = 'rankedItems';
+
 		var ou = getParameterByName('ou');
 		var pe = getParameterByName('pe');
         var repUID = getParameterByName('uid');
-        var OUlevel = ((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : (dhis2.report.organisationUnitHierarchy.length+1));
+        var OUlevel = parseInt((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : ( (bDATA_TABLES_ONLY) ? 5 : (dhis2.report.organisationUnitHierarchy.length+1) ) );
         var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
-        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : 0);
-        var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) )
+        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : ( (bDATA_TABLES_ONLY) ? 1 : 0 ) );
+        var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) || (bDATA_TABLES_ONLY) );
 
 	</script>
 
@@ -114,58 +117,23 @@
 		<table id='logoTable' class='landingPage'>
 			<tr>
 				<td style='width:225px;text-align:left;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/new%20health%20logo-2.jpg' style='width:225px;height:80px;'> </td>
-				<td></td>
+				<td style='text-align:center;'>
+					<div>
+						<strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION <br>MONTHLY SUMMARY REPORT</strong>	
+					</div>
+					<div style='text-align:center;font-size:14pt;font-weight:400' id='ouName'></div>
+					<div style='text-align:center;font-size:14pt;font-weight:400' id='peSummary'></div>
+				</td>
 				<td style='width:180px;text-align:right;padding:5px;'> <img src='http://timesheets.hisp.org/timesheets/images/southafrica_pepfarlogo.jpg' style='width:155px;height:100px;'> </td>
 			</tr>
-			<tr>
-                <td colspan=3 style='padding:10px;'>
-                    &nbsp;
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='text-align:center;'>
-                    <strong style='font-size:17pt;'>90-90-90 TREATMENT AND RETENTION ACCELERATION <br>MONTHLY SUMMARY REPORT</strong>
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='padding:2px;'>
-                    &nbsp;
-                </td>
-            </tr>
-            <tr>
-                <td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
-                    <div style='font-size:14pt;font-weight:400' id='ouName'></div>
-                </td>
-            </tr>
-            <tr>
-                <td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
-                    <div style='font-size:14pt;font-weight:400' id='peSummary'></div>
-                </td>
-            </tr>
-    
-            <tr>
-                <td colspan=3 style='padding:10px;'>
-                    &nbsp;
-                </td>
-            </tr>
 			<tr>
                 <td colspan=3 style='text-align:center;background-Color:#fff;'>
                     <div id='leafMap'></div>
                 </td>
             </tr>
-			<tr>
-                <td colspan=3 style='padding:2px;'>
-                    &nbsp;
-                </td>
-            </tr>
             <tr>
                 <td colspan=3>
                     <textarea class="quantative" style="width:99%;height:70px;font-size:12pt;" id='genDetails'></textarea>
-                </td>
-            </tr>
-			<tr>
-                <td colspan=3 style='padding:2px;'>
-                    &nbsp;
                 </td>
             </tr>
         </table>
@@ -403,7 +371,7 @@
 <!-- <input type="button" value="Export to Excel" id="exceldownloadbutton" name="exceldownloadbutton" onclick="javascript:fnExcelReport()" class="no-print" style="display:none;width:140px;position:absolute;left:306px;top:65px;"> -->
 
  <script language=javascript>
-	var CONST_NUMERIC_DIGIT_SEPARATOR = ",";
+	var CONST_NUMERIC_DIGIT_SEPARATOR = " ";
 	var quarters = ['Jan-Mar', 'Apr-Jun', 'Jul-Sep', 'Oct-Dec'];
 	var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ];
 	var dxCore = 'KnQn2N452bE,Bmo4lk1FhgP,fG0NDp9ZcQh,mH17opU6Ivq'; //
@@ -421,65 +389,79 @@
 	var dxCoreCat = '';
 	var lblCat = 'Actual,Target,Gap';
 	var dxMMendOfQtr = 'mH17opU6Ivq';
-	var peQTRrangeMMending = '';
-	var peQTRrange = '';
-	var peQTRrangeEnd = '';
+	var peMMrangeMMending = '';
+	var peMMrange = '';
+	var peMMrangeEnd = '';
 	var peQTRlabelEnd = '';
 	var peQTRprevYmmRangeEnd = '';
 	var peQTRcurrYRangeEnd = '';
 	var peQTRcurrYmmRangeEnd = '';
-	var peQTRrangeAct = '';
+	var peMMrangeAct = '';
 	var dxSummaryCounter = [];
     var ouScoreArr = [];
     var dxCurrent = '';
     var g_geoJSONlayerObj;
+	var ArrOUlevels = [];
+	var OUlevelLoopIncr = ( (bDATA_TABLES_ONLY) ? 0 : 1);
 
     upgradeReportsMenu();
 
-    /* MAP START */
+	if (bDATA_TABLES_ONLY){
 
-    var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+		var dv1 = document.createElement('div');
+		dv1.setAttribute('id','dv_new_body');
+		document.getElementById('reportHeader').parentElement.appendChild(dv1);
+		destDataTables = 'dv_new_body';
+		document.getElementById('reportHeader').style.display = 'none';
+	}
 
-    var g_baseMapLayerOpacity = 0.5;
+	if (bDATA_TABLES_ONLY != true){
 
-    var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
-    var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
-    var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
-    var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
+	    /* MAP START */
 
-    g_baseMapCollection = {
-        "PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
-        "PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
-        "PRINT: StreetMap": Open_StreetMap,
-        "HikeBike":HikeBike_HikeBike
-    };
+		var g_map = new L.map('leafMap', { zoomControl:false, renderer: L.svg({ padding: 100 }) }).setView([-28.5, 26], 6);
+		var g_baseMapLayerOpacity = 0.5;
 
-    var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
-    var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+		var Esri_WorldGrayCanvas = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',maxZoom: 16});
+		var Esri_WorldShadedRelief = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {opacity: g_baseMapLayerOpacity, attribution: 'Tiles &copy; Esri &mdash; Source: Esri',	maxZoom: 13});
+		var Open_StreetMap = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',});
+		var HikeBike_HikeBike = L.tileLayer('http://{s}.tiles.wmflabs.org/hikebike/{z}/{x}/{y}.png', {opacity: g_baseMapLayerOpacity, maxZoom: 19,attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'});
 
-        /* on mouseover control START */
-        var g_infoControl = L.control();
-        g_infoControl.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-        g_infoControl.update = function (props) {
-            if (props == undefined){
-                this._div.innerHTML = '';
-                this._div.style = ("display:none;");
-            }
-            else{
-                this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
-                var e = window.event;
-                this._div.style = ("display:block;"); 
-            }
-        };
-        g_infoControl.addTo(g_map);
-        /* on mouseover control END */
+		g_baseMapCollection = {
+			"PRINT: Esri.WorldGrayCanvas": Esri_WorldGrayCanvas,
+			"PRINT: Esri.WorldShadedRelief": Esri_WorldShadedRelief,
+			"PRINT: StreetMap": Open_StreetMap,
+			"HikeBike":HikeBike_HikeBike
+		};
+
+		var layerControl = L.control.layers(g_baseMapCollection, null, {position:'bottomright', opacitySlider: true}).addTo(g_map);
+		var g_baseLayer = Esri_WorldGrayCanvas.addTo(g_map);
+
+			/* on mouseover control START */
+			var g_infoControl = L.control();
+			g_infoControl.onAdd = function (map) {
+				this._div = L.DomUtil.create('div', 'info');
+				this.update();
+				return this._div;
+			};
+			g_infoControl.update = function (props) {
+				if (props == undefined){
+					this._div.innerHTML = '';
+					this._div.style = ("display:none;");
+				}
+				else{
+					this._div.innerHTML = ReturnHTMLpreview(JSON.stringify(props));
+					var e = window.event;
+					this._div.style = ("display:block;"); 
+				}
+			};
+			g_infoControl.addTo(g_map);
+			/* on mouseover control END */
 
 
-    /* MAP END */
+		/* MAP END */
+
+	}
 
 	var peMMcurr = parseInt(pe.substring(4,6)); //parseInt(pe.substring(4,6));
 	var peFcurr = parseInt(pe.substring(0,4)); //parseInt(pe.substring(0,4));
@@ -516,7 +498,7 @@
 		if ( (p > peMMcurr) && (peMMcurr > 3) ){
 			document.getElementById('1_peMM'+paddNumeric(p,2)).style.display='none';
 		} else {
-			peQTRrange += ((peFcurr+paddNumeric(p,2))+';');
+			peMMrange += ((peFcurr+paddNumeric(p,2))+';');
 			peQTRlabelEnd = ((months[peMMcurr-1]).toString()+'<br>'+peFcurrSuff);
 		}
 	}
@@ -525,7 +507,7 @@
 		if ( (p > peMMcurr) || (peMMcurr > 3) ) {
 			document.getElementById('1_peMM'+paddNumeric(p,2)).style.display='none';
 		} else {
-			peQTRrange += ((peFcurr+1)+paddNumeric(p,2)+';');
+			peMMrange += ((peFcurr+1)+paddNumeric(p,2)+';');
 			peQTRlabelEnd = ((months[peMMcurr-1]).toString()+'<br>'+peFcurrSuff);
 		}
 	}
@@ -554,14 +536,16 @@
     dxCoreCat = dxCoreCat.substring(dxCoreCat,dxCoreCat.length-1);
 
     var ArrDx = dxCore.split(',');
-    var ArrPEmmEnd = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';');
+    var ArrPEmmEnd = peMMrange.substring(peMMrange,peMMrange.length-1).split(';');
     var dxVariations = '';
 
+	if (bDATA_TABLES_ONLY != true){
+		var tblCounter = 2;
+    	document.getElementById('table1Title').innerText = 'Table 1. Monthly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+	} else {
+		var tblCounter = 1;
+	}
 
-    document.getElementById('table1Title').innerText = 'Table 1. Monthly Summary for '+dhis2.report.organisationUnit.name+' (F' + peFcurr + ', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
-
-
-    var tblCounter = 2;
     var OURet = [];
 
     for (var p = 0; p < dxCoreArr.length; p++){
@@ -625,13 +609,11 @@
 
         if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
             dxTargetPair = '';
-            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peMMrangeMMending+peMMrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peMMrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
         } else {
             dxTargetPair = getIndTargetPair(dxCoreArr[p]);
-            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+            var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peMMrangeMMending+peMMrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peMMrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:' + ou + '&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
         }
-
-		//console.log(sDataGet);
 
         $.ajax({
             url: sDataGet,
@@ -643,46 +625,50 @@
             },
             success : function(dataOU){
 
-                var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
+				if (bDATA_TABLES_ONLY != true){
 
-                OURet[this.row].dxName = OURetTemp[0].dxName;
-                OURet[this.row].baseline = OURetTemp[0].baseline;
-                OURet[this.row].FYtarget = OURetTemp[0].FYtarget;
-                OURet[this.row].YTDtarget = OURetTemp[0].YTDtarget;
-                OURet[this.row].YTDactual = OURetTemp[0].YTDactual;
-                OURet[this.row].YTDactualSum = OURetTemp[0].YTDactualSum;
-                OURet[this.row].YTDgapNum = OURetTemp[0].YTDgapNum;
-                OURet[this.row].YTDgapPer = OURetTemp[0].YTDgapPer;
-                OURet[this.row].CALCtarget = OURetTemp[0].CALCtarget;
-                OURet[this.row].CALCactual = OURetTemp[0].CALCactual;
-                OURet[this.row].mm4 = OURetTemp[0].mm4;
-                OURet[this.row].targ4 = OURetTemp[0].targ4;
-                OURet[this.row].mm5 = OURetTemp[0].mm5;
-                OURet[this.row].targ5 = OURetTemp[0].targ5;
-                OURet[this.row].mm6 = OURetTemp[0].mm6;
-                OURet[this.row].targ6 = OURetTemp[0].targ6;
-                OURet[this.row].mm7 = OURetTemp[0].mm7;
-                OURet[this.row].targ7 = OURetTemp[0].targ7;
-                OURet[this.row].mm8 = OURetTemp[0].mm8;
-                OURet[this.row].targ8 = OURetTemp[0].targ8;
-                OURet[this.row].mm9 = OURetTemp[0].mm9;
-                OURet[this.row].targ9 = OURetTemp[0].targ9;
-                OURet[this.row].mm10 = OURetTemp[0].mm10;
-                OURet[this.row].targ10 = OURetTemp[0].targ10;
-                OURet[this.row].mm11 = OURetTemp[0].mm11;
-                OURet[this.row].targ11 = OURetTemp[0].targ11;
-                OURet[this.row].mm12 = OURetTemp[0].mm12;
-                OURet[this.row].targ12 = OURetTemp[0].targ12;
-                OURet[this.row].mm1 = OURetTemp[0].mm1;
-                OURet[this.row].targ1 = OURetTemp[0].targ1;
-                OURet[this.row].mm2 = OURetTemp[0].mm2;
-                OURet[this.row].targ2 = OURetTemp[0].targ2;
-                OURet[this.row].mm3 = OURetTemp[0].mm3;
-                OURet[this.row].targ3 = OURetTemp[0].targ3;
-                OURet[this.row].NumSum = OURetTemp[0].NumSum;
-                OURet[this.row].DenSum = OURetTemp[0].DenSum;
-                OURet[this.row].factor = OURetTemp[0].factor;
-                OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
+                	var OURetTemp = returnPrepArray(dataOU,this.dx,this.dxTargetPair);
+
+					OURet[this.row].dxName = OURetTemp[0].dxName;
+					OURet[this.row].baseline = OURetTemp[0].baseline;
+					OURet[this.row].FYtarget = OURetTemp[0].FYtarget;
+					OURet[this.row].YTDtarget = OURetTemp[0].YTDtarget;
+					OURet[this.row].YTDactual = OURetTemp[0].YTDactual;
+					OURet[this.row].YTDactualSum = OURetTemp[0].YTDactualSum;
+					OURet[this.row].YTDgapNum = OURetTemp[0].YTDgapNum;
+					OURet[this.row].YTDgapPer = OURetTemp[0].YTDgapPer;
+					OURet[this.row].CALCtarget = OURetTemp[0].CALCtarget;
+					OURet[this.row].CALCactual = OURetTemp[0].CALCactual;
+					OURet[this.row].mm4 = OURetTemp[0].mm4;
+					OURet[this.row].targ4 = OURetTemp[0].targ4;
+					OURet[this.row].mm5 = OURetTemp[0].mm5;
+					OURet[this.row].targ5 = OURetTemp[0].targ5;
+					OURet[this.row].mm6 = OURetTemp[0].mm6;
+					OURet[this.row].targ6 = OURetTemp[0].targ6;
+					OURet[this.row].mm7 = OURetTemp[0].mm7;
+					OURet[this.row].targ7 = OURetTemp[0].targ7;
+					OURet[this.row].mm8 = OURetTemp[0].mm8;
+					OURet[this.row].targ8 = OURetTemp[0].targ8;
+					OURet[this.row].mm9 = OURetTemp[0].mm9;
+					OURet[this.row].targ9 = OURetTemp[0].targ9;
+					OURet[this.row].mm10 = OURetTemp[0].mm10;
+					OURet[this.row].targ10 = OURetTemp[0].targ10;
+					OURet[this.row].mm11 = OURetTemp[0].mm11;
+					OURet[this.row].targ11 = OURetTemp[0].targ11;
+					OURet[this.row].mm12 = OURetTemp[0].mm12;
+					OURet[this.row].targ12 = OURetTemp[0].targ12;
+					OURet[this.row].mm1 = OURetTemp[0].mm1;
+					OURet[this.row].targ1 = OURetTemp[0].targ1;
+					OURet[this.row].mm2 = OURetTemp[0].mm2;
+					OURet[this.row].targ2 = OURetTemp[0].targ2;
+					OURet[this.row].mm3 = OURetTemp[0].mm3;
+					OURet[this.row].targ3 = OURetTemp[0].targ3;
+					OURet[this.row].NumSum = OURetTemp[0].NumSum;
+					OURet[this.row].DenSum = OURetTemp[0].DenSum;
+					OURet[this.row].factor = OURetTemp[0].factor;
+					OURet[this.row].GrandTotAll = OURetTemp[0].GrandTotAll;
+
+				}
 
             }
 
@@ -698,7 +684,7 @@
 
         }
 
-        for (var ouL = OUlevel; ouL <= (OUlevel+1); ouL++){
+        for (var ouL = OUlevel; ouL <= (OUlevel+parseInt(OUlevelLoopIncr)); ouL++){
 
             if (ouL <= 5){
 
@@ -706,10 +692,10 @@
 
                 if (dxIndicators.indexOf(dxCoreArr[p]) < 0){
                     dxTargetPair = '';
-                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxCoreCat+'&dimension=pe:'+peMMrangeMMending+peMMrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peMMrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true';
                 } else {
                     dxTargetPair = getIndTargetPair(dxCoreArr[p]);
-                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peQTRrangeMMending+peQTRrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peQTRrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
+                    var sDataGet = '../api/26/analytics.json?dimension=dx:'+dxCoreArr[p]+';'+dxTargetPair+'&dimension=pe:'+peMMrangeMMending+peMMrangeAct+peQTRcurrYRangeEnd+';'+( (peQTRprevYmmRangeEnd.length > 0) ? (peQTRprevYmmRangeEnd + ';' + peQTRcurrYmmRangeEnd + ';') : '' )+peMMrange+peFYcurr+';'+peFYprev+';'+peFYprevJul+'&dimension=ou:LEVEL-' + ouL + ';'+ou+'&displayProperty=NAME&outputIdScheme=UID&showHierarchy=true&includeNumDen=true';
                 }
 
                 var dv1 = document.createElement('div');
@@ -719,12 +705,12 @@
 
                 tblCounter +=1;
 
-                document.getElementById('rankedItems').appendChild(dv1);
+                document.getElementById(destDataTables).appendChild(dv1);
 
                 var dv1 = document.createElement('div');
                 dv1.setAttribute('id','dv_'+dxCoreArr[p]+'_'+ouL);
                 dv1.innerHTML = template1.replace('tblMaster','tbl_'+dxCoreArr[p]+'_'+ouL);
-                document.getElementById('rankedItems').appendChild(dv1);
+                document.getElementById(destDataTables).appendChild(dv1);
 
                 $.ajax({
                     url: sDataGet,
@@ -739,11 +725,13 @@
                     },
                     success : function(dataDE){
 
-                        if (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1){
-                            document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
-                        }
+						if (bDATA_TABLES_ONLY != true){
+							if (this.oulevel == dhis2.report.organisationUnitHierarchy.length+1){
+								document.getElementById('dxName_'+this.dx).innerText = ' • '+dataDE.metaData.items[this.dx].name;
+							}
+						}
 
-                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' (OU'+this.oulevel+' below '+dhis2.report.organisationUnit.name+', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
+                        document.getElementById('title_'+this.dx+'_'+this.oulevel).innerText += (dataDE.metaData.items[this.dx].name).replace('TRAP_','') + ' ('+getMatchOUlevelName(this.oulevel)+' level below '+dhis2.report.organisationUnit.name+', month ending [' + peQTRlabelEnd.replace('<br>',' ') + '])';
                         document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML = (document.getElementById('tbl_'+this.dx+'_'+this.oulevel).innerHTML.replace('tblMaster','tbl_'+this.dx+'_'+this.oulevel).replace('{PLACEHOLDER}',dataDE.metaData.items[this.dx].name));
 
                         var myPrepArr = returnPrepArray(dataDE,this.dx,this.dxTargetPair);
@@ -757,10 +745,12 @@
                         $('#dv_'+this.dx+'_'+this.oulevel).append(txt$);
 
                         if ( (this.bfinalDx == true) && (this.oulevel == OUlevel) ) {
-                            buildOUsummaryTable(OURet,'#tblMaster');
-                            loadChart();
-                            loadMapFrame();
-                            resizeTextAreas();
+							if (bDATA_TABLES_ONLY != true){
+								buildOUsummaryTable(OURet,'#tblMaster');
+								loadChart();
+								loadMapFrame();
+							}
+                            resizeReportSections();
                         }
 
                         myPrepArr = [];
@@ -781,7 +771,22 @@
     document.getElementById('genDetails').value = 'Compiled By: \nDesignation/Position: \nDate Compiled: ' + todayDate();
 
 
-    function resizeTextAreas(){
+    function getMatchOUlevelName(iOUlevel){
+        for (var z=0; z<ArrOUlevels.length; z++){
+            if (ArrOUlevels[z].level == iOUlevel){
+                return ArrOUlevels[z].name;
+            }
+        }
+    }
+
+    function resizeReportSections(){
+		if (bDATA_TABLES_ONLY != true){
+			$(".SecondaryTbl").each(
+				function() {
+					$(this).width(((document.getElementById('tblMaster').offsetWidth-4) + 'px'));
+				}
+			);
+		}
         $(".quantative").each(
             function() {
                 if (this.id=='genDetails'){
@@ -942,8 +947,8 @@
             })
         }
 
-        var ArrPEmmEnd = peQTRrangeMMending.substring(peQTRrangeMMending,peQTRrangeMMending.length-1).split(';');
-        var peArr = peQTRrange.substring(peQTRrange,peQTRrange.length-1).split(';');
+        var ArrPEmmEnd = peMMrangeMMending.substring(peMMrangeMMending,peMMrangeMMending.length-1).split(';');
+        var peArr = peMMrange.substring(peMMrange,peMMrange.length-1).split(';');
 
         for (var a = 0; a < ArrRet.length; a++){
 
@@ -1017,9 +1022,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1036,9 +1044,6 @@
                         }
                     } else {
                         if (peArr.length >= 1){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[0]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[0])) ) {
                                 ArrRet[a].targ4 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1051,9 +1056,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm5 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ5 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm5 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1070,9 +1078,6 @@
                         }
                     } else {
                         if (peArr.length >= 2){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[1]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm5 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[1])) ) {
                                 ArrRet[a].targ5 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1085,9 +1090,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm6 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ6 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm6 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1104,9 +1112,6 @@
                         }
                     } else {
                         if (peArr.length >= 3){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[2]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm6 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[2])) ) {
                                 ArrRet[a].targ6 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1119,9 +1124,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm7 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ7 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm7 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1138,9 +1146,6 @@
                         }
                     } else {
                         if (peArr.length >= 4){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[3]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm7 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[3])) ) {
                                 ArrRet[a].targ7 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1153,9 +1158,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm8 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ8 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm8 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1172,9 +1180,6 @@
                         }
                     } else {
                         if (peArr.length >= 5){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[4]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm8 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[4])) ) {
                                 ArrRet[a].targ8 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1187,9 +1192,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm9 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ9 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm9 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1206,9 +1214,6 @@
                         }
                     } else {
                         if (peArr.length >= 6){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[5]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm9 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[5])) ) {
                                 ArrRet[a].targ9 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1221,9 +1226,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm10 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ10 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm10 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1240,9 +1248,6 @@
                         }
                     } else {
                         if (peArr.length >= 7){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[6]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm10 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[6])) ) {
                                 ArrRet[a].targ10 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1255,9 +1260,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm11 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ11 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm11 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1274,9 +1282,6 @@
                         }
                     } else {
                         if (peArr.length >= 8){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[7]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm11 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[7])) ) {
                                 ArrRet[a].targ11 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1289,9 +1294,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1308,9 +1316,6 @@
                         }
                     } else {
                         if (peArr.length >= 9){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[8]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[8])) ) {
                                 ArrRet[a].targ12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1324,15 +1329,18 @@
                     /* MM 1  */
                     if ( (peArr.length >= 10) && (myData.rows[i][1] == peArr[9]) ) {
                         if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0)  && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
-                            ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].mm1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
-                            ArrRet[a].targ12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
+                            ArrRet[a].targ1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
-                            ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                            ArrRet[a].mm1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
                             ArrRet[a].DenSum += (isNumber(myData.rows[i][5]) ? parseFloat(myData.rows[i][5]) : 0);
                             ArrRet[a].factor = (isNumber(myData.rows[i][6]) ? parseFloat(myData.rows[i][6]) : 0);
@@ -1347,11 +1355,8 @@
                         }
                     } else {
                         if (peArr.length >= 10){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[9]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[9])) ) {
-                                ArrRet[a].targ12 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+                                ArrRet[a].targ1 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
                         }
                     }
@@ -1362,9 +1367,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1381,9 +1389,6 @@
                         }
                     } else {
                         if (peArr.length >= 11){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[10]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[10])) ) {
                                 ArrRet[a].targ2 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1396,9 +1401,12 @@
                             //cumulative actual
                             ArrRet[a].YTDactualSum += (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                         }
-                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
+						if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
+							ArrRet[a].mm3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
+						}
+                        if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) ) {
                             ArrRet[a].targ3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                        } 
+                        }
                         if ( ( (dxIndicators).indexOf(myData.rows[i][0]) >= 0)  ) {
                             ArrRet[a].mm3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             ArrRet[a].NumSum += (isNumber(myData.rows[i][4]) ? parseFloat(myData.rows[i][4]) : 0);
@@ -1415,9 +1423,6 @@
                         }
                     } else {
                         if (peArr.length == 12){
-                            if ( ( (myData.rows[i][0]).indexOf('.wyZ6KAmjZeD') >= 0) && (myData.rows[i][1] == ArrPEmmEnd[11]) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (myData.rows[i][0]).indexOf(dx) >= 0) ) {
-                                ArrRet[a].mm3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
-                            }
                             if ( ( (myData.rows[i][0]).indexOf('.mLVlvjLwl9q') >= 0) && ( (dxMMendOfQtr).indexOf(dx) >= 0) && ((myData.rows[i][1] == ArrPEmmEnd[11])) ) {
                                 ArrRet[a].targ3 = (isNumber(myData.rows[i][3]) ? parseFloat(myData.rows[i][3]) : 0);
                             }
@@ -1440,15 +1445,63 @@
                 ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
                 ArrRet[a].FYtarget = (parseFloat(ArrRet[a].LASTtarget)).toFixed(0);
                 ArrRet[a].YTDactual = parseFloat(parseFloat(ArrRet[a].NumSum) / parseFloat(ArrRet[a].DenSum) * parseFloat(ArrRet[a].factor)).toFixed(0).replace('NaN','0');
-                
             }
-            if ( (dxMMendOfQtr).indexOf(dx) >= 0){
-                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
-            }
-            if ( ( (dxIndicators).indexOf(dx) < 0) && ( (dxMMendOfQtr).indexOf(dx) < 0) ) {
-                ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
-                ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
-            }
+            if ( ( (dxMMendOfQtr).indexOf(dx) >= 0) && ( (dxIndicators).indexOf(dx) < 0) ) {
+				if (peArr.length == 1){
+					ArrRet[a].YTDtarget = ArrRet[a].targ4;
+					ArrRet[a].YTDactual = ArrRet[a].mm4;
+				}
+				if (peArr.length == 2){
+					ArrRet[a].YTDtarget = ArrRet[a].targ5;
+					ArrRet[a].YTDactual = ArrRet[a].mm5;
+				}
+				if (peArr.length == 3){
+					ArrRet[a].YTDtarget = ArrRet[a].targ6;
+					ArrRet[a].YTDactual = ArrRet[a].mm6;
+				}
+				if (peArr.length == 4){
+					ArrRet[a].YTDtarget = ArrRet[a].targ7;
+					ArrRet[a].YTDactual = ArrRet[a].mm7;
+				}
+				if (peArr.length == 5){
+					ArrRet[a].YTDtarget = ArrRet[a].targ8;
+					ArrRet[a].YTDactual = ArrRet[a].mm8;
+				}
+				if (peArr.length == 6){
+					ArrRet[a].YTDtarget = ArrRet[a].targ9;
+					ArrRet[a].YTDactual = ArrRet[a].mm9;
+				}
+				if (peArr.length == 7){
+					ArrRet[a].YTDtarget = ArrRet[a].targ10;
+					ArrRet[a].YTDactual = ArrRet[a].mm10;
+				}
+				if (peArr.length == 8){
+					ArrRet[a].YTDtarget = ArrRet[a].targ11;
+					ArrRet[a].YTDactual = ArrRet[a].mm11;
+				}
+				if (peArr.length == 9){
+					ArrRet[a].YTDtarget = ArrRet[a].targ12;
+					ArrRet[a].YTDactual = ArrRet[a].mm12;
+				}
+				if (peArr.length == 10){
+					ArrRet[a].YTDtarget = ArrRet[a].targ1;
+					ArrRet[a].YTDactual = ArrRet[a].mm1;
+				}
+				if (peArr.length == 11){
+					ArrRet[a].YTDtarget = ArrRet[a].targ2;
+					ArrRet[a].YTDactual = ArrRet[a].mm2;
+				}
+				if (peArr.length == 12){
+					ArrRet[a].YTDtarget = ArrRet[a].targ3;
+					ArrRet[a].YTDactual = ArrRet[a].mm3;
+				} 
+				ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget)).toFixed(0);
+            } else {
+				if ( (dxIndicators).indexOf(dx) < 0){
+					ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
+					ArrRet[a].CALCtarget = parseFloat(parseFloat(parseFloat(ArrRet[a].targ4)+parseFloat(ArrRet[a].targ5)+parseFloat(ArrRet[a].targ6)+parseFloat(ArrRet[a].targ7)+parseFloat(ArrRet[a].targ8)+parseFloat(ArrRet[a].targ9)+parseFloat(ArrRet[a].targ10)+parseFloat(ArrRet[a].targ11)+parseFloat(ArrRet[a].targ12)+parseFloat(ArrRet[a].targ1)+parseFloat(ArrRet[a].targ2)+parseFloat(ArrRet[a].targ3))/peArr.length).toFixed(0);
+				}
+			}
             ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].YTDtarget) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
             if (ArrRet[a].GrandTotAll == 0){
                 sRem += (a + ',');
@@ -1460,6 +1513,7 @@
                     ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1).replace('.0','') : 0);
                 }
             }
+
 
         }
 
@@ -1821,26 +1875,31 @@ function getGrowthSentiment(dx){
 
 // Builds the HTML Table out of myList.
 function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
-  if (ouLevel == 5){
-    var myCount = ( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
-  } else {
-    var myCount = (myList.length+1);
-  }
+
+	if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
+		var myCount = Math.ceil( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
+	} else {
+		var myCount = (myList.length+1);
+	}
+
   var iGS = getGrowthSentiment(dx);
   for (var i = 0; i < myList.length; i++) {
     if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
-        if ( (bUseRankingGroupHeaders) && (i == 0) ){
-            var row$ = $('<tr/>');    
-            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-            $(selector).append(row$);
-        }
-
-        if ( (bUseRankingGroupHeaders) && ((i+1) == ((myList.length-(parseInt(myCount+1))+2))) ){
-            var row$ = $('<tr/>');    
-            row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-            $(selector).append(row$);
-        }
+        if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
+			// First Summary Header
+			if (i == 0) {
+				var row$ = $('<tr/>');    
+				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+				$(selector).append(row$);
+			}
+			// Second Summary Header
+			if ( (i+1) == ((myList.length-(parseInt(myCount+1))+2)) ) {
+				var row$ = $('<tr/>');    
+				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
+				$(selector).append(row$);
+			}
+		}
 
         var row$ = $('<tr/>');
 
@@ -1850,26 +1909,26 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         if (ouLevel == 5){
             var iH = 22, sStyleOffs = 'position:relative;top:2px;';
             var ArrTemp = myList[i].ouHierarchy.toString().split('/');
-            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
+            row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
         } else {
             var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-            row$.append($('<td title="'+myList[i].ou+'" class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
+            row$.append($('<td class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
         }
 
         //prevY BASELINE: 2
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline)) ));
 
         //prevY TARGET: 3 
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0)));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0))));
 
         //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0)));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0))));
 
         //YTD ACTUAL: 5
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
 
         //YTD GAP Number: 7
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
 
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
@@ -1883,68 +1942,68 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         loadScore(myList[i].ou,myList[i].ouName,dx,iW);
 
         //QTR TARGET: 9
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
 
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //MM 4: 1
 		var thisStyle = ( (myList[i].mm4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
-		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm4));
+		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
 
         if ( (peMMcurr >= 5) || (peMMcurr < 4) ) {
     	    //MM 5
 			var thisStyle = ( (myList[i].mm5>myList[i].targ5) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm5));
+            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
         }
         if ( (peMMcurr >= 6) || (peMMcurr < 4) ) {
     	    //MM 6
 			var thisStyle = ( (myList[i].mm6>myList[i].targ6) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm6));
+            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
         }
         if ( (peMMcurr >= 7) || (peMMcurr < 4) ) {
     	    //MM 7
 			var thisStyle = ( (myList[i].mm7>myList[i].targ7) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm7));
+            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
         }
         if ( (peMMcurr >= 8) || (peMMcurr < 4) ) {
     	    //MM 8
 			var thisStyle = ( (myList[i].mm8>myList[i].targ8) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm8));
+            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
         }
         if ( (peMMcurr >= 9) || (peMMcurr < 4) ) {
     	    //MM 9
 			var thisStyle = ( (myList[i].mm9>myList[i].targ9) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm9));
+            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
         }
         if ( (peMMcurr >= 10) || (peMMcurr < 4) ) {
     	    //MM 10
 			var thisStyle = ( (myList[i].mm10>myList[i].targ10) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm10));
+            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
         }
         if ( (peMMcurr >= 11) || (peMMcurr < 4) ) {
     	    //MM 11
 			var thisStyle = ( (myList[i].mm11>myList[i].targ11) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm11));
+            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
         }
         if ( (peMMcurr == 12) || (peMMcurr < 4) ) {
     	    //MM 12
 			var thisStyle = ( (myList[i].mm12>myList[i].targ12) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm12));
+            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
         }
         if ( (peMMcurr >= 1) && (peMMcurr < 4) ) {
     	    //MM 1
 			var thisStyle = ( (myList[i].mm1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm1));
+            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
         }
         if ( (peMMcurr >= 2) && (peMMcurr < 4) ) {
     	    //MM 2
 			var thisStyle = ( (myList[i].mm2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm2));
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
         }
 		if ( (peMMcurr >= 3) && (peMMcurr < 4) ) {
     	    //MM 3
 			var thisStyle = ( (myList[i].mm3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm3));
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
         }
         $(selector).append(row$);
     }
@@ -1990,22 +2049,22 @@ function buildOUsummaryTable(myList,selector) {
         /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
 
         var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-        row$.append($('<td title="'+myList[i].dx+'" class="rowItemLeft"/>').html(myList[i].dxName));
+        row$.append($('<td class="rowItemLeft"/>').html(myList[i].dxName));
 
         //prevY BASELINE: 2
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].baseline));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline)) ));
 
         //prevY TARGET: 3 
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].FYtarget).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0)) ));
 
         //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDtarget).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0)) ));
 
         //YTD ACTUAL: 5
-        row$.append($('<td title="(' + myList[i].NumSum + ' / ' + myList[i].DenSum + ' x ' + myList[i].factor + ')"  class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDactual).toFixed(0) ));
+        row$.append($('<td title="(' + myList[i].NumSum + ' / ' + myList[i].DenSum + ' x ' + myList[i].factor + ')"  class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
 
         //YTD GAP Number: 7
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+parseFloat(myList[i].YTDgapNum).toFixed(0) ));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
 
         //YTD PROGRESS %: 8
         if (( (dxOffset).indexOf(myList[i].dx) >= 0) || ( (dxIndicators).indexOf(myList[i].dx) >= 0)){
@@ -2019,68 +2078,68 @@ function buildOUsummaryTable(myList,selector) {
         loadScore(myList[i].ou,myList[i].ouName,myList[i].dx,iW);
 
         //QTR TARGET: 9
-        row$.append($('<td class="rowItem cellNumeric"/>').html('&nbsp;'+myList[i].CALCtarget));
+        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
 
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //MM 4: 1
 		var thisStyle = ( (myList[i].mm4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
-		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm4));
+		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
 
         if ( (peMMcurr >= 5) || (peMMcurr < 4) ) {
     	    //MM 5
 			var thisStyle = ( (myList[i].mm5>myList[i].targ5) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm5));
+            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
         }
         if ( (peMMcurr >= 6) || (peMMcurr < 4) ) {
     	    //MM 6
 			var thisStyle = ( (myList[i].mm6>myList[i].targ6) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm6));
+            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
         }
         if ( (peMMcurr >= 7) || (peMMcurr < 4) ) {
     	    //MM 7
 			var thisStyle = ( (myList[i].mm7>myList[i].targ7) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm7));
+            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
         }
         if ( (peMMcurr >= 8) || (peMMcurr < 4) ) {
     	    //MM 8
 			var thisStyle = ( (myList[i].mm8>myList[i].targ8) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm8));
+            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
         }
         if ( (peMMcurr >= 9) || (peMMcurr < 4) ) {
     	    //MM 9
 			var thisStyle = ( (myList[i].mm9>myList[i].targ9) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm9));
+            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
         }
         if ( (peMMcurr >= 10) || (peMMcurr < 4) ) {
     	    //MM 10
 			var thisStyle = ( (myList[i].mm10>myList[i].targ10) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm10));
+            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
         }
         if ( (peMMcurr >= 11) || (peMMcurr < 4) ) {
     	    //MM 11
 			var thisStyle = ( (myList[i].mm11>myList[i].targ11) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm11));
+            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
         }
         if ( (peMMcurr == 12) || (peMMcurr < 4) ) {
     	    //MM 12
 			var thisStyle = ( (myList[i].mm12>myList[i].targ12) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm12));
+            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
         }
         if ( (peMMcurr >= 1) && (peMMcurr < 4) ) {
     	    //MM 1
 			var thisStyle = ( (myList[i].mm1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm1));
+            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
         }
         if ( (peMMcurr >= 2) && (peMMcurr < 4) ) {
     	    //MM 2
 			var thisStyle = ( (myList[i].mm2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm2));
+            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
         }
 		if ( (peMMcurr >= 3) && (peMMcurr < 4) ) {
     	    //MM 3
 			var thisStyle = ( (myList[i].mm3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html('&nbsp;'+myList[i].mm3));
+            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
         }
 
         $(selector).append(row$);
@@ -2494,7 +2553,7 @@ function getMenu(){
     tr.appendChild(td);
     var lbl = document.createElement('label');
     lbl.setAttribute("style",'font-weight:800;font-size:10pt;c');
-    lbl.innerHTML = 'Report Filters';
+    lbl.innerHTML = 'Report Options';
     td.appendChild(lbl);
 
     var tr = document.createElement('tr');
@@ -2674,10 +2733,11 @@ function getMenu(){
         success : function(dataOUlevs){
             var u = 0;
             for (var o = 0; o < dataOUlevs.organisationUnitLevels.length; o++){
+				ArrOUlevels.push ( {level: dataOUlevs.organisationUnitLevels[o].level, name: dataOUlevs.organisationUnitLevels[o].name } )
                 u+=1;
                 var opt = document.createElement('option');
                 opt.value = dataOUlevs.organisationUnitLevels[o].level;
-                if (u < dataOUlevs.organisationUnitLevels.length){
+                if ( (u < dataOUlevs.organisationUnitLevels.length) && (bDATA_TABLES_ONLY!= true) ) {
                     opt.innerHTML = (dataOUlevs.organisationUnitLevels[o].name + ', ' + dataOUlevs.organisationUnitLevels[u].name);
                 } else {
                     opt.innerHTML = dataOUlevs.organisationUnitLevels[o].name;    
@@ -2778,7 +2838,7 @@ function averageScores(bRoundDownTo100){
     var dv = document.createElement('div');
     dv.setAttribute("id",'scoreDistribution');
     dv.setAttribute("style",'width:'+document.getElementById("tblMaster").offsetWidth+'px;height:400px');
-    document.getElementById('rankedItems').appendChild(dv);
+    document.getElementById(destDataTables).appendChild(dv);
 
     createBarChartValueRange('scoreDistribution',document.getElementById("tblMaster").offsetWidth,400,ouScoreArr,dhis2.report.organisationUnit.name,'Score Distribution');
 
