@@ -1516,9 +1516,9 @@ function sortTable(table_id, sortColumn){
 }
 
 function getGrowthSentiment(dx){
-    for(var a=0;a<dxCoreArr.length-1;a++){
-        if (dxCoreArr[a] == dx){
-            return dxCoreSentimentArr[a];
+    for(var c=0;c<dxCoreArr.length;c++){
+        if (dxCoreArr[c] == dx){
+            return dxCoreSentimentArr[c];
         }
     }
 }
@@ -1533,6 +1533,10 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
 	}
 
   var iGS = getGrowthSentiment(dx);
+  if (dx == 'mH17opU6Ivq'){
+	  console.log(dx + ': ' + iGS);
+  }
+
   for (var i = 0; i < myList.length; i++) {
     if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
 
@@ -1597,22 +1601,22 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //QTR 1: 11
-        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
+        row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
 
         if ( (peQcurr > 2) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 2: 12
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
         }
         if ( (peQcurr > 3) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 3: 13
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
         }
         if (peQcurr == 1){
             var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 4: 14
-            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
         }
 
         $(selector).append(row$);
@@ -1693,22 +1697,22 @@ function buildOUsummaryTable(myList,selector) {
         var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //QTR 1: 11
-        row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
+        row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
 
         if ( (peQcurr > 2) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 2: 12
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
         }
         if ( (peQcurr > 3) || (peQcurr == 1) ) {
             var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 3: 13
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
         }
         if (peQcurr == 1){
             var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 4: 14
-            row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
         }
 
         $(selector).append(row$);

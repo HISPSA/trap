@@ -1513,8 +1513,6 @@
                     ArrRet[a].YTDgapPer = ( (ArrRet[a].YTDtarget > 0) ? parseFloat(parseFloat(ArrRet[a].YTDactual / ArrRet[a].YTDtarget) * 100 ).toFixed(1).replace('.0','') : 0);
                 }
             }
-
-
         }
 
         if (sRem.length > 0){
@@ -1866,9 +1864,9 @@ function sortTable(table_id, sortColumn){
 }
 
 function getGrowthSentiment(dx){
-    for(var a=0;a<dxCoreArr.length-1;a++){
-        if (dxCoreArr[a] == dx){
-            return dxCoreSentimentArr[a];
+    for(var c=0;c<dxCoreArr.length;c++){
+        if (dxCoreArr[c] == dx){
+            return dxCoreSentimentArr[c];
         }
     }
 }
@@ -1948,62 +1946,62 @@ function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
 
         //MM 4: 1
 		var thisStyle = ( (myList[i].mm4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
-		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
+		row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
 
         if ( (peMMcurr >= 5) || (peMMcurr < 4) ) {
     	    //MM 5
 			var thisStyle = ( (myList[i].mm5>myList[i].targ5) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ5))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
         }
         if ( (peMMcurr >= 6) || (peMMcurr < 4) ) {
     	    //MM 6
 			var thisStyle = ( (myList[i].mm6>myList[i].targ6) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ6))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
         }
         if ( (peMMcurr >= 7) || (peMMcurr < 4) ) {
     	    //MM 7
 			var thisStyle = ( (myList[i].mm7>myList[i].targ7) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ7))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
         }
         if ( (peMMcurr >= 8) || (peMMcurr < 4) ) {
     	    //MM 8
 			var thisStyle = ( (myList[i].mm8>myList[i].targ8) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ8))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
         }
         if ( (peMMcurr >= 9) || (peMMcurr < 4) ) {
     	    //MM 9
 			var thisStyle = ( (myList[i].mm9>myList[i].targ9) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ9))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
         }
         if ( (peMMcurr >= 10) || (peMMcurr < 4) ) {
     	    //MM 10
 			var thisStyle = ( (myList[i].mm10>myList[i].targ10) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ10))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
         }
         if ( (peMMcurr >= 11) || (peMMcurr < 4) ) {
     	    //MM 11
 			var thisStyle = ( (myList[i].mm11>myList[i].targ11) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ11))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
         }
         if ( (peMMcurr == 12) || (peMMcurr < 4) ) {
     	    //MM 12
 			var thisStyle = ( (myList[i].mm12>myList[i].targ12) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ12))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
         }
         if ( (peMMcurr >= 1) && (peMMcurr < 4) ) {
     	    //MM 1
 			var thisStyle = ( (myList[i].mm1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
         }
         if ( (peMMcurr >= 2) && (peMMcurr < 4) ) {
     	    //MM 2
 			var thisStyle = ( (myList[i].mm2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
         }
 		if ( (peMMcurr >= 3) && (peMMcurr < 4) ) {
     	    //MM 3
 			var thisStyle = ( (myList[i].mm3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
         }
         $(selector).append(row$);
     }
@@ -2084,62 +2082,62 @@ function buildOUsummaryTable(myList,selector) {
 
         //MM 4: 1
 		var thisStyle = ( (myList[i].mm4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
-		row$.append($('<td title="Target: '+myList[i].targ4+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
+		row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm4)) ));
 
         if ( (peMMcurr >= 5) || (peMMcurr < 4) ) {
     	    //MM 5
 			var thisStyle = ( (myList[i].mm5>myList[i].targ5) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ5+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ5))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm5)) ));
         }
         if ( (peMMcurr >= 6) || (peMMcurr < 4) ) {
     	    //MM 6
 			var thisStyle = ( (myList[i].mm6>myList[i].targ6) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ6+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ6))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm6)) ));
         }
         if ( (peMMcurr >= 7) || (peMMcurr < 4) ) {
     	    //MM 7
 			var thisStyle = ( (myList[i].mm7>myList[i].targ7) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ7+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ7))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm7)) ));
         }
         if ( (peMMcurr >= 8) || (peMMcurr < 4) ) {
     	    //MM 8
 			var thisStyle = ( (myList[i].mm8>myList[i].targ8) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ8+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ8))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm8)) ));
         }
         if ( (peMMcurr >= 9) || (peMMcurr < 4) ) {
     	    //MM 9
 			var thisStyle = ( (myList[i].mm9>myList[i].targ9) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ9+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ9))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm9)) ));
         }
         if ( (peMMcurr >= 10) || (peMMcurr < 4) ) {
     	    //MM 10
 			var thisStyle = ( (myList[i].mm10>myList[i].targ10) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ10+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ10))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm10)) ));
         }
         if ( (peMMcurr >= 11) || (peMMcurr < 4) ) {
     	    //MM 11
 			var thisStyle = ( (myList[i].mm11>myList[i].targ11) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ11+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ11))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm11)) ));
         }
         if ( (peMMcurr == 12) || (peMMcurr < 4) ) {
     	    //MM 12
 			var thisStyle = ( (myList[i].mm12>myList[i].targ12) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ12+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ12))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm12)) ));
         }
         if ( (peMMcurr >= 1) && (peMMcurr < 4) ) {
     	    //MM 1
 			var thisStyle = ( (myList[i].mm1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ1+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm1)) ));
         }
         if ( (peMMcurr >= 2) && (peMMcurr < 4) ) {
     	    //MM 2
 			var thisStyle = ( (myList[i].mm2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ2+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm2)) ));
         }
 		if ( (peMMcurr >= 3) && (peMMcurr < 4) ) {
     	    //MM 3
 			var thisStyle = ( (myList[i].mm3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
-            row$.append($('<td title="Target: '+myList[i].targ3+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].mm3)) ));
         }
 
         $(selector).append(row$);
