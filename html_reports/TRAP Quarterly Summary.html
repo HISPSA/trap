@@ -40,13 +40,14 @@
 
         /* #tblMaster {display:none;} */
         #leafMap {
-                    width:1000px;height:800px;
-                    position:relative;top:0;left:0;
-                    padding:0; margin:0;border:2px solid #C0C0C0; 
-                    background-Color:#fff;
-                    -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;
-                    cursor: default; 
-                }
+            width:1000px;height:800px;
+            position:relative;top:0;left:0;
+            padding:0; margin:0;border:2px solid #C0C0C0; 
+            background-Color:#fff;
+            -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;
+            cursor: default; 
+        }
+
         #SentimentSummary {border:1px solid #C0C0C0; background-Color:#EBEBEB; font-size: 10pt;padding:10px; -webkit-border-radius: 8px 8px 8px 8px;-moz-border-radius: 8px 8px 8px 8px;border-radius: 8px 8px 8px 8px;}
 
         .landingPage {width:1000px; }
@@ -55,6 +56,7 @@
         .leaflet-control-layers-sliderControl {width:100%;}
 
         textarea.quantative {border:1px solid #fff;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px;}
+        textarea.annexHeading {border:1px solid #fff;-webkit-border-radius: 4px 4px 4px 4px;-moz-border-radius: 4px 4px 4px 4px;border-radius: 4px 4px 4px 4px; font-size:14pt;font-weight:800;}
 
         .input:focus {
             outline: none !important;
@@ -102,8 +104,8 @@
 		var pe = getParameterByName('pe');
         var repUID = getParameterByName('uid');
         var OUlevel = parseInt((getParameterByName('oulevel').length > 0) ? getParameterByName('oulevel') : ( (bDATA_TABLES_ONLY) ? 5 : (dhis2.report.organisationUnitHierarchy.length+1) ) );
-        var limitCount = ((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
-        var limitPercent = ((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : ( (bDATA_TABLES_ONLY) ? 1 : 0 ) );
+        var limitCount = parseInt((getParameterByName('limitcount').length > 0) ? getParameterByName('limitcount') : 0);
+        var limitPercent = ( (limitCount > 0) ? 0 :  parseInt((getParameterByName('limitperc').length > 0) ? getParameterByName('limitperc') : ( (bDATA_TABLES_ONLY) ? 1 : 0 ) ) );
         var bUseRankingGroupHeaders = ( (getParameterByName('limitperc').length > 0) || (getParameterByName('limitcount').length > 0) || (bDATA_TABLES_ONLY) );
 
 	</script>
@@ -137,12 +139,12 @@
             </tr>
             <tr>
                 <td colspan=3 style='text-align:center;padding:14px 0 0 0;'>
-                    <div style='font-size:14pt;font-weight:400' id='ouName'></div>
+                    <div style='font-size:16pt;font-weight:400' id='ouName'></div>
                 </td>
             </tr>
             <tr>
                 <td colspan=3 style='text-align:center;padding:6px 0 0 0;'>
-                    <div style='font-size:14pt;font-weight:400' id='peSummary'></div>
+                    <div style='font-size:16pt;font-weight:400' id='peSummary'></div>
                 </td>
             </tr>
     
@@ -188,7 +190,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3 style='text-align:left;'>
+                <td colspan=3 style='text-align:left;font-size:10pt;'>
                     South Africa adopted the UNAIDS 90, 90, 90 targets for HIV in 2014, which aim to ensure that by 2020:<br><br>
                     •	 90% of all people living with HIV will know their HIV status<br>
                     •	 90% of all people with diagnosed HIV infection will receive sustained antiretroviral therapy<br>
@@ -212,7 +214,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;font-size:10pt;'>
                     The purpose of this report is to improve accountability and ownership at all levels of care through close monitoring, timely remedial actions and rapid mitigation. The indicators listed below must be monitored closely against set targets.
                 </td>
             </tr>
@@ -231,7 +233,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;'>
+                <td colspan=3 style='text-align:left;padding: 0 0 0 4px;font-size:10pt;'>
                     Cascades are used to track performance towards achieving the 90-90-90 targets. The indicators below are used for this purpose:<br><br>
 
                     1st bar: The total population living with HIV (LHIV). This is generated from the Thembisa estimate model.<br><br>
@@ -240,9 +242,9 @@
                         
                     3rd bar: LHIV with known status on ART. At least 90% of the LHIV population who know their HIV status must be on ART. The acual number of clients on ART (TROA) is generated from the Provincial integrated webDHIS instances.<br><br>
                         
-                    4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br><br>
+                    4th bar: LHIV on ART with VLD at 12 months. 100% of the population that should be on ART must have a viral load done at 12 months. The actual value seen in the green section of the bar is generated from the "viral load done at 12 months rate"  from the cohort of patients who started ART 13-15 months before<br><br>
 
-                    5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 12-15 months before<br>
+                    5th bar: 90% of expected patients on ART must be virally suppressed. The actual value seen in the green section of the bar is generated from the "viral load suppressed at 12 months rate"  from the cohort of patients who started ART 13-15 months before<br>
                 </td>
             </tr>
             <tr>
@@ -269,11 +271,11 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3 style='text-align:left;'>
+                <td colspan=3 style='text-align:left;font-size:10pt;'>
                     The use of color grading provides an easy way to monitor progress against targets. Indicator progress scores are colour graded and represented by four outcome groups: green, orange, red and blue (horizontal) bars. These graded colours represent the following:<br><br>
                     <div style="color:#FD3838">Red: Critical</div>
-                    <div style="color:#FCDC65">Orange: Need to improve</div>
-                    <div style="color:#6EFD35">Green: The indicator is close to or reached its target value</div>
+                    <div style="color:#FC860F">Orange: Need to improve</div>
+                    <div style="color:#35BA00">Green: The indicator is close to or reached its target value</div>
                     <div style="color:#656AFC">Blue: Needs explanation</div><br>
                     <!-- Colour ranges for the indicators have been set as follows: -->
                 </td>
@@ -283,25 +285,25 @@
                     The following set of indicators are being closely monitored against their targets with colour ranges having been set as follows:<br>
                     <table>
                         <tr>
-                            <td id='dxName_KnQn2N452bE'>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                            <td id='dxName_KnQn2N452bE'>- HIV test done total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FC860F">70-89.9 (orange)</td><td style="color:#35BA00">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_Bmo4lk1FhgP'>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                            <td id='dxName_Bmo4lk1FhgP'>- HIV test positive total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FC860F">70-89.9 (orange)</td><td style="color:#35BA00">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_fG0NDp9ZcQh'>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                            <td id='dxName_fG0NDp9ZcQh'>- ART client naive start ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FC860F">70-89.9 (orange)</td><td style="color:#35BA00">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_mH17opU6Ivq'>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FCDC65">70-89.9 (orange)</td><td style="color:#6EFD35">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
+                            <td id='dxName_mH17opU6Ivq'>- ART client remain on ART total</td>	<td style="color:#FD3838">below 70 (red)</td><td style="color:#FC860F">70-89.9 (orange)</td><td style="color:#35BA00">90-110 (green)</td><td style="color:#656AFC">above 110 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_bTs3h1d6t6Y'>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FCDC65">60-74.9 (orange)</td><td style="color:#6EFD35">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                            <td id='dxName_bTs3h1d6t6Y'>- ART adult viral load done rate at 6 months</td>	<td style="color:#FD3838">below 60 (red)</td><td style="color:#FC860F">60-74.9 (orange)</td><td style="color:#35BA00">75-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_r0T2RG2Wp1p'>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FCDC65">65-84.9 (orange)</td><td style="color:#6EFD35">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
+                            <td id='dxName_r0T2RG2Wp1p'>- ART adult viral load suppressed rate at 6 months</td>	<td style="color:#FD3838">below 65 (red)</td><td style="color:#FC860F">65-84.9 (orange)</td><td style="color:#35BA00">85-100 (green)</td><td style="color:#656AFC">above 100 (blue)</td>
                         </tr>
                         <tr>
-                            <td id='dxName_Q0ctiOhPAEq'>- ART adult loss to follow-up at 6 months</td>	<td style="color:#6EFD35">below 24 (green)</td><td style="color:#FCDC65">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
+                            <td id='dxName_Q0ctiOhPAEq'>- ART adult loss to follow-up at 6 months</td>	<td style="color:#35BA00">below 24 (green)</td><td style="color:#FC860F">24-30 (orange)</td>	<td style="color:#FD3838">31-60 (red )</td><td style="color:#656AFC">above 60 (blue)</td>
                         </tr>
 
                     </table>
@@ -314,9 +316,7 @@
             </tr>
         </table>
 
-        <footer></footer>
-
-        <table id='subHeader2' style="">
+        <table id='subHeader2' style="overflow-x:visible;">
             <tr>
                 <td colspan=3 style='text-align:left;font-size:14pt;padding:10px 0 0 0;'>
                     <strong>&nbsp; 5. &nbsp;Summary</strong>
@@ -327,14 +327,14 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3>
+                <td colspan=3 style="font-size:10pt;">
                     &nbsp;The following table provide a summary of progress for the current financial year.
                 </td>
             </tr>
             <tr>
-                <td colspan=3 style='text-align:left;'>
+                <td colspan=3 style='text-align:left;overflow-x:visible;'>
 
-                    <div id='mainPage' style="padding:0;margin:0;" >
+                    <div id='mainPage' style="padding:0;margin:0;overflow-x:visible;" >
 
                         <div id='table1Title' class='tableTitle'></div>
 
@@ -381,8 +381,8 @@
                 </td>
             </tr>
             <tr>
-                <td colspan=3>
-                    &nbsp;Organisation units are ranked from those with the largest gap to those with the smallest gap in relation to the targets for the individual indicators.
+                <td colspan=3 style="font-size:10pt;">
+                    &nbsp;Organisation units are ranked from those with the largest gap (poor performing) to those with the smallest gap in relation to the targets for the individual indicators.
                 </td>
             </tr>
             <tr>
@@ -439,6 +439,9 @@
 		document.getElementById('reportHeader').parentElement.appendChild(dv1);
 		destDataTables = 'dv_new_body';
 		document.getElementById('reportHeader').style.display = 'none';
+
+        var txt$ = $('<textarea class="annexHeading" style="width:99%;height:22px;font-size:12pt;">Annexure A</textarea>');
+        $('#dv_new_body').append(txt$);
 
 	}
 
@@ -801,6 +804,14 @@
                 }
             }
         );
+        if (bDATA_TABLES_ONLY){
+            $('#reportFilterTable').width(((document.getElementById('tbl_'+dxCoreArr[0]+'_'+OUlevel).offsetWidth) + 'px'));
+            $(".annexHeading").each(
+                function() {
+                    $(this).width((document.getElementById('tbl_'+dxCoreArr[0]+'_'+OUlevel).offsetWidth + 'px'));
+                }
+            );
+        }
     }
 
     function buildCUSTOMsummaryTable(dx,ouLevel){
@@ -847,7 +858,7 @@
             td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
             tr.appendChild(td);
 
-            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FCDC65;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['orange']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['orange']+') scored in <span style="background-Color:#FC860F;color:#fff;width:50px;">[ORANGE]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['orange_progress']/(dxSummaryCounter[n].colorMatch['orange'])).toFixed(1) + '%];</div>';
             td.innerHTML = sInner;
 
         }
@@ -860,7 +871,7 @@
             td.setAttribute("style",'padding:0 0 0 4px;border-bottom:1px solid #fff;width:500px;height:14px;');
             tr.appendChild(td);
 
-            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#90FC65;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
+            sInner = '<div style="padding:0"> • '+parseFloat(dxSummaryCounter[n].colorMatch['green']/dxSummaryCounter[n].counter * 100).toFixed(0)+'% ('+dxSummaryCounter[n].colorMatch['green']+') scored in <span style="background-Color:#35BA00;color:#fff;width:50px;">[GREEN]</span> group with an average YTD progress score of [' + parseFloat(dxSummaryCounter[n].colorMatch['green_progress']/(dxSummaryCounter[n].colorMatch['green'])).toFixed(1) + '%];</div>';
             td.innerHTML = sInner;
 
         }
@@ -1154,7 +1165,7 @@
                 ArrRet[a].YTDactual = ArrRet[a].YTDactualSum;
                 ArrRet[a].CALCtarget = (parseFloat(ArrRet[a].YTDtarget / ArrPEmmEnd.length)).toFixed(0);
             }
-            ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].YTDtarget) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
+            ArrRet[a].GrandTotAll = (parseFloat(ArrRet[a].FYtarget) + parseFloat(ArrRet[a].baseline) + parseFloat(ArrRet[a].YTDactual) + parseFloat(ArrRet[a].CALCactual) + parseFloat(ArrRet[a].YTDgapNum) + parseFloat(ArrRet[a].QTR1) + parseFloat(ArrRet[a].QTR2) + parseFloat(ArrRet[a].QTR3) + parseFloat(ArrRet[a].QTR4));
             if (ArrRet[a].GrandTotAll == 0){
                 sRem += (a + ',');
             } else {
@@ -1349,13 +1360,13 @@
 					if (bSkipIncr != true){
 						incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
 					}
-					return '#90FC65'; // green
+					return '#35BA00'; // green
 				}
 				if ( (parseFloat(varVal) >= 70) && (parseFloat(varVal) < 90) ){
 					if (bSkipIncr != true){
 						incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
 					}
-					return '#FCDC65'; // orange
+					return '#FC860F'; // orange
 				}
 				if (parseFloat(varVal) < 70){
 					if (bSkipIncr != true){
@@ -1381,13 +1392,13 @@
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
                         }
-						return '#FCDC65'; // orange
+						return '#FC860F'; // orange
 					}
 					if (parseFloat(varVal) < 24){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
                         }
-						return '#90FC65'; // green
+						return '#35BA00'; // green
 					}
 				}
 				if (dx == 'bTs3h1d6t6Y'){
@@ -1401,13 +1412,13 @@
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
     					}
-						return '#90FC65'; // green
+						return '#35BA00'; // green
 					}
 					if ( (parseFloat(varVal) >= 65) && (parseFloat(varVal) < 85) ){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
                         }
-						return '#FCDC65'; // orange
+						return '#FC860F'; // orange
 					}
 					if (parseFloat(varVal) < 65){
 						if (bSkipIncr != true){
@@ -1427,13 +1438,13 @@
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('green',dx,ouLev,parseFloat(varVal));
                         }
-						return '#90FC65'; // green
+						return '#35BA00'; // green
 					}
 					if ( (parseFloat(varVal) >= 24) && (parseFloat(varVal) < 85) ){
 						if (bSkipIncr != true){
                             incrDxSummaryCounter('orange',dx,ouLev,parseFloat(varVal));
                         }
-						return '#FCDC65'; // orange
+						return '#FC860F'; // orange
 					}
 					if (parseFloat(varVal) < 24){
 						if (bSkipIncr != true){
@@ -1525,108 +1536,115 @@ function getGrowthSentiment(dx){
 
 // Builds the HTML Table out of myList.
 function buildCUSTOMHtmlTable(myList,selector,dx,ouLevel) {
-
-	if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
-		var myCount = Math.ceil( (parseInt(limitCount) > 0) ? parseInt(limitCount) : ( (parseInt(limitPercent) > 0) ? ( (myList.length+1) * (parseInt(limitPercent)/100) )  : (myList.length+1)) );
-	} else {
-		var myCount = (myList.length+1);
-	}
-
-  var iGS = getGrowthSentiment(dx);
-  if (dx == 'mH17opU6Ivq'){
-	  console.log(dx + ': ' + iGS);
-  }
-
-  for (var i = 0; i < myList.length; i++) {
-    if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
-
-        if ((bUseRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) {
-			// First Summary Header
-			if (i == 0) {
-				var row$ = $('<tr/>');    
-				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-				$(selector).append(row$);
-			}
-			// Second Summary Header
-			if ( (i+1) == ((myList.length-(parseInt(myCount+1))+2)) ) {
-				var row$ = $('<tr/>');    
-				row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing' ) + ( (limitPercent>0) ? (limitPercent+'%') : ((limitCount>0) ? (limitCount + ' Count')  : 'x' ) ) ));
-				$(selector).append(row$);
-			}
-		}
-
-        var row$ = $('<tr/>');
-
-        /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
-
-        // # Rank + OUname: 1
-        if (ouLevel == 5){
-            var iH = 22, sStyleOffs = 'position:relative;top:2px;';
-            var ArrTemp = myList[i].ouHierarchy.toString().split('/');
-            row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
+    var blocalisedRankingGroupHeaders = bUseRankingGroupHeaders;
+    var localLimitPerc = limitPercent, localLimitCount = limitCount; 
+    if (bDATA_TABLES_ONLY){
+        var myCount = Math.ceil( (parseInt(localLimitCount) > 0) ? parseInt(localLimitCount) : ( (parseInt(localLimitPerc) > 0) ? ( (myList.length+1) * (parseInt(localLimitPerc)/100) )  : (myList.length+1)) );
+    } else {
+        if ( (ouLevel > OUlevel) || (OUlevel == 5) ) {
+            if ( (localLimitCount==0) && (localLimitPerc==0) && (ouLevel == 5)  ){
+                localLimitPerc = 1;
+                blocalisedRankingGroupHeaders = true;
+            }
+            var myCount = Math.ceil( (parseInt(localLimitCount) > 0) ? parseInt(localLimitCount) : ( (parseInt(localLimitPerc) > 0) ? ( (myList.length+1) * (parseInt(localLimitPerc)/100) )  : (myList.length+1)) );
         } else {
-            var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
-            row$.append($('<td class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (bUseRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
+            var myCount = (myList.length+1);
         }
-
-        //prevY BASELINE: 2
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline))));
-
-        //prevY TARGET: 3 
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0)) ));
-
-        //YTD TARGET: 4
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0)) ));
-
-        //YTD ACTUAL: 5
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
-
-        //YTD GAP Number: 7
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
-
-        //YTD PROGRESS %: 8
-        if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
-            var iW = parseFloat(myList[i].YTDgapPer);
-            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
-        } else {
-            var iW = parseFloat(myList[i].YTDgapPer);
-            row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
-        }
-
-        loadScore(myList[i].ou,myList[i].ouName,dx,iW);
-
-        //QTR TARGET: 9
-        row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
-
-        var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
-
-        //QTR 1: 11
-        row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
-
-        if ( (peQcurr > 2) || (peQcurr == 1) ) {
-            var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
-            //QTR 2: 12
-            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
-        }
-        if ( (peQcurr > 3) || (peQcurr == 1) ) {
-            var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
-            //QTR 3: 13
-            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
-        }
-        if (peQcurr == 1){
-            var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
-            //QTR 4: 14
-            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
-        }
-
-        $(selector).append(row$);
     }
-  }
+
+    var iGS = getGrowthSentiment(dx);
+
+    for (var i = 0; i < myList.length; i++) {
+        if ( (i < parseInt(myCount)) || (i > (myList.length-(parseInt(myCount)+1))) ){
+
+            if ( ((blocalisedRankingGroupHeaders) && ( (ouLevel > OUlevel) || (OUlevel == 5) ) ) || (bDATA_TABLES_ONLY) ) {
+                // First Summary Header
+                if (i == 0) {
+                    var row$ = $('<tr/>');    
+                    row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Worst Performing ' : 'Best Performing ' ) + ( (localLimitPerc>0) ? (localLimitPerc+'%') : ((localLimitCount>0) ? (localLimitCount + ' Count')  : 'x' ) ) ));
+                    $(selector).append(row$);
+                }
+                // Second Summary Header
+                if ( (i+1) == ((myList.length-(parseInt(myCount+1))+2)) ) {
+                    var row$ = $('<tr/>');    
+                    row$.append($('<td colspan="' + (8+ArrPEmmEnd.length) +'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('&nbsp;'+ ( ( parseInt(iGS) > 0 ) ? 'Best Performing ' : 'Worst Performing ' ) + ( (localLimitPerc>0) ? (localLimitPerc+'%') : ((localLimitCount>0) ? (localLimitCount + ' Count')  : 'x' ) ) ));
+                    $(selector).append(row$);
+                }
+            }
+
+            var row$ = $('<tr/>');
+
+            /* 1. how will rule-logic be applied/tested? reduce + simpify arrays keys? */
+
+            // # Rank + OUname: 1
+            if (ouLevel == 5){
+                var iH = 22, sStyleOffs = 'position:relative;top:2px;';
+                var ArrTemp = myList[i].ouHierarchy.toString().split('/');
+                row$.append($('<td class="rowItemLeft"/>').html('<div style="height:12px;color:#AAA;font-size:8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ArrTemp[ArrTemp.length-3]+'&nbsp;>&nbsp;'+ArrTemp[ArrTemp.length-2]+'</div><div style="height:13px;padding:0 0 0 5px;">'+( (blocalisedRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName+'</div>'));
+            } else {
+                var iH = 15, sStyleOffs = 'position:relative;top:-1px;';
+                row$.append($('<td class="rowItemLeft"/>').html('<a href="generateHtmlReport.action?uid='+repUID+'&pe='+pe+'&ou='+myList[i].ou+'" style="color:#000">' + ( (blocalisedRankingGroupHeaders) ? ('#'+(i+1)+'&nbsp;') : '' )+myList[i].ouName + '</a>'));
+            }
+
+            //prevY BASELINE: 2
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].baseline))));
+
+            //prevY TARGET: 3 
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].FYtarget).toFixed(0)) ));
+
+            //YTD TARGET: 4
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDtarget).toFixed(0)) ));
+
+            //YTD ACTUAL: 5
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDactual).toFixed(0)) ));
+
+            //YTD GAP Number: 7
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].YTDgapNum).toFixed(0)) ));
+
+            //YTD PROGRESS %: 8
+            if (( (dxOffset).indexOf(dx) >= 0) || ( (dxIndicators).indexOf(dx) >= 0)){
+                var iW = parseFloat(myList[i].YTDgapPer);
+                row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+            } else {
+                var iW = parseFloat(myList[i].YTDgapPer);
+                row$.append($('<td class="rowItem"/>').html('<div class="perfBar"><div class="cellNumeric" style="height:'+iH+'px;padding:4px 4px 0px 4px;'+sStyleOffs+'">' + formatNumber(myList[i].YTDgapPer).replace('Infinity','0').replace('NaN','0') + '%' + '</div><div style="position:relative;left:0;top:0;width:' + ( (parseInt(iW) > 0) ? ((parseInt(iW) > 500) ? 500 : parseInt(iW)) : 0)  + '%;height:4px;border-top:1px solid #f5f5f5;border-right:0;background-Color:'+getBackgroundPerformanceColor(iW,dx,ouLevel,(myList[i].ou==ou))+';">&nbsp;</div></div>'));
+            }
+
+            loadScore(myList[i].ou,myList[i].ouName,dx,iW);
+
+            //QTR TARGET: 9
+            row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
+
+            var thisStyle = ( (myList[i].QTR1>=myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
+
+            //QTR 1: 11
+            row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
+
+            if ( (peQcurr > 2) || (peQcurr == 1) ) {
+                var thisStyle = ( (myList[i].QTR2>=myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
+                //QTR 2: 12
+                row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
+            }
+            if ( (peQcurr > 3) || (peQcurr == 1) ) {
+                var thisStyle = ( (myList[i].QTR3>=myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
+                //QTR 3: 13
+                row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
+            }
+            if (peQcurr == 1){
+                var thisStyle = ( (myList[i].QTR4>=myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
+                //QTR 4: 14
+                row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
+            }
+
+            $(selector).append(row$);
+        }
+    }
 
   document.getElementById("logoTable").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
   //document.getElementById("leafMap").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
   document.getElementById("subHeader1").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
   document.getElementById("subHeader2").style.width = (document.getElementById("tbl_"+dx+'_'+(OUlevel)).offsetWidth + 'px');
+
 }
 
 function initialiseParentOUscores(){
@@ -1653,7 +1671,7 @@ function buildOUsummaryTable(myList,selector) {
             var iCols = row$[0].children.length;
             var row$ = $('<tr/>');
 
-            row$.append($('<td colspan="'+iCols+'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('Generated from patient cohort starting treatment 6 - 9 months before'));
+            row$.append($('<td colspan="'+iCols+'" style="font-style:italic;background-Color:#f5f5f5;padding:3px;border-bottom:1px solid #000;width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>').html('Generated from patient cohort starting treatment 7 - 9 months before'));
             $(selector).append(row$);
 
         }
@@ -1694,23 +1712,23 @@ function buildOUsummaryTable(myList,selector) {
         //QTR TARGET: 9
         row$.append($('<td class="rowItem cellNumeric"/>').html(''+formatNumber(parseFloat(myList[i].CALCtarget)) ));
 
-        var thisStyle = ( (myList[i].QTR1>myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
+        var thisStyle = ( (myList[i].QTR1>=myList[i].targ1) ? 'color:#000;' : 'color:#FF0000;' );
 
         //QTR 1: 11
         row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ1))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR1)) ));
 
         if ( (peQcurr > 2) || (peQcurr == 1) ) {
-            var thisStyle = ( (myList[i].QTR2>myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
+            var thisStyle = ( (myList[i].QTR2>=myList[i].targ2) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 2: 12
             row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ2))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR2)) ));
         }
         if ( (peQcurr > 3) || (peQcurr == 1) ) {
-            var thisStyle = ( (myList[i].QTR3>myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
+            var thisStyle = ( (myList[i].QTR3>=myList[i].targ3) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 3: 13
             row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ3))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR3)) ));
         }
         if (peQcurr == 1){
-            var thisStyle = ( (myList[i].QTR4>myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
+            var thisStyle = ( (myList[i].QTR4>=myList[i].targ4) ? 'color:#000;' : 'color:#FF0000;' );
             //QTR 4: 14
             row$.append($('<td title="Target: '+formatNumber(parseFloat(myList[i].targ4))+'" class="rowItem cellNumeric" style="'+thisStyle+'" />').html(''+formatNumber(parseFloat(myList[i].QTR4)) ));
         }
@@ -2114,6 +2132,7 @@ function getMenu(){
     var tbl = document.createElement('table');
     tbl.setAttribute("style","margin:0 0 16px 0;border:1px solid #D6D6D6;width:"+document.getElementById("leafMap").offsetWidth+"px;");
 	tbl.setAttribute("class","rounded");
+    tbl.setAttribute("id","reportFilterTable");
     dvReturn.appendChild(tbl);
 
     var tr = document.createElement('tr');
@@ -2128,6 +2147,24 @@ function getMenu(){
     lbl.setAttribute("style",'font-weight:800;font-size:10pt;c');
     lbl.innerHTML = 'Report Options';
     td.appendChild(lbl);
+
+    if (bDATA_TABLES_ONLY!=true){
+        var tr = document.createElement('tr');
+        tr.setAttribute("style","height:26px;");
+        tbl.appendChild(tr);
+
+        var td = document.createElement('td');
+        td.setAttribute("style",'background-color: #f5f5f5;border: 2px solid #fff;');
+        td.setAttribute("colspan",3);
+        tr.appendChild(td);
+        var lbl = document.createElement('label');
+        lbl.setAttribute("style",'width:100%;');
+        lbl.setAttribute("id",'filterHeaderMessage');
+        lbl.innerHTML = "This report is generated for two administrative/hierarchy levels. You've selected a report at {OUlevelName}-level. The report generates summarised overviews for two levels below it. The lowest level can be filtered to display the Top/Bottom performers; select percentage or counts of performers in the report options below.";
+        td.appendChild(lbl);
+    }
+
+    
 
     var tr = document.createElement('tr');
     tr.setAttribute("style","height:26px;");
@@ -2312,14 +2349,25 @@ function getMenu(){
                 opt.value = dataOUlevs.organisationUnitLevels[o].level;
                 if ( (u < dataOUlevs.organisationUnitLevels.length) && (bDATA_TABLES_ONLY!= true) ) {
                     opt.innerHTML = (dataOUlevs.organisationUnitLevels[o].name + ', ' + dataOUlevs.organisationUnitLevels[u].name);
+                    if (OUlevel == dataOUlevs.organisationUnitLevels[o].level ){
+                        opt.selected = 'selected';
+                    }
+                    document.getElementById('oulevels').appendChild(opt);
                 } else {
                     opt.innerHTML = dataOUlevs.organisationUnitLevels[o].name;    
+                    if (OUlevel == dataOUlevs.organisationUnitLevels[o].level ){
+                        opt.selected = 'selected';
+                    }
+                    if (bDATA_TABLES_ONLY){
+                        document.getElementById('oulevels').appendChild(opt);
+                    }
                 }
-                if (OUlevel == dataOUlevs.organisationUnitLevels[o].level ){
-                    opt.selected = 'selected';
-                }
-                document.getElementById('oulevels').appendChild(opt);
             }
+
+            if (bDATA_TABLES_ONLY!=true){
+                document.getElementById('filterHeaderMessage').innerHTML = document.getElementById('filterHeaderMessage').innerHTML.replace('{OUlevelName}',ArrOUlevels[0].name)
+            }
+
         }
     });
 
