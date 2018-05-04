@@ -97,7 +97,7 @@
 			return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 		}
 
-		var bDATA_TABLES_ONLY = false;
+		var bDATA_TABLES_ONLY = true;
 		var destDataTables = 'rankedItems';
 
 		var ou = getParameterByName('ou');
@@ -175,8 +175,15 @@
             </tr>
         </table>
 
-        <footer></footer>
+        <p>&nbsp;</p>
 
+        <p>&nbsp;</p>
+        <br>
+        <p>&nbsp;</p>
+
+        <p>&nbsp;</p>
+        <br>
+        <p>&nbsp;</p>
 
         <table id='subHeader1' style="">
 
@@ -2323,13 +2330,17 @@ function getMenu(){
     td.appendChild(inp);
 
     var tr = document.createElement('tr');
+    tr.setAttribute("style","height:26px;");
     tbl.appendChild(tr);
 
     var td = document.createElement('td');
-    td.setAttribute("style",'');
+    td.setAttribute("style",'border: 2px solid #fff;');
     td.setAttribute("colspan",3);
-    td.innerHTML = '&nbsp;';
     tr.appendChild(td);
+    var lbl = document.createElement('label');
+    lbl.setAttribute("style",'background-color: #fff;');
+    lbl.innerHTML = "Print Layout: A4 Portrait, margins 12.5mm";
+    td.appendChild(lbl);
 
     $('.hideInPrint')[0].innerHTML = (dvReturn.innerHTML + $('.hideInPrint')[0].innerHTML);
 
