@@ -1644,8 +1644,8 @@
 			"dimension": "pe",
 			"items": [
 				{
-				"id": ( ( (peMMcurr < 4) ? (peFcurr+1) : peFcurr)  + 'Q' + Math.ceil(peMMcurr/3)), //peFYcurr,
-				"name": ( ( (peMMcurr < 4) ? (peFcurr+1) : peFcurr)  + 'Q' + Math.ceil(peMMcurr/3)) //peQTRlabelEnd
+				"id": ( (peMMcurr < 4) ? (peFcurr+'Q4') : peFcurr + 'Q' + (Math.ceil(peMMcurr/3)-1)), //( ( (peMMcurr < 4) ? (peFcurr+1) : peFcurr)  + 'Q' + Math.ceil(peMMcurr/3)), 
+				"name": ( (peMMcurr < 4) ? (peFcurr+'Q4') : peFcurr + 'Q' + (Math.ceil(peMMcurr/3)-1)) //( ( (peMMcurr < 4) ? (peFcurr+1) : peFcurr)  + 'Q' + Math.ceil(peMMcurr/3)) 
 				}
 			]
 			}
